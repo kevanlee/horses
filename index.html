@@ -4,15 +4,34 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Your Squad</title>
-  <link rel="stylesheet" href="res/styles.css"/>
+  <link rel="stylesheet" href="res/styles.css" />
 </head>
 <body>
   <div class="container">
     <button id="start-btn">Start</button>
+    <button id="battle-btn" class="hidden">Battle!</button>
+    <div id="scoreboard">
+      <h3>Squad Record</h3>
+      <p>Wins: <span id="wins">0</span></p>
+      <p>Losses: <span id="losses">0</span></p>
+      <p>Ties: <span id="ties">0</span></p>
+      <p>Point Differential: <span id="point-diff">0</span></p>
+    </div>
+    
+<p id="result" class="result-text hidden"></p>
+<div id="breakdown" class="hidden">
+  <h3>Battle Breakdown</h3>
+  <pre id="breakdown-text"></pre>
+</div>
+
+
 
     <section id="squad-section" class="hidden">
       <h2>Your Squad</h2>
       <div id="card-container" class="card-grid"></div>
+
+      <h2>Opponent</h2>
+      <div id="opponent-container" class="card-grid"></div>
     </section>
   </div>
 

@@ -33,7 +33,7 @@ button:hover {
 }
 
 h2 {
-  margin-top: 2rem;
+  margin-top: 2.5rem;
   color: #333;
 }
 
@@ -61,4 +61,36 @@ h2 {
 .stat {
   margin: 0.25rem 0;
   font-size: 0.95rem;
+}
+.result-text {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-top: 1rem;
+  text-align: center;
+}
+
+button {
+  margin: 1rem 0;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  cursor: pointer;
+}
+#breakdown {
+  background-color: #f9f9f9;
+  border: 2px solid #ccc;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-top: 1rem;
+  white-space: pre-wrap;
+  font-family: monospace;
+}
+
+.result-text {
+  font-weight: bold;
+  font-size: 1.2rem;
+  margin-top: 1rem;
+}
+
+#scoreboard p span {
+  font-weight: bold;
 }
