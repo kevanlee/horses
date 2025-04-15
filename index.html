@@ -2,39 +2,52 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Your Squad</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Basketball GM Clicker Game</title>
   <link rel="stylesheet" href="res/styles.css" />
 </head>
 <body>
-  <div class="container">
-    <button id="start-btn">Start</button>
-    <button id="battle-btn" class="hidden">Battle!</button>
-    <div id="scoreboard">
-      <h3>Squad Record</h3>
-      <p>Wins: <span id="wins">0</span></p>
-      <p>Losses: <span id="losses">0</span></p>
-      <p>Ties: <span id="ties">0</span></p>
-      <p>Point Differential: <span id="point-diff">0</span></p>
-    </div>
-    
-<p id="result" class="result-text hidden"></p>
-<div id="breakdown" class="hidden">
-  <h3>Battle Breakdown</h3>
-  <pre id="breakdown-text"></pre>
-</div>
-
-
-
-    <section id="squad-section" class="hidden">
-      <h2>Your Squad</h2>
-      <div id="card-container" class="card-grid"></div>
-
-      <h2>Opponent</h2>
-      <div id="opponent-container" class="card-grid"></div>
-    </section>
+  <h1>Basketball GM Clicker</h1>
+  
+  <!-- Clicker Button Section -->
+  <div id="clicker-section">
+    <button id="click-btn">Manage Team</button>
+    <p>Cred: <span id="cred-display">0</span></p>
   </div>
 
-  <script src="src/main.js" defer></script>
+  <div id="game-container">
+    <!-- Left Column with Narration Box -->
+    <div id="left-column">
+      <div id="narration-box">
+        <p>Welcome to the Basketball GM Clicker! Click the button to start managing your team.</p>
+      </div>
+
+      <!-- Display Owned Cards -->
+      <div id="owned-cards">
+        <h3>Your Cards</h3>
+        <div id="owned-cards-list"></div>
+      </div>
+    </div>
+
+    <!-- Right Column with Shop and Team Slots -->
+    <div id="right-column">
+      <div id="shop">
+        <h2>Card Shop</h2>
+        <div id="shop-cards" class="card-grid"></div>
+      </div>
+
+      <div id="team">
+        <h2>Your Team</h2>
+        <div id="team-slots"></div>
+      </div>
+
+      <div id="hand">
+        <h2>Your Hand</h2>
+        <div id="hand-cards" class="card-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="src/main.js"></script>
 </body>
 </html>

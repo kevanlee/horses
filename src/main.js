@@ -1,185 +1,187 @@
-const fruits = ['Apple', 'Mango', 'Peach', 'Banana', 'Kiwi', 'Strawberry', 'Pineapple', 'Grape', 'Orange', 'Cherry'];
-const animals = ['Tiger', 'Eagle', 'Shark', 'Bear', 'Panther', 'Wolf', 'Falcon', 'Rhino', 'Cobra', 'Jaguar'];
+// src/main.js
 
-function getRandomInt(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+let cred = 0;
+let deck = [];
+let hand = [];
+let discardPile = [];
+const maxHandSize = 3;
+let teamSlots = 0;
 
-function generatePlayer() {
-  const name = `${fruits[getRandomInt(0, fruits.length - 1)]} ${animals[getRandomInt(0, animals.length - 1)]}`;
-  const offense = getRandomInt(1, 99);
-  const defense = getRandomInt(1, 99);
-  const intangibles = getRandomInt(1, 99);
-  const overall = Math.round((offense + defense + intangibles) / 3);
-  return { name, offense, defense, intangibles, overall };
-}
+const gameState = {
+  cred: 0,
+  clickMultiplier: 1,
+  passiveIncome: 0,
+  extraDrawNextRound: 0,
+  autoClickInterval: null,
+  ownedCards: []  // Track owned cards
+};
 
-function createCard(player) {
-  return `
-    <div class="card">
-      <h3>${player.name}</h3>
-      <p class="stat"><strong>Overall:</strong> ${player.overall}</p>
-      <p class="stat"><strong>Offense:</strong> ${player.offense}</p>
-      <p class="stat"><strong>Defense:</strong> ${player.defense}</p>
-      <p class="stat"><strong>Intangibles:</strong> ${player.intangibles}</p>
-    </div>
-  `;
-}
-function loadRecord() {
-  return {
-    wins: parseInt(localStorage.getItem('wins')) || 0,
-    losses: parseInt(localStorage.getItem('losses')) || 0,
-    ties: parseInt(localStorage.getItem('ties')) || 0,
-    pointDiff: parseInt(localStorage.getItem('pointDiff')) || 0,
-  };
-}
-
-function saveRecord(record) {
-  localStorage.setItem('wins', record.wins);
-  localStorage.setItem('losses', record.losses);
-  localStorage.setItem('ties', record.ties);
-  localStorage.setItem('pointDiff', record.pointDiff);
-}
-
-
-function updateScoreboard(record) {
-  document.getElementById('wins').textContent = record.wins;
-  document.getElementById('losses').textContent = record.losses;
-  document.getElementById('ties').textContent = record.ties;
-  document.getElementById('point-diff').textContent = record.pointDiff;
-}
-
-
-
-document.addEventListener("DOMContentLoaded", () => {
-  const startBtn = document.getElementById('start-btn');
-  const battleBtn = document.getElementById('battle-btn');
-  const squadSection = document.getElementById('squad-section');
-  const cardContainer = document.getElementById('card-container');
-  const opponentContainer = document.getElementById('opponent-container');
-  const resultText = document.getElementById('result');
-
-  let squad = [];
-  let opponent = [];
-
-  startBtn.addEventListener('click', () => {
-    cardContainer.innerHTML = '';
-    opponentContainer.innerHTML = '';
-    resultText.classList.add('hidden');
-    battleBtn.classList.remove('hidden');
-
-    squad = [];
-    opponent = [];
-
-    for (let i = 0; i < 5; i++) {
-      const player = generatePlayer();
-      squad.push(player);
-      cardContainer.innerHTML += createCard(player);
+const availableCards = [
+  {
+    id: 1,
+    name: "Auto Clicker",
+    type: "boost",
+    cost: 30,
+    description: "Auto-clicks at 1 click every 1.5 seconds.",
+    effect: (state) => {
+      if (!state.autoClickInterval) {
+        state.autoClickInterval = setInterval(() => {
+          cred += 1 * gameState.clickMultiplier;
+          updateCredDisplay();
+        }, 1500);
+      }
     }
-
-    for (let i = 0; i < 5; i++) {
-      const enemy = generatePlayer();
-      opponent.push(enemy);
-      opponentContainer.innerHTML += createCard(enemy);
+  },
+  {
+    id: 2,
+    name: "Scout Prospect",
+    type: "utility",
+    cost: 10,
+    description: "Draw 1 extra card next round",
+    effect: (state) => { state.extraDrawNextRound += 1; }
+  },
+  {
+    id: 3,
+    name: "Sign All-Star",
+    type: "boost",
+    cost: 50,
+    description: "2x Cred per click for 30 sec",
+    effect: (state) => {
+      state.clickMultiplier = 2;
+      setTimeout(() => state.clickMultiplier = 1, 30000);
     }
+  },
+  {
+    id: 4,
+    name: "Hire Analytics Team",
+    type: "passive",
+    cost: 75,
+    description: "Gain +1 Cred per second",
+    effect: (state) => { state.passiveIncome += 1; }
+  }
+];
 
-    squadSection.classList.remove('hidden');
+function updateCredDisplay() {
+  document.getElementById("cred-display").textContent = cred;
+}
+
+function updateShopUI() {
+  const shopContainer = document.getElementById("shop-cards");
+  shopContainer.innerHTML = "";
+
+  availableCards.forEach(card => {
+    if (cred >= card.cost) {  // Only show cards the player can afford
+      const cardEl = document.createElement("div");
+      cardEl.className = "card";
+      cardEl.innerHTML = `
+        <h3>${card.name}</h3>
+        <p>${card.description}</p>
+        <p>Cost: ${card.cost} Cred</p>
+        <button onclick="buyCard(${card.id})">Buy</button>
+      `;
+      shopContainer.appendChild(cardEl);
+    }
   });
-
-  battleBtn.addEventListener('click', () => {
-    function getTeamStats(team) {
-      let offenseTotal = 0;
-      let defenseTotal = 0;
-      let intangiblesTotal = 0;
-  
-      team.forEach(player => {
-        offenseTotal += player.offense;
-        defenseTotal += player.defense;
-        intangiblesTotal += player.intangibles;
-      });
-  
-      const avgOffense = offenseTotal / team.length;
-      const avgDefense = defenseTotal / team.length;
-      const avgIntangibles = intangiblesTotal / team.length;
-      const randomBonus = getRandomInt(0, 10);
-  
-      const score = 
-        (avgOffense * 0.4) + 
-        (avgDefense * 0.3) + 
-        (avgIntangibles * 0.3) + 
-        randomBonus;
-  
-      return {
-        avgOffense: avgOffense.toFixed(1),
-        avgDefense: avgDefense.toFixed(1),
-        avgIntangibles: avgIntangibles.toFixed(1),
-        bonus: randomBonus,
-        score: Math.round(score)
-      };
-    }
-  
-    const squadStats = getTeamStats(squad);
-    const opponentStats = getTeamStats(opponent);
-  
-    let result = '';
-    if (squadStats.score > opponentStats.score) {
-      result = `Your Squad Wins! 🎉 (${squadStats.score} - ${opponentStats.score})`;
-    } else if (opponentStats.score > squadStats.score) {
-      result = `Opponent Wins! 😤 (${opponentStats.score} - ${squadStats.score})`;
-    } else {
-      result = `It's a tie! 🤝 (${squadStats.score} - ${opponentStats.score})`;
-    }
-  
-    resultText.textContent = result;
-    resultText.classList.remove('hidden');
-  
-    if (squadStats.score > opponentStats.score) {
-      currentRecord.wins += 1;
-    } else if (opponentStats.score > squadStats.score) {
-      currentRecord.losses += 1;
-    } else {
-      currentRecord.ties += 1;
-    }
-    
-// Add point differential
-currentRecord.pointDiff += squadStats.score - opponentStats.score;
-
-// Then update the record as before
-if (squadStats.score > opponentStats.score) {
-  currentRecord.wins += 1;
-} else if (opponentStats.score > squadStats.score) {
-  currentRecord.losses += 1;
-} else {
-  currentRecord.ties += 1;
 }
 
-saveRecord(currentRecord);
-updateScoreboard(currentRecord);
+function updateTeamSlotsUI() {
+  const teamContainer = document.getElementById("team-slots");
+  teamContainer.innerHTML = "";
 
-    
-    const breakdownText = `
-  🟦 Your Squad
-  - Avg Offense: ${squadStats.avgOffense}
-  - Avg Defense: ${squadStats.avgDefense}
-  - Avg Intangibles: ${squadStats.avgIntangibles}
-  - Bonus: ${squadStats.bonus}
-  - Final Score: ${squadStats.score}
-  
-  🟥 Opponent Squad
-  - Avg Offense: ${opponentStats.avgOffense}
-  - Avg Defense: ${opponentStats.avgDefense}
-  - Avg Intangibles: ${opponentStats.avgIntangibles}
-  - Bonus: ${opponentStats.bonus}
-  - Final Score: ${opponentStats.score}
-    `.trim();
-  
-    document.getElementById('breakdown-text').textContent = breakdownText;
-    document.getElementById('breakdown').classList.remove('hidden');
+  if (cred >= 50) {
+    teamSlots = 1;  // Unlock a team slot
+    const teamSlot = document.createElement("div");
+    teamSlot.className = "card";
+    teamSlot.innerHTML = `<p>New team slot unlocked! Slot 1</p>`;
+    teamContainer.appendChild(teamSlot);
+  }
+}
+
+function buyCard(cardId) {
+  const card = availableCards.find(c => c.id === cardId);
+  if (card && cred >= card.cost) {
+    cred -= card.cost;
+    deck.push(card);
+    gameState.ownedCards.push(card);  // Track owned cards
+    updateShopUI();
+    updateCredDisplay();
+    updateOwnedCardsUI();  // Update the UI for owned cards
+  }
+}
+
+function updateOwnedCardsUI() {
+  const ownedCardsContainer = document.getElementById("owned-cards-list");
+  ownedCardsContainer.innerHTML = "";
+
+  gameState.ownedCards.forEach(card => {
+    const cardEl = document.createElement("div");
+    cardEl.className = "card";
+    cardEl.innerHTML = `
+      <h3>${card.name}</h3>
+      <p>${card.description}</p>
+      <p>Owned</p>
+    `;
+    ownedCardsContainer.appendChild(cardEl);
   });
-  
-  
-});
+}
 
-const currentRecord = loadRecord();
-updateScoreboard(currentRecord);
+function drawHand() {
+  shuffle(deck);
+  hand = deck.slice(0, maxHandSize + gameState.extraDrawNextRound);
+  gameState.extraDrawNextRound = 0;
+  updateHandUI();
+}
 
+function playCard(index) {
+  const card = hand[index];
+  if (!card) return;
+
+  card.effect(gameState);
+  discardPile.push(card);
+  hand.splice(index, 1);
+  updateHandUI();
+}
+
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
+function updateHandUI() {
+  const handEl = document.getElementById("hand-cards");
+  handEl.innerHTML = "";
+  hand.forEach((card, index) => {
+    const el = document.createElement("div");
+    el.className = "card";
+    el.innerHTML = `
+      <h3>${card.name}</h3>
+      <p>${card.description}</p>
+      <button onclick="playCard(${index})">Play</button>
+    `;
+    handEl.appendChild(el);
+  });
+}
+
+function tick() {
+  cred += gameState.passiveIncome;
+  updateCredDisplay();
+}
+
+function initClicker() {
+  document.getElementById("click-btn").addEventListener("click", () => {
+    cred += 1 * gameState.clickMultiplier;
+    updateCredDisplay();
+    updateShopUI();  // Update the shop UI after each click
+    updateTeamSlotsUI();  // Check if team slots should be unlocked
+  });
+}
+
+// Initial setup
+updateCredDisplay();
+updateShopUI();
+updateTeamSlotsUI();
+updateOwnedCardsUI();  // Display owned cards on game start
+initClicker();
+setInterval(tick, 1000);
