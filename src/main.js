@@ -1,187 +1,201 @@
-// src/main.js
+import { createPlayer, drawCards } from './game.js';
+import { cards } from './cards.js';
 
-let cred = 0;
-let deck = [];
-let hand = [];
-let discardPile = [];
-const maxHandSize = 3;
-let teamSlots = 0;
+const player = createPlayer();
+drawCards(player, 5);
+renderDeckInventory();  // Display the initial deck inventory right after game setup
 
-const gameState = {
-  cred: 0,
-  clickMultiplier: 1,
-  passiveIncome: 0,
-  extraDrawNextRound: 0,
-  autoClickInterval: null,
-  ownedCards: []  // Track owned cards
-};
+const handEl = document.getElementById('player-hand');
+const marketplaceEl = document.getElementById('marketplace');
+const logEl = document.getElementById('log');
+const goldDisplay = document.getElementById('gold-display');
 
-const availableCards = [
-  {
-    id: 1,
-    name: "Auto Clicker",
-    type: "boost",
-    cost: 30,
-    description: "Auto-clicks at 1 click every 1.5 seconds.",
-    effect: (state) => {
-      if (!state.autoClickInterval) {
-        state.autoClickInterval = setInterval(() => {
-          cred += 1 * gameState.clickMultiplier;
-          updateCredDisplay();
-        }, 1500);
-      }
-    }
-  },
-  {
-    id: 2,
-    name: "Scout Prospect",
-    type: "utility",
-    cost: 10,
-    description: "Draw 1 extra card next round",
-    effect: (state) => { state.extraDrawNextRound += 1; }
-  },
-  {
-    id: 3,
-    name: "Sign All-Star",
-    type: "boost",
-    cost: 50,
-    description: "2x Cred per click for 30 sec",
-    effect: (state) => {
-      state.clickMultiplier = 2;
-      setTimeout(() => state.clickMultiplier = 1, 30000);
-    }
-  },
-  {
-    id: 4,
-    name: "Hire Analytics Team",
-    type: "passive",
-    cost: 75,
-    description: "Gain +1 Cred per second",
-    effect: (state) => { state.passiveIncome += 1; }
-  }
+const marketSupply = [
+  { card: cards.smithy, count: 10 },
+  { card: cards.estate, count: 8 },
+  { card: cards.copper, count: 46 }
 ];
 
-function updateCredDisplay() {
-  document.getElementById("cred-display").textContent = cred;
+function renderHand() {
+  handEl.innerHTML = '<h2>Your Hand</h2>';
+  player.hand.forEach((card) => {
+    const cardEl = document.createElement('div');
+    cardEl.className = 'card';
+    cardEl.innerText = card.name;
+    handEl.appendChild(cardEl);
+  });
+  updateGoldDisplay();
+  renderDeckAndDiscardCount();  // Add this line to update deck and discard counts
 }
 
-function updateShopUI() {
-  const shopContainer = document.getElementById("shop-cards");
-  shopContainer.innerHTML = "";
+function renderMarketplace() {
+  marketplaceEl.innerHTML = '<h2>Marketplace</h2>';
+  marketSupply.forEach((slot, index) => {
+    const cardEl = document.createElement('div');
+    cardEl.className = 'card';
+    cardEl.innerHTML = `
+      <strong>${slot.card.name}</strong><br>
+      Cost: ${slot.card.cost}<br>
+      Left: ${slot.count}
+    `;
+    cardEl.addEventListener('click', () => buyCard(index));
+    marketplaceEl.appendChild(cardEl);
+  });
+}
 
-  availableCards.forEach(card => {
-    if (cred >= card.cost) {  // Only show cards the player can afford
-      const cardEl = document.createElement("div");
-      cardEl.className = "card";
-      cardEl.innerHTML = `
-        <h3>${card.name}</h3>
-        <p>${card.description}</p>
-        <p>Cost: ${card.cost} Cred</p>
-        <button onclick="buyCard(${card.id})">Buy</button>
-      `;
-      shopContainer.appendChild(cardEl);
+function updateGoldDisplay() {
+  const gold = player.hand
+    .filter(card => card.type === 'Treasure')
+    .reduce((sum, card) => sum + card.value, 0);
+  player.gold = gold;
+  goldDisplay.textContent = `Gold: ${player.gold}`;
+}
+
+function logMessage(msg) {
+  const entry = document.createElement('div');
+  entry.textContent = msg;
+  logEl.appendChild(entry);  // This adds the log message below the header
+}
+
+function buyCard(index) {
+  const slot = marketSupply[index];
+  const cost = slot.card.cost;
+
+  // Check if we have enough Buys
+  if (player.buys <= 0) {
+    logMessage("You don't have any buys left this turn.");
+    return;
+  }
+
+  const treasures = player.hand.filter(card => card.type === 'Treasure');
+  const totalGold = treasures.reduce((sum, card) => sum + card.value, 0);
+
+  if (slot.count <= 0) {
+    logMessage(`${slot.card.name} is sold out.`);
+    return;
+  }
+
+  if (totalGold < cost) {
+    logMessage(`Not enough gold to buy ${slot.card.name}.`);
+    return;
+  }
+
+  // Spend treasures to pay for the card
+  let remainingCost = cost;
+  for (let i = 0; i < player.hand.length && remainingCost > 0; i++) {
+    const card = player.hand[i];
+    if (card.type === 'Treasure') {
+      remainingCost -= card.value;
+      player.discard.push(card);  // Add treasure to discard pile
+      player.hand.splice(i, 1);   // Remove from hand
+      i--;  // Adjust index after splice
+    }
+  }
+
+  // Add purchased card to discard pile
+  player.discard.push(slot.card);  // Add the card to the discard pile
+  slot.count -= 1;
+
+  player.buys--;  // Decrement Buys by 1
+  logMessage(`You bought a ${slot.card.name}.`);
+
+  // Immediately update discard pile counter
+  renderDeckAndDiscardCount();
+
+  // Updates the deck inventory after buying a card
+  renderDeckInventory();  
+
+  renderMarketplace();
+  renderActionsAndBuys();
+}
+
+renderHand();
+renderMarketplace();
+
+const nextTurnBtn = document.getElementById('next-turn');
+nextTurnBtn.addEventListener('click', nextTurn);
+
+function nextTurn() {
+  // Reset Actions and Buys at the start of the next turn
+  player.actions = 1;  // 1 action per turn by default
+  player.buys = 1;     // 1 buy per turn by default
+
+  // Discard current hand
+  player.discard.push(...player.hand);
+  player.hand = [];
+
+  // Draw 5 new cards
+  drawCards(player, 5);
+
+  renderDeckInventory();  // Update the deck inventory after drawing new cards
+
+
+  logMessage("You started a new turn.");
+  renderHand();
+  renderDeckAndDiscardCount();
+  renderActionsAndBuys();
+}
+
+function renderDeckAndDiscardCount() {
+  const deckCountEl = document.getElementById('deck-count');
+  const discardCountEl = document.getElementById('discard-count');
+
+  deckCountEl.textContent = `Deck: ${player.deck.length} cards`;
+  discardCountEl.textContent = `Discard Pile: ${player.discard.length} cards`;
+}
+
+function renderActionsAndBuys() {
+  const actionsLeftEl = document.getElementById('actions-left');
+  const buysLeftEl = document.getElementById('buys-left');
+
+  actionsLeftEl.textContent = `Actions: ${player.actions}`;
+  buysLeftEl.textContent = `Buys: ${player.buys}`;
+}
+
+function playActionCard(card) {
+  if (player.actions <= 0) {
+    logMessage("No actions left to play.");
+    return;
+  }
+
+  player.actions--;  // Use an action to play this card
+  logMessage(`You played a ${card.name}.`);
+
+  if (card.name === "Smithy") {
+    player.actions++;  // Smithy gives +1 action
+    logMessage("Smithy gave you +1 Action.");
+  }
+
+  renderActionsAndBuys();
+}
+
+function renderDeckInventory() {
+  const deckListEl = document.getElementById('deck-list');
+  deckListEl.innerHTML = ''; // Clear current inventory
+
+  // Count the cards in the deck, hand, and discard pile
+  const cardCounts = {};
+
+  // Count cards in the player's deck, hand, and discard pile
+  [...player.deck, ...player.hand, ...player.discard].forEach(card => {
+    if (cardCounts[card.name]) {
+      cardCounts[card.name]++;
+    } else {
+      cardCounts[card.name] = 1;
     }
   });
-}
 
-function updateTeamSlotsUI() {
-  const teamContainer = document.getElementById("team-slots");
-  teamContainer.innerHTML = "";
-
-  if (cred >= 50) {
-    teamSlots = 1;  // Unlock a team slot
-    const teamSlot = document.createElement("div");
-    teamSlot.className = "card";
-    teamSlot.innerHTML = `<p>New team slot unlocked! Slot 1</p>`;
-    teamContainer.appendChild(teamSlot);
+  // Render each card type and count
+  let totalCards = 0;
+  for (const cardName in cardCounts) {
+    const listItem = document.createElement('li');
+    listItem.textContent = `${cardName}: ${cardCounts[cardName]}`;
+    deckListEl.appendChild(listItem);
+    totalCards += cardCounts[cardName];
   }
+
+  // Add total card count
+  const totalCountEl = document.createElement('li');
+  totalCountEl.textContent = `Total Cards: ${totalCards}`;
+  deckListEl.appendChild(totalCountEl);
 }
-
-function buyCard(cardId) {
-  const card = availableCards.find(c => c.id === cardId);
-  if (card && cred >= card.cost) {
-    cred -= card.cost;
-    deck.push(card);
-    gameState.ownedCards.push(card);  // Track owned cards
-    updateShopUI();
-    updateCredDisplay();
-    updateOwnedCardsUI();  // Update the UI for owned cards
-  }
-}
-
-function updateOwnedCardsUI() {
-  const ownedCardsContainer = document.getElementById("owned-cards-list");
-  ownedCardsContainer.innerHTML = "";
-
-  gameState.ownedCards.forEach(card => {
-    const cardEl = document.createElement("div");
-    cardEl.className = "card";
-    cardEl.innerHTML = `
-      <h3>${card.name}</h3>
-      <p>${card.description}</p>
-      <p>Owned</p>
-    `;
-    ownedCardsContainer.appendChild(cardEl);
-  });
-}
-
-function drawHand() {
-  shuffle(deck);
-  hand = deck.slice(0, maxHandSize + gameState.extraDrawNextRound);
-  gameState.extraDrawNextRound = 0;
-  updateHandUI();
-}
-
-function playCard(index) {
-  const card = hand[index];
-  if (!card) return;
-
-  card.effect(gameState);
-  discardPile.push(card);
-  hand.splice(index, 1);
-  updateHandUI();
-}
-
-function shuffle(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-}
-
-function updateHandUI() {
-  const handEl = document.getElementById("hand-cards");
-  handEl.innerHTML = "";
-  hand.forEach((card, index) => {
-    const el = document.createElement("div");
-    el.className = "card";
-    el.innerHTML = `
-      <h3>${card.name}</h3>
-      <p>${card.description}</p>
-      <button onclick="playCard(${index})">Play</button>
-    `;
-    handEl.appendChild(el);
-  });
-}
-
-function tick() {
-  cred += gameState.passiveIncome;
-  updateCredDisplay();
-}
-
-function initClicker() {
-  document.getElementById("click-btn").addEventListener("click", () => {
-    cred += 1 * gameState.clickMultiplier;
-    updateCredDisplay();
-    updateShopUI();  // Update the shop UI after each click
-    updateTeamSlotsUI();  // Check if team slots should be unlocked
-  });
-}
-
-// Initial setup
-updateCredDisplay();
-updateShopUI();
-updateTeamSlotsUI();
-updateOwnedCardsUI();  // Display owned cards on game start
-initClicker();
-setInterval(tick, 1000);

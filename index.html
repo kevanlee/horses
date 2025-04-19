@@ -3,51 +3,28 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Basketball GM Clicker Game</title>
+  <title>Deck Builder</title>
   <link rel="stylesheet" href="res/styles.css" />
 </head>
 <body>
-  <h1>Basketball GM Clicker</h1>
-  
-  <!-- Clicker Button Section -->
-  <div id="clicker-section">
-    <button id="click-btn">Manage Team</button>
-    <p>Cred: <span id="cred-display">0</span></p>
-  </div>
-
-  <div id="game-container">
-    <!-- Left Column with Narration Box -->
-    <div id="left-column">
-      <div id="narration-box">
-        <p>Welcome to the Basketball GM Clicker! Click the button to start managing your team.</p>
-      </div>
-
-      <!-- Display Owned Cards -->
-      <div id="owned-cards">
-        <h3>Your Cards</h3>
-        <div id="owned-cards-list"></div>
-      </div>
+  <h1>Dominion-Inspired Deck Builder</h1>
+  <div id="game">
+    <div>
+      <div id="gold-display"></div>
+      <div id="deck-count"></div>
+      <div id="discard-count"></div>
+      <div id="actions-left">Actions: 1</div>
+      <div id="buys-left">Buys: 1</div>
+      <button id="next-turn">Next Turn</button>
+      <div id="player-hand"></div>
     </div>
-
-    <!-- Right Column with Shop and Team Slots -->
-    <div id="right-column">
-      <div id="shop">
-        <h2>Card Shop</h2>
-        <div id="shop-cards" class="card-grid"></div>
-      </div>
-
-      <div id="team">
-        <h2>Your Team</h2>
-        <div id="team-slots"></div>
-      </div>
-
-      <div id="hand">
-        <h2>Your Hand</h2>
-        <div id="hand-cards" class="card-grid"></div>
-      </div>
-    </div>
+    <div id="marketplace"></div>
   </div>
-
-  <script src="src/main.js"></script>
+  <div id="log"><h2>Game Log</h2></div>
+  <div id="deck-inventory">
+    <h2>Deck Inventory</h2>
+    <ul id="deck-list"></ul>
+  </div>  
+  <script type="module" src="src/main.js"></script>
 </body>
 </html>
