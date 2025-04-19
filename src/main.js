@@ -25,7 +25,7 @@ function renderHand() {
     handEl.appendChild(cardEl);
   });
   updateGoldDisplay();
-  renderDeckAndDiscardCount();  // Add this line to update deck and discard counts
+  renderDeckAndDiscardCount();
 }
 
 function renderMarketplace() {
@@ -61,7 +61,6 @@ function buyCard(index) {
   const slot = marketSupply[index];
   const cost = slot.card.cost;
 
-  // Check if we have enough Buys
   if (player.buys <= 0) {
     logMessage("You don't have any buys left this turn.");
     return;
@@ -93,20 +92,17 @@ function buyCard(index) {
   }
 
   // Add purchased card to discard pile
-  player.discard.push(slot.card);  // Add the card to the discard pile
+  player.discard.push(slot.card);
   slot.count -= 1;
 
-  player.buys--;  // Decrement Buys by 1
+  player.buys--;
   logMessage(`You bought a ${slot.card.name}.`);
 
-  // Immediately update discard pile counter
   renderDeckAndDiscardCount();
-
-  // Updates the deck inventory after buying a card
-  renderDeckInventory();  
-
+  renderDeckInventory();
   renderMarketplace();
   renderActionsAndBuys();
+  renderHand(); // Ensure hand reflects removed Treasures
 }
 
 renderHand();
@@ -116,20 +112,15 @@ const nextTurnBtn = document.getElementById('next-turn');
 nextTurnBtn.addEventListener('click', nextTurn);
 
 function nextTurn() {
-  // Reset Actions and Buys at the start of the next turn
-  player.actions = 1;  // 1 action per turn by default
-  player.buys = 1;     // 1 buy per turn by default
+  player.actions = 1;
+  player.buys = 1;
 
-  // Discard current hand
   player.discard.push(...player.hand);
   player.hand = [];
 
-  // Draw 5 new cards
   drawCards(player, 5);
 
-  renderDeckInventory();  // Update the deck inventory after drawing new cards
-
-
+  renderDeckInventory();
   logMessage("You started a new turn.");
   renderHand();
   renderDeckAndDiscardCount();
@@ -158,11 +149,11 @@ function playActionCard(card) {
     return;
   }
 
-  player.actions--;  // Use an action to play this card
+  player.actions--;
   logMessage(`You played a ${card.name}.`);
 
   if (card.name === "Smithy") {
-    player.actions++;  // Smithy gives +1 action
+    player.actions++;
     logMessage("Smithy gave you +1 Action.");
   }
 
@@ -171,12 +162,10 @@ function playActionCard(card) {
 
 function renderDeckInventory() {
   const deckListEl = document.getElementById('deck-list');
-  deckListEl.innerHTML = ''; // Clear current inventory
+  deckListEl.innerHTML = '';
 
-  // Count the cards in the deck, hand, and discard pile
   const cardCounts = {};
 
-  // Count cards in the player's deck, hand, and discard pile
   [...player.deck, ...player.hand, ...player.discard].forEach(card => {
     if (cardCounts[card.name]) {
       cardCounts[card.name]++;
@@ -185,7 +174,6 @@ function renderDeckInventory() {
     }
   });
 
-  // Render each card type and count
   let totalCards = 0;
   for (const cardName in cardCounts) {
     const listItem = document.createElement('li');
@@ -194,7 +182,6 @@ function renderDeckInventory() {
     totalCards += cardCounts[cardName];
   }
 
-  // Add total card count
   const totalCountEl = document.createElement('li');
   totalCountEl.textContent = `Total Cards: ${totalCards}`;
   deckListEl.appendChild(totalCountEl);
