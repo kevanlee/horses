@@ -10,20 +10,43 @@ const marketplaceEl = document.getElementById('marketplace');
 const logEl = document.getElementById('log');
 const goldDisplay = document.getElementById('gold-display');
 
+// Define the cards and their initial supply count in the marketplace
 const marketSupply = [
-  { card: cards.smithy, count: 10 },
+  { card: cards.copper, count: 46 },
+  { card: cards.silver, count: 40 },
+  { card: cards.gold, count: 30 },
   { card: cards.estate, count: 8 },
-  { card: cards.copper, count: 46 }
+  { card: cards.duchy, count: 8 },
+  { card: cards.province, count: 8 },
+  { card: cards.smithy, count: 10 },
+  { card: cards.village, count: 10 },  // Add Village with 10 cards
+  { card: cards.market, count: 10 }    // Add Market with 10 cards
 ];
 
 function renderHand() {
   handEl.innerHTML = '<h2>Your Hand</h2>';
-  player.hand.forEach((card) => {
+  player.hand.forEach((card, index) => {
     const cardEl = document.createElement('div');
     cardEl.className = 'card';
-    cardEl.innerText = card.name;
+    cardEl.innerHTML = `
+      <strong>${card.name}</strong><br>
+      <em>Type:</em> ${card.type}<br>
+      <em>Cost:</em> ${card.cost}<br>
+      <em>${card.description || ''}</em>
+    `;
+
+    // Add "Play" button only if player has actions left and card is an Action type
+    if (player.actions > 0 && card.type === 'Action') {
+      const playBtn = document.createElement('button');
+      playBtn.textContent = 'Play';
+      playBtn.addEventListener('click', () => playActionCard(card));
+      cardEl.appendChild(document.createElement('br'));
+      cardEl.appendChild(playBtn);
+    }
+
     handEl.appendChild(cardEl);
   });
+
   updateGoldDisplay();
   renderDeckAndDiscardCount();
 }
@@ -35,7 +58,9 @@ function renderMarketplace() {
     cardEl.className = 'card';
     cardEl.innerHTML = `
       <strong>${slot.card.name}</strong><br>
-      Cost: ${slot.card.cost}<br>
+      <em>Type:</em> ${slot.card.type}<br>
+      <em>Cost:</em> ${slot.card.cost}<br>
+      <em>${slot.card.description || ''}</em><br>
       Left: ${slot.count}
     `;
     cardEl.addEventListener('click', () => buyCard(index));
@@ -152,12 +177,37 @@ function playActionCard(card) {
   player.actions--;
   logMessage(`You played a ${card.name}.`);
 
-  if (card.name === "Smithy") {
-    player.actions++;
-    logMessage("Smithy gave you +1 Action.");
+  switch (card.name) {
+    case "Smithy":
+      drawCards(player, 3);
+      logMessage("Smithy: +3 Cards");
+      break;
+    case "Village":
+      drawCards(player, 1);
+      player.actions += 2;
+      logMessage("Village: +1 Card, +2 Actions");
+      break;
+    case "Market":
+      drawCards(player, 1);
+      player.actions += 1;
+      player.buys += 1;
+      player.gold += 1;
+      logMessage("Market: +1 Card, +1 Action, +1 Buy, +1 Gold");
+      break;
+    default:
+      logMessage(`${card.name} has no defined effect yet.`);
   }
 
+  // Remove card from hand and place it in discard
+  const index = player.hand.indexOf(card);
+  if (index !== -1) {
+    player.hand.splice(index, 1);
+    player.discard.push(card);
+  }
+
+  updateGoldDisplay();
   renderActionsAndBuys();
+  renderHand();
 }
 
 function renderDeckInventory() {
