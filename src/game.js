@@ -11,7 +11,8 @@ export const createPlayer = () => {
       drawPile: [],
       gold: 0,
       actions: 1,  // 1 action by default
-      buys: 1      // 1 buy by default
+      buys: 1,      // 1 buy by default
+      bonusGold: 0,
     };
   };  
 

@@ -1,9 +1,13 @@
 import { createPlayer, drawCards } from './game.js';
 import { cards } from './cards.js';
+import { playActionCardEffect } from './actionCards.js';
+
 
 const player = createPlayer();
+player.log = logMessage;
 drawCards(player, 5);
 renderDeckInventory();  // Display the initial deck inventory right after game setup
+
 
 const handEl = document.getElementById('player-hand');
 const marketplaceEl = document.getElementById('marketplace');
@@ -69,11 +73,19 @@ function renderMarketplace() {
 }
 
 function updateGoldDisplay() {
-  const gold = player.hand
+  // Calculate the current gold value from treasure cards in hand
+  const treasureGold = player.hand
     .filter(card => card.type === 'Treasure')
     .reduce((sum, card) => sum + card.value, 0);
-  player.gold = gold;
-  goldDisplay.textContent = `Gold: ${player.gold}`;
+
+  // Update the base treasure value
+  player.gold = treasureGold;
+
+  // Calculate total with any bonusGold from Action cards like Market
+  const totalGold = player.gold + (player.bonusGold || 0);
+
+  // Update the gold display
+  goldDisplay.textContent = `Gold: ${totalGold}`;
 }
 
 function logMessage(msg) {
@@ -121,7 +133,11 @@ function buyCard(index) {
   slot.count -= 1;
 
   player.buys--;
-  logMessage(`You bought a ${slot.card.name}.`);
+  let cardName = slot.card.name;
+  let cardStartsWith = cardName.charAt(0).toLowerCase();
+  let vowels = ["a", "e", "i", "o", "u"];
+  if (vowels.includes(cardStartsWith)) logMessage(`You bought an ${slot.card.name}.`);
+  else logMessage(`You bought a ${slot.card.name}.`);
 
   renderDeckAndDiscardCount();
   renderDeckInventory();
@@ -139,6 +155,7 @@ nextTurnBtn.addEventListener('click', nextTurn);
 function nextTurn() {
   player.actions = 1;
   player.buys = 1;
+  player.bonusGold = 0;
 
   player.discard.push(...player.hand);
   player.hand = [];
@@ -175,28 +192,14 @@ function playActionCard(card) {
   }
 
   player.actions--;
-  logMessage(`You played a ${card.name}.`);
+  let cardName = card.name;
+  let cardStartsWith = cardName.startswith;
+  let vowels = ["a", "e", "i", "o", "u"];
+  if (vowels.includes(cardStartsWith)) logMessage(`You played an ${card.name}.`);
+  else logMessage(`You played a ${card.name}.`);
 
-  switch (card.name) {
-    case "Smithy":
-      drawCards(player, 3);
-      logMessage("Smithy: +3 Cards");
-      break;
-    case "Village":
-      drawCards(player, 1);
-      player.actions += 2;
-      logMessage("Village: +1 Card, +2 Actions");
-      break;
-    case "Market":
-      drawCards(player, 1);
-      player.actions += 1;
-      player.buys += 1;
-      player.gold += 1;
-      logMessage("Market: +1 Card, +1 Action, +1 Buy, +1 Gold");
-      break;
-    default:
-      logMessage(`${card.name} has no defined effect yet.`);
-  }
+  // 🔽 Use the new handler function from actionCards.js
+  playActionCardEffect(card, player);
 
   // Remove card from hand and place it in discard
   const index = player.hand.indexOf(card);
