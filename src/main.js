@@ -13,6 +13,9 @@ const handEl = document.getElementById('player-hand');
 const marketplaceEl = document.getElementById('marketplace');
 const logEl = document.getElementById('log');
 const goldDisplay = document.getElementById('gold-display');
+const victoryDisplay = document.getElementById('victory-display'); 
+
+updateVictoryPoints();
 
 // Define the cards and their initial supply count in the marketplace
 const marketSupply = [
@@ -73,20 +76,14 @@ function renderMarketplace() {
 }
 
 function updateGoldDisplay() {
-  // Calculate the current gold value from treasure cards in hand
   const treasureGold = player.hand
     .filter(card => card.type === 'Treasure')
     .reduce((sum, card) => sum + card.value, 0);
 
-  // Update the base treasure value
-  player.gold = treasureGold;
-
-  // Calculate total with any bonusGold from Action cards like Market
-  const totalGold = player.gold + (player.bonusGold || 0);
-
-  // Update the gold display
-  goldDisplay.textContent = `Gold: ${totalGold}`;
+  player.gold = treasureGold + player.bonusGold;
+  goldDisplay.textContent = `Gold: ${player.gold}`;
 }
+
 
 function logMessage(msg) {
   const entry = document.createElement('div');
@@ -103,30 +100,39 @@ function buyCard(index) {
     return;
   }
 
-  const treasures = player.hand.filter(card => card.type === 'Treasure');
-  const totalGold = treasures.reduce((sum, card) => sum + card.value, 0);
+  const totalGold = player.gold;
 
   if (slot.count <= 0) {
     logMessage(`${slot.card.name} is sold out.`);
     return;
   }
 
-  if (totalGold < cost) {
+  if (player.gold < cost) {
     logMessage(`Not enough gold to buy ${slot.card.name}.`);
     return;
   }
 
-  // Spend treasures to pay for the card
   let remainingCost = cost;
+
+  // Remove treasure cards from hand first
   for (let i = 0; i < player.hand.length && remainingCost > 0; i++) {
     const card = player.hand[i];
     if (card.type === 'Treasure') {
       remainingCost -= card.value;
-      player.discard.push(card);  // Add treasure to discard pile
-      player.hand.splice(i, 1);   // Remove from hand
-      i--;  // Adjust index after splice
+      player.discard.push(card);
+      player.hand.splice(i, 1);
+      i--;
     }
   }
+  
+  // If there's still cost remaining, subtract it from bonusGold
+  if (remainingCost > 0) {
+    player.bonusGold -= remainingCost;
+  }
+  
+  // Recalculate and update gold display
+  updateGoldDisplay();
+  
 
   // Add purchased card to discard pile
   player.discard.push(slot.card);
@@ -144,6 +150,7 @@ function buyCard(index) {
   renderMarketplace();
   renderActionsAndBuys();
   renderHand(); // Ensure hand reflects removed Treasures
+  updateVictoryPoints();
 }
 
 renderHand();
@@ -167,6 +174,7 @@ function nextTurn() {
   renderHand();
   renderDeckAndDiscardCount();
   renderActionsAndBuys();
+  updateVictoryPoints();
 }
 
 function renderDeckAndDiscardCount() {
@@ -193,7 +201,7 @@ function playActionCard(card) {
 
   player.actions--;
   let cardName = card.name;
-  let cardStartsWith = cardName.startswith;
+  let cardStartsWith = cardName.charAt(0).toLowerCase();
   let vowels = ["a", "e", "i", "o", "u"];
   if (vowels.includes(cardStartsWith)) logMessage(`You played an ${card.name}.`);
   else logMessage(`You played a ${card.name}.`);
@@ -238,4 +246,17 @@ function renderDeckInventory() {
   const totalCountEl = document.createElement('li');
   totalCountEl.textContent = `Total Cards: ${totalCards}`;
   deckListEl.appendChild(totalCountEl);
+}
+
+function updateVictoryPoints() {
+  // Calculate the victory points from all cards in hand, deck, and discard
+  const victoryPoints = [...player.hand, ...player.deck, ...player.discard]
+    .filter(card => card.type === 'Victory')
+    .reduce((sum, card) => sum + (card.points || 0), 0);
+
+  // Update the player's victory points
+  player.victoryPoints = victoryPoints;
+
+  // Update the victory points display
+  victoryDisplay.textContent = `Victory Points: ${player.victoryPoints}`;
 }
