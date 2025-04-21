@@ -78,6 +78,17 @@ function renderHand() {
 // Make renderHand globally accessible
 window.renderHand = renderHand;
 
+function updateGoldDisplay() {
+  const treasureGold = player.hand
+    .filter(card => card.type === 'Treasure')
+    .reduce((sum, card) => sum + card.value, 0);
+
+  player.gold = treasureGold + player.bonusGold;
+  goldDisplay.textContent = `Gold: ${player.gold}`;
+}
+
+window.updateGoldDisplay = updateGoldDisplay;
+
 function renderMarketplace() {
   marketplaceEl.innerHTML = '<h2>Marketplace</h2>';
 
@@ -85,8 +96,11 @@ function renderMarketplace() {
     const cardEl = document.createElement('div');
     cardEl.className = 'card';
 
+    // Account for both gold and bonusGold when determining if a card is affordable
+    const totalGold = player.gold;
+
     // Disable card if it's too expensive or if the player is out of buys
-    if (slot.card.cost > player.gold || player.buys <= 0) {
+    if (slot.card.cost > totalGold || player.buys <= 0) {
       cardEl.classList.add('disabled'); // Add 'disabled' class if card is too expensive or no buys left
     } else {
       cardEl.classList.remove('disabled'); // Remove 'disabled' class if the card is affordable and player has buys
@@ -109,15 +123,7 @@ function renderMarketplace() {
   });
 }
 
-function updateGoldDisplay() {
-  const treasureGold = player.hand
-    .filter(card => card.type === 'Treasure')
-    .reduce((sum, card) => sum + card.value, 0);
-
-  player.gold = treasureGold + player.bonusGold;
-  goldDisplay.textContent = `Gold: ${player.gold}`;
-}
-
+window.renderMarketplace = renderMarketplace;
 
 function logMessage(msg) {
   const entry = document.createElement('div');
@@ -134,21 +140,32 @@ function buyCard(index) {
     return;
   }
 
-  const totalGold = player.gold;
+  // Calculate total available gold correctly (including player gold and bonus gold)
+  const treasureGold = player.hand
+    .filter(card => card.type === 'Treasure')
+    .reduce((sum, card) => sum + card.value, 0);
+  
+  const totalGold = treasureGold + player.bonusGold;
+
+  console.log("📊 Buying card...");
+  console.log("Gold in hand:", treasureGold);
+  console.log("Bonus gold from actions:", player.bonusGold);
+  console.log("Total available gold:", totalGold);
+  console.log("Cost of selected card:", cost);
 
   if (slot.count <= 0) {
     logMessage(`${slot.card.name} is sold out.`);
     return;
   }
 
-  if (player.gold < cost) {
+  if (totalGold < cost) {
     logMessage(`Not enough gold to buy ${slot.card.name}.`);
     return;
   }
 
   let remainingCost = cost;
 
-  // Remove treasure cards from hand first
+  // Remove treasure cards from hand first and update gold accordingly
   for (let i = 0; i < player.hand.length && remainingCost > 0; i++) {
     const card = player.hand[i];
     if (card.type === 'Treasure') {
@@ -158,15 +175,23 @@ function buyCard(index) {
       i--;
     }
   }
-  
+
   // If there's still cost remaining, subtract it from bonusGold
   if (remainingCost > 0) {
     player.bonusGold -= remainingCost;
   }
-  
-  // Recalculate and update gold display
+
+  // Don't zero out player.gold unless all the gold is spent
+  // If remaining cost is 0, the gold from the hand has been fully used
+  if (remainingCost === 0) {
+    // You don't need to reset player.gold here because it will be updated after the turn anyway
+    // player.gold = 0; 
+  }
+
+  player.bonusGold = 0; // Reset bonus gold after purchase
+
+  // Update the gold display after purchase
   updateGoldDisplay();
-  
 
   // Add purchased card to discard pile
   player.discard.push(slot.card);
@@ -181,11 +206,14 @@ function buyCard(index) {
 
   renderDeckAndDiscardCount();
   renderDeckInventory();
-  renderMarketplace();
   renderActionsAndBuys();
+  renderMarketplace();
   renderHand(); // Ensure hand reflects removed Treasures
   updateVictoryPoints();
 }
+
+
+
 
 renderHand();
 renderMarketplace();
@@ -254,6 +282,8 @@ function playActionCard(card) {
   updateGoldDisplay();
   renderActionsAndBuys();
   renderHand();
+  renderMarketplace();
+  renderDeckAndDiscardCount();
 }
 
 function renderDeckInventory() {
