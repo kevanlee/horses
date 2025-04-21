@@ -36,10 +36,17 @@ const marketSupply = [
 ];
 
 function renderHand() {
+  // Clear previous hand content and create a new container for the cards
   handEl.innerHTML = '<h2>Your Hand</h2>';
+  
+  // Create the card container div
+  const cardContainer = document.createElement('div');
+  cardContainer.className = 'card-container'; // Add the class for styling
+
+  // Loop through each card in the player's hand and create a card element
   player.hand.forEach((card, index) => {
     const cardEl = document.createElement('div');
-    cardEl.className = 'card';
+    cardEl.className = 'card'; // Add the 'card' class for styling
     cardEl.innerHTML = `
       <strong>${card.name}</strong><br>
       <em>Type:</em> ${card.type}<br>
@@ -56,19 +63,32 @@ function renderHand() {
       cardEl.appendChild(playBtn);
     }
 
-    handEl.appendChild(cardEl);
+    // Append the card element to the card container
+    cardContainer.appendChild(cardEl);
   });
 
+  // Append the card container to the hand element
+  handEl.appendChild(cardContainer);
+
+  // Update the gold display and deck/discard counts
   updateGoldDisplay();
   renderDeckAndDiscardCount();
 }
 
 function renderMarketplace() {
   marketplaceEl.innerHTML = '<h2>Marketplace</h2>';
-  
+
   marketSupply.forEach((slot, index) => {
     const cardEl = document.createElement('div');
     cardEl.className = 'card';
+
+    // Disable card if it's too expensive or if the player is out of buys
+    if (slot.card.cost > player.gold || player.buys <= 0) {
+      cardEl.classList.add('disabled'); // Add 'disabled' class if card is too expensive or no buys left
+    } else {
+      cardEl.classList.remove('disabled'); // Remove 'disabled' class if the card is affordable and player has buys
+    }
+
     cardEl.innerHTML = `
       <strong>${slot.card.name}</strong><br>
       <em>Type:</em> ${slot.card.type}<br>
@@ -76,7 +96,12 @@ function renderMarketplace() {
       <em>${slot.card.description || ''}</em><br>
       Left: ${slot.count}
     `;
-    cardEl.addEventListener('click', () => buyCard(index));
+
+    // Only allow buying the card if it's not disabled
+    if (!cardEl.classList.contains('disabled')) {
+      cardEl.addEventListener('click', () => buyCard(index));
+    }
+
     marketplaceEl.appendChild(cardEl);
   });
 }
@@ -179,6 +204,7 @@ function nextTurn() {
   logMessage("You started a new turn.");
   renderHand();
   renderDeckAndDiscardCount();
+  renderMarketplace();
   renderActionsAndBuys();
   updateVictoryPoints();
 }

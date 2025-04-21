@@ -1,23 +1,128 @@
+/* === Global Styles === */
 body {
-  font-family: sans-serif;
+  font-family: "Funnel Sans", sans-serif;
   background-color: #f3f3f3;
   padding: 1rem;
 }
 
+h1.title {
+  font-size: 4rem;
+  text-align: center;
+  border-bottom: 1px solid #000000;
+}
+
+/* === Grid Layout for #game === */
 #game {
   display: grid;
-  grid-template-columns: 1fr 2fr;
+  grid-template-columns: repeat(12, 1fr); /* 12 equal columns */
   gap: 1rem;
 }
 
-#player-hand,
-#marketplace {
+/* === Header Section === */
+#header {
+  grid-column: span 12; /* Span the entire 12-column width */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#scoreboard {
+  list-style: none;
+  display: flex;
+  gap: 1rem;
+  padding: 0;
+  margin: 0;
+}
+
+#scoreboard li {
+  display: flex;
+  align-items: center;
+}
+
+#header button {
+  margin-left: 1rem; /* Align button to the right */
+}
+
+/* === Hand Section === */
+#hand {
+  grid-column: span 12; /* Span the entire 12-column width */
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 1rem;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #000000; 
+}
+
+#deck-count {
+  grid-column: span 1; /* Deck count takes up 1 column */
+}
+
+#player-hand {
+  grid-column: span 10; /* Player hand takes up 10 columns */
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
   background-color: white;
   border: 1px solid #ccc;
   padding: 1rem;
   border-radius: 8px;
 }
 
+#player-hand h2 {
+  margin: 0;
+  text-align: center;
+  font-size: 1.5rem;
+}
+
+.card-container {
+  display: flex; /* Aligns cards in a row */
+  flex-wrap: wrap; /* Cards will wrap to the next line if necessary */
+  gap: 0.5rem; /* Adds spacing between cards */
+  justify-content: center; /* Centers cards horizontally */
+  align-items: center; /* Centers cards vertically (optional) */
+}
+
+#discard-count {
+  grid-column: span 1; /* Discard count takes up 1 columns */
+}
+
+#deck-count,
+#discard-count {
+  display: flex;
+  align-items: flex-end; /* Align content to the bottom */
+  padding: 0.5rem; /* Add padding if necessary */
+}
+
+/* === Shop Section === */
+#shop {
+  grid-column: span 12; /* Span the entire 12-column width */
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 1rem;
+}
+
+#deck-inventory {
+  grid-column: span 2; /* Deck inventory takes up 2 columns */
+  background-color: white;
+  border: 1px solid #ccc;
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+#marketplace {
+  grid-column: span 10; /* Marketplace takes up 10 columns */
+  background-color: white;
+  border: 1px solid #ccc;
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+/* === Log Section === */
+#log {
+  grid-column: span 12; /* Span the entire 12-column width */
+}
+
+/* === Card Styles === */
 .card {
   display: inline-block;
   background: #eee;
@@ -29,3 +134,32 @@ body {
   cursor: pointer;
   border-radius: 5px;
 }
+
+.card.disabled {
+  opacity: 0.5; /* Make cards that are too expensive semi-transparent */
+  pointer-events: none; /* Optional: Disable interactions (like clicks) with disabled cards */
+}
+
+/* === Mobile === */
+
+@media (max-width: 768px) {
+  #game {
+    grid-template-columns: 1fr; /* Make grid a single column */
+  }
+
+  #header, #hand, #shop, #log {
+    grid-column: span 1; /* Ensure these sections span the entire width */
+  }
+}
+
+
+/* === Debugging Styles (Outlines) === 
+#game > div {
+  outline: 1px dashed red; 
+}
+
+#game > div > div {
+  outline: 1px dotted blue; 
+  padding: 0.25rem;
+}
+*/

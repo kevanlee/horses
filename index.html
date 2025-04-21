@@ -5,27 +5,36 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Deck Builder</title>
   <link rel="stylesheet" href="res/styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Funnel+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
 </head>
 <body>
-  <h1>Dominion-Inspired Deck Builder</h1>
+  <h1 class="title">✌️ Dominion-Inspired Deck Builder ✌️</h1>
   <div id="game">
-    <div>
-      <div id="gold-display"></div>
-      <div id="victory-display">Victory Points: 0</div>
-      <div id="deck-count"></div>
-      <div id="discard-count"></div>
-      <div id="actions-left">Actions: 1</div>
-      <div id="buys-left">Buys: 1</div>
+    <div id="header">
+      <ul id="scoreboard">
+        <li><div id="gold-display"></div></li>
+        <li><div id="victory-display">Victory Points: 0</div></li>
+        <li><div id="actions-left">Actions: 1</div></li>
+        <li><div id="buys-left">Buys: 1</div></li>
+      </ul>
       <button id="next-turn">Next Turn</button>
-      <div id="player-hand"></div>
     </div>
-    <div id="marketplace"></div>
+    <div id="hand">
+      <div id="deck-count"></div>
+      <div id="player-hand"></div>
+      <div id="discard-count"></div>
+    </div>
+    <div id="shop">
+      <div id="deck-inventory">
+        <h2>Deck Inventory</h2>
+        <ul id="deck-list"></ul>
+      </div> 
+      <div id="marketplace"></div>
+    </div>
   </div> 
-  <div id="log"><h2>Game Log</h2></div>
-  <div id="deck-inventory">
-    <h2>Deck Inventory</h2>
-    <ul id="deck-list"></ul>
-  </div>  
+  <div id="log"><h2>Game Log</h2></div> 
   <script type="module" src="src/main.js"></script>
 </body>
 </html>
