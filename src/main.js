@@ -75,6 +75,9 @@ function renderHand() {
   renderDeckAndDiscardCount();
 }
 
+// Make renderHand globally accessible
+window.renderHand = renderHand;
+
 function renderMarketplace() {
   marketplaceEl.innerHTML = '<h2>Marketplace</h2>';
 
