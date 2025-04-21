@@ -2,7 +2,6 @@ import { createPlayer, drawCards } from './game.js';
 import { cards } from './cards.js';
 import { playActionCardEffect } from './actionCards.js';
 
-
 const player = createPlayer();
 player.log = logMessage;
 drawCards(player, 5);
@@ -15,6 +14,7 @@ const logEl = document.getElementById('log');
 const goldDisplay = document.getElementById('gold-display');
 const victoryDisplay = document.getElementById('victory-display'); 
 
+
 updateVictoryPoints();
 
 // Define the cards and their initial supply count in the marketplace
@@ -26,8 +26,13 @@ const marketSupply = [
   { card: cards.duchy, count: 8 },
   { card: cards.province, count: 8 },
   { card: cards.smithy, count: 10 },
-  { card: cards.village, count: 10 },  // Add Village with 10 cards
-  { card: cards.market, count: 10 }    // Add Market with 10 cards
+  { card: cards.village, count: 10 },
+  { card: cards.market, count: 10 },
+  { card: cards.cellar, count: 10 },
+  { card: cards.militia, count: 10 },
+  { card: cards.festival, count: 10 },
+  { card: cards.library, count: 10 },
+  { card: cards.laboratory, count: 10 }
 ];
 
 function renderHand() {
@@ -60,6 +65,7 @@ function renderHand() {
 
 function renderMarketplace() {
   marketplaceEl.innerHTML = '<h2>Marketplace</h2>';
+  
   marketSupply.forEach((slot, index) => {
     const cardEl = document.createElement('div');
     cardEl.className = 'card';
