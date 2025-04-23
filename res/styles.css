@@ -140,7 +140,14 @@ h1.title {
   pointer-events: none; /* Optional: Disable interactions (like clicks) with disabled cards */
 }
 
-/* === Cellar Modal === */
+.card.confirmed {
+  border: 2px solid green;
+  background-color: #eaffea;
+  opacity: 0.8;
+}
+
+
+/* === Modal === */
 .modal {
   position: fixed;
   top: 0;
@@ -155,6 +162,9 @@ h1.title {
 }
 
 .modal.hidden {
+  display: none;
+}
+.hidden {
   display: none;
 }
 

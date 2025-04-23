@@ -35,13 +35,23 @@
     </div>
   </div> 
   <div id="log"><h2>Game Log</h2></div> 
-  <div id="cellar-modal" class="modal hidden">
+  <div id="card-modal" class="modal hidden">
     <div class="modal-content">
-      <h2>Choose cards to discard</h2>
-      <div id="cellar-hand" class="card-container"></div>
-      <button id="confirm-discard">Discard Selected</button>
+      <h2 id="modal-title">Choose cards</h2>
+      <div id="modal-body" class="card-container"></div>
+      <button id="modal-confirm">Confirm</button>
+    </div>
+  </div>
+  <!-- Library Modal -->
+  <div id="library-modal" class="modal hidden">
+    <div class="modal-content">
+      <h2>Library - Draw Cards</h2>
+      <p id="library-modal-text">You currently have X cards. You need to draw Y more cards.</p>
+      <div id="library-hand" class="card-container"></div>
+      <button id="modal-confirm" class="hidden">That's 7!</button>
     </div>
   </div>  
+  
   <script type="module" src="src/main.js"></script>
 </body>
 </html>

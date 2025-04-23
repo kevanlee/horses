@@ -29,7 +29,6 @@ const marketSupply = [
   { card: cards.village, count: 10 },
   { card: cards.market, count: 10 },
   { card: cards.cellar, count: 10 },
-  { card: cards.militia, count: 10 },
   { card: cards.festival, count: 10 },
   { card: cards.library, count: 10 },
   { card: cards.laboratory, count: 10 }
@@ -146,12 +145,6 @@ function buyCard(index) {
     .reduce((sum, card) => sum + card.value, 0);
   
   const totalGold = treasureGold + player.bonusGold;
-
-  console.log("📊 Buying card...");
-  console.log("Gold in hand:", treasureGold);
-  console.log("Bonus gold from actions:", player.bonusGold);
-  console.log("Total available gold:", totalGold);
-  console.log("Cost of selected card:", cost);
 
   if (slot.count <= 0) {
     logMessage(`${slot.card.name} is sold out.`);

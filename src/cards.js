@@ -20,12 +20,6 @@ export const cardTypes = {
       cost: 2,
       description: '+1 Action. Discard any number of cards, then draw that many.'
     },
-    militia: {
-      name: 'Militia',
-      type: 'Action',
-      cost: 4,
-      description: '+2 Gold. Each other player discards down to 3 cards.'
-    },
     festival: {
       name: 'Festival',
       type: 'Action',
