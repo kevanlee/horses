@@ -64,6 +64,13 @@ export function playActionCardEffect(card, player) {
       handleWorkshopEffect(player, card);
       break;
 
+    case "Woodcutter":
+      player.buys += 1;
+      player.bonusGold += 2;
+      player.log("Woodcutter: +1 Buy, +2 Gold");
+      break;
+    
+
     default:
       player.log(`${card.name} has no effect yet.`);
   }
