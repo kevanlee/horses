@@ -70,6 +70,9 @@ export function playActionCardEffect(card, player) {
       player.log("Woodcutter: +1 Buy, +2 Gold");
       break;
     
+    case 'Vassal':
+      handleVassalEffect(player, card);
+      break;      
 
     default:
       player.log(`${card.name} has no effect yet.`);
@@ -378,4 +381,98 @@ function handleWorkshopEffect(player, workshopCard) {
     renderMarketplace();
     renderDeckInventory();
   };  
+}
+
+function handleVassalEffect(player, vassalCard) {
+  // Play Vassal: +2 gold immediately
+  playActionCard(player, vassalCard);
+  player.bonusGold += 2;
+  player.log("Vassal: +2 Gold");
+
+  const modal = document.getElementById('card-modal');
+  const modalTitle = document.getElementById('modal-title');
+  const modalBody = document.getElementById('modal-body');
+  const modalConfirm = document.getElementById('modal-confirm');
+
+  modalTitle.textContent = 'Vassal Effect';
+  modalBody.innerHTML = `
+    <p>You've gained +2 gold! Click the card below to reveal the top card of your deck.</p>
+  `;
+  modalConfirm.classList.add('hidden'); // Hide confirm button for now
+
+  if (player.deck.length === 0) {
+    shuffleDiscardIntoDeck(player);
+  }
+
+  if (player.deck.length === 0) {
+    modalBody.innerHTML += `<p>Your deck is empty. No card to reveal.</p>`;
+    modalConfirm.classList.remove('hidden');
+    modalConfirm.textContent = 'Continue';
+    modalConfirm.onclick = () => {
+      modal.classList.add('hidden');
+      renderHand();
+      renderMarketplace();
+      renderDeckInventory();
+    };
+    modal.classList.remove('hidden');
+    return;
+  }
+
+  const topCard = player.deck.pop();
+
+  const cardEl = document.createElement('div');
+  cardEl.className = 'card card-back'; // Initially styled as face-down
+  cardEl.innerHTML = `<em>Click to reveal</em>`;
+
+  cardEl.addEventListener('click', () => {
+    cardEl.classList.remove('card-back');
+    cardEl.innerHTML = `
+      <strong>${topCard.name}</strong><br>
+      <em>Type:</em> ${topCard.type}<br>
+      <em>Cost:</em> ${topCard.cost}
+    `;
+
+    if (topCard.type === 'Action') {
+      modalBody.innerHTML += `<p>It's an Action card! Play it or discard it?</p>`;
+      modalConfirm.classList.remove('hidden');
+      modalConfirm.textContent = 'Play This Card';
+
+      // Play it if they click confirm
+      modalConfirm.onclick = () => {
+        playActionCard(player, topCard);
+        player.log(`Vassal: You played ${topCard.name} for free!`);
+        modal.classList.add('hidden');
+        renderHand();
+        renderMarketplace();
+        renderDeckInventory();
+      };
+
+      // Add discard option
+      const discardButton = document.createElement('button');
+      discardButton.textContent = 'Discard Instead';
+      discardButton.onclick = () => {
+        player.discard.push(topCard);
+        player.log(`Vassal: You discarded ${topCard.name}.`);
+        modal.classList.add('hidden');
+        renderHand();
+        renderMarketplace();
+        renderDeckInventory();
+      };
+      modalBody.appendChild(discardButton);
+    } else {
+      player.discard.push(topCard);
+      modalBody.innerHTML += `<p>It's not an Action card. It has been discarded.</p>`;
+      modalConfirm.classList.remove('hidden');
+      modalConfirm.textContent = 'Continue';
+      modalConfirm.onclick = () => {
+        modal.classList.add('hidden');
+        renderHand();
+        renderMarketplace();
+        renderDeckInventory();
+      };
+    }
+  });
+
+  modalBody.appendChild(cardEl);
+  modal.classList.remove('hidden');
 }
