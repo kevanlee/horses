@@ -1,4 +1,14 @@
 import { drawCards, shuffle } from './game.js';
+import { marketSupply } from './main.js';
+
+function playActionCard(player, card) {
+  const index = player.hand.indexOf(card);
+  if (index !== -1) {
+    player.hand.splice(index, 1);
+    player.discard.push(card);
+  }
+}
+
 
 // 👇 Central function that handles any action card
 export function playActionCardEffect(card, player) {
@@ -45,7 +55,15 @@ export function playActionCardEffect(card, player) {
       player.actions += 1;
       player.log("Laboratory: +2 Cards, +1 Action");
       break;
-    
+
+    case 'Chapel':
+      handleChapelEffect(player, card);  
+      break;
+
+    case 'Workshop':
+      handleWorkshopEffect(player, card);
+      break;
+
     default:
       player.log(`${card.name} has no effect yet.`);
   }
@@ -218,4 +236,139 @@ function handleLibraryEffect(player, libraryCard) {
       renderMarketSupply(); // This will need to be implemented to update the available market cards
     };
   }
+}
+
+function handleChapelEffect(player, chapelCard) {
+  // Remove the Chapel card from the hand
+  const index = player.hand.indexOf(chapelCard);
+  if (index !== -1) {
+    player.hand.splice(index, 1);
+  }
+
+  const modal = document.getElementById('card-modal');
+  const modalTitle = document.getElementById('modal-title');
+  const modalBody = document.getElementById('modal-body');
+  const modalConfirm = document.getElementById('modal-confirm');
+
+  modalBody.innerHTML = '';
+  modalTitle.textContent = 'Choose up to 4 cards to trash';
+  const selectedCards = new Set();
+
+  player.hand.forEach((c, idx) => {
+    // Don't allow the Chapel card itself to be selected
+    if (c.name !== 'Chapel') {
+      const cardEl = document.createElement('div');
+      cardEl.className = 'card';
+      cardEl.innerHTML = `
+        <strong>${c.name}</strong><br>
+        <em>Type:</em> ${c.type}<br>
+        <em>Cost:</em> ${c.cost}<br>
+      `;
+      cardEl.addEventListener('click', () => {
+        if (selectedCards.has(idx)) {
+          selectedCards.delete(idx);
+          cardEl.classList.remove('selected');
+        } else if (selectedCards.size < 4) { // Only allow up to 4 cards to be selected
+          selectedCards.add(idx);
+          cardEl.classList.add('selected');
+        }
+      });
+      modalBody.appendChild(cardEl);
+    }
+  });
+
+  // Show modal
+  modal.classList.remove('hidden');
+
+  modalConfirm.textContent = 'Trash Selected';
+  modalConfirm.onclick = () => {
+    if (selectedCards.size > 0) {
+      // Trash selected cards from the player's hand and deck
+      const cardsToTrash = [];
+      player.hand.forEach((card, i) => {
+        if (selectedCards.has(i)) {
+          cardsToTrash.push(card);
+        }
+      });
+
+      // Remove the selected cards from hand and deck
+      cardsToTrash.forEach(card => {
+        const handIndex = player.hand.indexOf(card);
+        if (handIndex !== -1) {
+          player.hand.splice(handIndex, 1);
+        }
+        const deckIndex = player.deck.indexOf(card);
+        if (deckIndex !== -1) {
+          player.deck.splice(deckIndex, 1);
+        }
+      });
+
+      // Close the modal and update the UI
+      modal.classList.add('hidden');
+      renderHand();
+      renderDeckInventory();  
+    } else {
+      alert('Please select at least one card to trash.');
+    }
+  };
+}
+
+function handleWorkshopEffect(player, workshopCard) {
+  // Remove Workshop from hand
+  playActionCard(player, workshopCard);
+
+  const modal = document.getElementById('card-modal');
+  const modalTitle = document.getElementById('modal-title');
+  const modalBody = document.getElementById('modal-body');
+  const modalConfirm = document.getElementById('modal-confirm');
+
+  modalBody.innerHTML = '';
+  modalTitle.textContent = 'Choose a card costing up to 4';
+  const selectedCardIndex = { value: null };
+
+  // Filter marketSupply for cards costing <= 4
+  marketSupply.forEach((slot, idx) => {
+    if (slot.card.cost <= 4 && slot.count > 0) {
+      const cardEl = document.createElement('div');
+      cardEl.className = 'card';
+      cardEl.innerHTML = `
+        <strong>${slot.card.name}</strong><br>
+        <em>Type:</em> ${slot.card.type}<br>
+        <em>Cost:</em> ${slot.card.cost}<br>
+      `;
+
+      cardEl.addEventListener('click', () => {
+        // Deselect others
+        Array.from(modalBody.children).forEach(c => c.classList.remove('selected'));
+        // Select this one
+        cardEl.classList.add('selected');
+        selectedCardIndex.value = idx;
+      });
+
+      modalBody.appendChild(cardEl);
+    }
+  });
+
+  // Show modal
+  modal.classList.remove('hidden');
+
+  modalConfirm.textContent = 'Gain Selected';
+  modalConfirm.onclick = () => {
+    if (selectedCardIndex.value !== null) {
+      const chosenSlot = marketSupply[selectedCardIndex.value];
+      if (chosenSlot.count > 0) {
+        player.discard.push(chosenSlot.card);
+        chosenSlot.count--;
+  
+        // 🎉 Add this line:
+        player.log(`You gained a ${chosenSlot.card.name}!`);
+      }
+    }
+  
+    // Close modal and update UI
+    modal.classList.add('hidden');
+    renderHand();
+    renderMarketplace();
+    renderDeckInventory();
+  };  
 }

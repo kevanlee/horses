@@ -18,7 +18,7 @@ const victoryDisplay = document.getElementById('victory-display');
 updateVictoryPoints();
 
 // Define the cards and their initial supply count in the marketplace
-const marketSupply = [
+export const marketSupply = [
   { card: cards.copper, count: 46 },
   { card: cards.silver, count: 40 },
   { card: cards.gold, count: 30 },
@@ -31,8 +31,25 @@ const marketSupply = [
   { card: cards.cellar, count: 10 },
   { card: cards.festival, count: 10 },
   { card: cards.library, count: 10 },
-  { card: cards.laboratory, count: 10 }
+  { card: cards.laboratory, count: 10 },
+  { card: cards.chapel, count: 10 },
+  { card: cards.throneRoom, count: 10 },
+  { card: cards.workshop, count: 10 },
+  { card: cards.woodcutter, count: 10 },
+  { card: cards.vassal, count: 10 },
+  { card: cards.remodel, count: 10 },
+  { card: cards.mine, count: 10 },
+  { card: cards.moneylender, count: 10 },
+  { card: cards.feast, count: 10 },
+  { card: cards.councilRoom, count: 10 },
+  { card: cards.adventurer, count: 10 },
+  { card: cards.gardens, count: 8 },         // Gardens usually matches Estate/Duchy/Province supply
+  { card: cards.treasury, count: 10 },
+  { card: cards.greatHall, count: 8 },       // Great Hall usually matches Estate/Duchy/Province too
+  { card: cards.masquerade, count: 10 },
+  { card: cards.harbinger, count: 10 }
 ];
+
 
 function renderHand() {
   // Clear previous hand content and create a new container for the cards
@@ -91,36 +108,66 @@ window.updateGoldDisplay = updateGoldDisplay;
 function renderMarketplace() {
   marketplaceEl.innerHTML = '<h2>Marketplace</h2>';
 
-  marketSupply.forEach((slot, index) => {
-    const cardEl = document.createElement('div');
-    cardEl.className = 'card';
+  const moneyCards = [];
+  const victoryCards = [];
+  const actionCards = [];
 
-    // Account for both gold and bonusGold when determining if a card is affordable
-    const totalGold = player.gold;
-
-    // Disable card if it's too expensive or if the player is out of buys
-    if (slot.card.cost > totalGold || player.buys <= 0) {
-      cardEl.classList.add('disabled'); // Add 'disabled' class if card is too expensive or no buys left
-    } else {
-      cardEl.classList.remove('disabled'); // Remove 'disabled' class if the card is affordable and player has buys
+  // Split cards into groups
+  marketSupply.forEach((slot) => {
+    if (slot.card.type === 'Treasure') {
+      moneyCards.push(slot);
+    } else if (slot.card.type === 'Victory') {
+      victoryCards.push(slot);
+    } else if (slot.card.type === 'Action') {
+      actionCards.push(slot);
     }
-
-    cardEl.innerHTML = `
-      <strong>${slot.card.name}</strong><br>
-      <em>Type:</em> ${slot.card.type}<br>
-      <em>Cost:</em> ${slot.card.cost}<br>
-      <em>${slot.card.description || ''}</em><br>
-      Left: ${slot.count}
-    `;
-
-    // Only allow buying the card if it's not disabled
-    if (!cardEl.classList.contains('disabled')) {
-      cardEl.addEventListener('click', () => buyCard(index));
-    }
-
-    marketplaceEl.appendChild(cardEl);
   });
+
+  // Sort action cards by cost ascending
+  actionCards.sort((a, b) => a.card.cost - b.card.cost);
+
+  // Helper to render a section
+  function renderSection(title, cards) {
+    if (cards.length > 0) {
+      const sectionTitle = document.createElement('h3');
+      sectionTitle.textContent = title;
+      marketplaceEl.appendChild(sectionTitle);
+
+      cards.forEach((slot, index) => {
+        const cardEl = document.createElement('div');
+        cardEl.className = 'card';
+
+        const totalGold = player.gold;
+
+        if (slot.card.cost > totalGold || player.buys <= 0) {
+          cardEl.classList.add('disabled');
+        } else {
+          cardEl.classList.remove('disabled');
+        }
+
+        cardEl.innerHTML = `
+          <strong>${slot.card.name}</strong><br>
+          <em>Type:</em> ${slot.card.type}<br>
+          <em>Cost:</em> ${slot.card.cost}<br>
+          <em>${slot.card.description || ''}</em><br>
+          Left: ${slot.count}
+        `;
+
+        if (!cardEl.classList.contains('disabled')) {
+          cardEl.addEventListener('click', () => buyCard(marketSupply.indexOf(slot)));
+        }
+
+        marketplaceEl.appendChild(cardEl);
+      });
+    }
+  }
+
+  // Render sections in order
+  renderSection('Money Cards', moneyCards);
+  renderSection('Victory Cards', victoryCards);
+  renderSection('Action Cards', actionCards);
 }
+
 
 window.renderMarketplace = renderMarketplace;
 
@@ -305,6 +352,8 @@ function renderDeckInventory() {
   totalCountEl.textContent = `Total Cards: ${totalCards}`;
   deckListEl.appendChild(totalCountEl);
 }
+
+window.renderDeckInventory = renderDeckInventory;
 
 function updateVictoryPoints() {
   // Calculate the victory points from all cards in hand, deck, and discard
