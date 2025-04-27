@@ -72,7 +72,31 @@ export function playActionCardEffect(card, player) {
     
     case 'Vassal':
       handleVassalEffect(player, card);
-      break;      
+      break;    
+
+    case "Great Hall":
+      drawCards(player, 1);
+      player.actions += 1;
+      player.log("Great Hall: +1 Card, +1 Action");
+      updateVictoryPoints(); // 🏆 Recalculate VP immediately
+      break;
+
+    case 'Masquerade':
+      player.log("Masquerade: Draw 2 cards. Keep one.")
+      handleMasqueradeEffect(player, card);
+      break;
+    
+    case 'Harbinger':
+      drawCards(player, 1);
+      player.actions += 1;
+      player.log("Harbinger: +1 Card, +1 Action");
+      handleHarbingerEffect(player, card); 
+      break;
+
+    case 'Throne Room':
+      player.log("Throne Room: Play an Action card twice.");
+      handleThroneRoomEffect(player);
+      break;
 
     default:
       player.log(`${card.name} has no effect yet.`);
@@ -243,7 +267,7 @@ function handleLibraryEffect(player, libraryCard) {
       modal.classList.add('hidden');
 
       // Re-render the market supply if there are changes to the hand
-      renderMarketSupply(); // This will need to be implemented to update the available market cards
+      renderMarketplace(); // This will need to be implemented to update the available market cards
     };
   }
 }
@@ -317,6 +341,7 @@ function handleChapelEffect(player, chapelCard) {
       modal.classList.add('hidden');
       renderHand();
       renderDeckInventory();  
+      updateVictoryPoints();
     } else {
       alert('Please select at least one card to trash.');
     }
@@ -474,5 +499,271 @@ function handleVassalEffect(player, vassalCard) {
   });
 
   modalBody.appendChild(cardEl);
+  modal.classList.remove('hidden');
+}
+
+function handleMasqueradeEffect(player, card) {
+  // 1. Draw 2 cards (reshuffle if needed)
+  const drawnCards = [];
+  for (let i = 0; i < 2; i++) {
+    if (player.deck.length === 0 && player.discard.length > 0) {
+      player.deck = [...player.discard];
+      player.discard = [];
+      shuffle(player.deck);
+    }
+    if (player.deck.length > 0) {
+      drawnCards.push(player.deck.shift());
+    }
+  }
+
+  // 2. Set up the modal
+  const modal = document.getElementById('card-modal');
+  const modalTitle = document.getElementById('modal-title');
+  const modalBody = document.getElementById('modal-body');
+  const confirmButton = document.getElementById('modal-confirm');
+
+  modalTitle.textContent = "Masquerade: Choose a card to keep";
+  modalBody.innerHTML = '';
+  modal.classList.remove('hidden');
+
+  let selectedCard = null;
+
+  // 3. Display the two drawn cards
+  drawnCards.forEach((drawnCard) => {
+    const cardDiv = document.createElement('div');
+    cardDiv.className = 'card'; // same styling
+    cardDiv.innerHTML = `
+      <strong>${drawnCard.name}</strong><br>
+      <em>Type:</em> ${drawnCard.type}</em><br>
+      <em>Cost:</em> ${drawnCard.cost}</em><br>
+      <em>${drawnCard.description || ''}</em>
+    `;
+
+    cardDiv.addEventListener('click', () => {
+      // Deselect previous selection
+      const previous = modalBody.querySelector('.selected');
+      if (previous) previous.classList.remove('selected');
+
+      // Select this card
+      cardDiv.classList.add('selected');
+      selectedCard = drawnCard;
+    });
+
+    modalBody.appendChild(cardDiv);
+  });
+
+  // 4. Handle Confirm button
+  function confirmChoice() {
+    if (!selectedCard) {
+      alert("Please select a card to keep!");
+      return;
+    }
+
+    // Add the selected card to hand
+    player.hand.push(selectedCard);
+
+    // Discard the other
+    drawnCards.forEach(card => {
+      if (card !== selectedCard) {
+        player.discard.push(card);
+      }
+    });
+
+    // Cleanup
+    modal.classList.add('hidden');
+    confirmButton.removeEventListener('click', confirmChoice);
+    modalBody.innerHTML = '';
+
+    // Update the UI
+    renderHand();
+    renderDeckAndDiscardCount();
+    updateVictoryPoints();
+    renderMarketplace();
+  }
+
+  // Add the listener
+  confirmButton.addEventListener('click', confirmChoice);
+}
+
+function handleHarbingerEffect(player, card) {
+
+  const modal = document.getElementById('card-modal');
+  const modalTitle = document.getElementById('modal-title');
+  const modalBody = document.getElementById('modal-body');
+  const confirmButton = document.getElementById('modal-confirm');
+
+  let selectedCard = null;
+  let currentPage = 0;
+  const cardsPerPage = 10;
+
+  const discardCopy = [...player.discard]; // Important: copy so we don't mutate during selection
+
+  // Helper: Render a page of discard cards
+  function renderPage() {
+    modalBody.innerHTML = '';
+
+    if (discardCopy.length === 0) {
+      modalBody.innerHTML = "<p>No cards to choose from.</p>";
+      return;
+    }
+
+    const start = currentPage * cardsPerPage;
+    const end = start + cardsPerPage;
+    const pageCards = discardCopy.slice(start, end);
+
+    pageCards.forEach((cardObj) => {
+      const cardDiv = document.createElement('div');
+      cardDiv.className = 'card';
+      cardDiv.innerHTML = `
+        <strong>${cardObj.name}</strong><br>
+        <em>Type:</em> ${cardObj.type}<br>
+        <em>Cost:</em> ${cardObj.cost}<br>
+        <em>${cardObj.description || ''}</em>
+      `;
+
+      cardDiv.addEventListener('click', () => {
+        // Deselect previous selection
+        const previous = modalBody.querySelector('.selected');
+        if (previous) previous.classList.remove('selected');
+
+        // Select this card
+        cardDiv.classList.add('selected');
+        selectedCard = cardObj;
+      });
+
+      modalBody.appendChild(cardDiv);
+    });
+
+    // Add page navigation
+    const totalPages = Math.ceil(discardCopy.length / cardsPerPage);
+    if (totalPages > 1) {
+      const navDiv = document.createElement('div');
+      navDiv.style.marginTop = '10px';
+      navDiv.innerHTML = `
+        <button id="prev-page" ${currentPage === 0 ? 'disabled' : ''}>Prev</button>
+        Page ${currentPage + 1} / ${totalPages}
+        <button id="next-page" ${currentPage === totalPages - 1 ? 'disabled' : ''}>Next</button>
+      `;
+      modalBody.appendChild(navDiv);
+
+      document.getElementById('prev-page').addEventListener('click', () => {
+        if (currentPage > 0) {
+          currentPage--;
+          renderPage();
+        }
+      });
+
+      document.getElementById('next-page').addEventListener('click', () => {
+        if (currentPage < totalPages - 1) {
+          currentPage++;
+          renderPage();
+        }
+      });
+    }
+  }
+
+  function confirmChoice() {
+    if (discardCopy.length === 0) {
+      modal.classList.add('hidden');
+      confirmButton.removeEventListener('click', confirmChoice);
+      modalBody.innerHTML = '';
+      return;
+    }
+
+    if (!selectedCard) {
+      alert("Please select a card to put on top of your deck!");
+      return;
+    }
+
+    // Remove selectedCard from discard pile and put on top of deck
+    const index = player.discard.indexOf(selectedCard);
+    if (index !== -1) {
+      player.discard.splice(index, 1);
+      player.deck.unshift(selectedCard);
+    }
+
+    // Cleanup
+    modal.classList.add('hidden');
+    confirmButton.removeEventListener('click', confirmChoice);
+    modalBody.innerHTML = '';
+
+    // Update UI
+    renderHand();
+    renderDeckAndDiscardCount();
+    updateVictoryPoints();
+  }
+
+  // Set up the modal
+  modalTitle.textContent = "Harbinger: Choose a card to put on top of your deck";
+  modal.classList.remove('hidden');
+  renderPage();
+  confirmButton.addEventListener('click', confirmChoice);
+}
+
+function handleThroneRoomEffect(player) {
+  const actionCardsInHand = player.hand.filter(card => card.type === 'Action');
+  const modal = document.getElementById('card-modal');
+  const modalTitle = document.getElementById('modal-title');
+  const modalBody = document.getElementById('modal-body');
+  const confirmButton = document.getElementById('modal-confirm');
+
+  if (actionCardsInHand.length === 0) {
+    modalTitle.textContent = 'No Action Cards to Play';
+    modalBody.textContent = 'You have no action cards to play with Throne Room.';
+    modal.classList.remove('hidden');
+    return; // No Action cards, so return early
+  }
+
+  modalTitle.textContent = 'Choose an Action Card to Play Twice';
+  modalBody.innerHTML = '';  // Clear previous contents
+
+  // Add a "x2" label to each action card
+  actionCardsInHand.forEach(card => {
+    const cardDiv = document.createElement('div');
+    cardDiv.className = 'card';
+    cardDiv.innerHTML = `
+      <strong>${card.name}</strong><br>
+      <em>Type:</em> ${card.type}<br>
+      <em>Cost:</em> ${card.cost}<br>
+      <em>${card.description || ''}</em>
+      <br><button class="play-action-btn">Play</button>
+    `;
+
+    // Get the button within the card
+    const playButton = cardDiv.querySelector('.play-action-btn');
+
+    // Highlight the button when clicked
+    playButton.addEventListener('click', () => {
+      const selectedButton = modalBody.querySelector('.selected');
+      if (selectedButton) {
+        selectedButton.classList.remove('selected');
+      }
+      playButton.classList.add('selected');  // Highlight the selected button
+    });
+
+    modalBody.appendChild(cardDiv);
+  });
+
+  // Handle the confirm button logic
+  confirmButton.addEventListener('click', () => {
+    const selectedButton = modalBody.querySelector('.selected');
+    if (!selectedButton) {
+      alert('Please select an Action card to play!');
+      return;
+    }
+
+    const selectedCardName = selectedButton.closest('.card').querySelector('strong').textContent;
+    const selectedCard = player.hand.find(card => card.name === selectedCardName);
+
+    if (selectedCard) {
+      // Play the selected card twice
+      playActionCardEffect(player, selectedCard);  // Assuming this is how you play a card
+      playActionCardEffect(player, selectedCard);  // Play again for x2 effect
+
+      modal.classList.add('hidden');
+      modalBody.innerHTML = '';  // Clear modal after confirm
+    }
+  });
+
   modal.classList.remove('hidden');
 }

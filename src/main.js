@@ -71,7 +71,7 @@ function renderHand() {
     `;
 
     // Add "Play" button only if player has actions left and card is an Action type
-    if (player.actions > 0 && card.type === 'Action') {
+    if (player.actions > 0 && card.type.includes('Action')) {
       const playBtn = document.createElement('button');
       playBtn.textContent = 'Play';
       playBtn.addEventListener('click', () => playActionCard(card));
@@ -114,12 +114,14 @@ function renderMarketplace() {
 
   // Split cards into groups
   marketSupply.forEach((slot) => {
-    if (slot.card.type === 'Treasure') {
-      moneyCards.push(slot);
-    } else if (slot.card.type === 'Victory') {
-      victoryCards.push(slot);
-    } else if (slot.card.type === 'Action') {
+    const type = slot.card.type;
+
+    if (type.includes('Action')) {
       actionCards.push(slot);
+    } else if (type.includes('Treasure')) {
+      moneyCards.push(slot);
+    } else if (type.includes('Victory')) {
+      victoryCards.push(slot);
     }
   });
 
@@ -133,7 +135,7 @@ function renderMarketplace() {
       sectionTitle.textContent = title;
       marketplaceEl.appendChild(sectionTitle);
 
-      cards.forEach((slot, index) => {
+      cards.forEach((slot) => {
         const cardEl = document.createElement('div');
         cardEl.className = 'card';
 
@@ -167,6 +169,7 @@ function renderMarketplace() {
   renderSection('Victory Cards', victoryCards);
   renderSection('Action Cards', actionCards);
 }
+
 
 
 window.renderMarketplace = renderMarketplace;
@@ -288,6 +291,9 @@ function renderDeckAndDiscardCount() {
   discardCountEl.textContent = `Discard Pile: ${player.discard.length} cards`;
 }
 
+window.renderDeckAndDiscardCount = renderDeckAndDiscardCount;
+
+
 function renderActionsAndBuys() {
   const actionsLeftEl = document.getElementById('actions-left');
   const buysLeftEl = document.getElementById('buys-left');
@@ -358,7 +364,7 @@ window.renderDeckInventory = renderDeckInventory;
 function updateVictoryPoints() {
   // Calculate the victory points from all cards in hand, deck, and discard
   const victoryPoints = [...player.hand, ...player.deck, ...player.discard]
-    .filter(card => card.type === 'Victory')
+    .filter(card => card.type.includes('Victory'))
     .reduce((sum, card) => sum + (card.points || 0), 0);
 
   // Update the player's victory points
@@ -367,3 +373,5 @@ function updateVictoryPoints() {
   // Update the victory points display
   victoryDisplay.textContent = `Victory Points: ${player.victoryPoints}`;
 }
+
+window.updateVictoryPoints = updateVictoryPoints;

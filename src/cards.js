@@ -51,8 +51,8 @@ export const cardTypes = {
     adventurer: {name: "Adventurer", type: "Action", cost: 6, description: "Reveal cards until you reveal 2 Treasures. Add them to hand."},
     gardens: {name: "Gardens", type: "Action", cost: 4, description: "Worth 1 VP for every 10 cards in your deck (rounded down)."},
     treasury: {name: "Treasury", type: "Action", cost: 5, description: "+1 Card, +1 Action, +1 Coin, when you buy it, you may put it on top of your deck."},
-    greatHall: {name: "Great Hall", type: "Action", cost: 3, description: "+1 Card, +1 Action, worth 1 VP."},
-    masquerade: {name: "Masquerade", type: "Action", cost: 3, description: "Draw 2 cards. Each player passes a card to the left. (Skip pass for solo.)"},
+    greatHall: {name: "Great Hall", type: "Action-Victory", cost: 3, points: 1, description: "+1 Card, +1 Action, worth 1 VP."},
+    masquerade: {name: "Masquerade", type: "Action", cost: 3, description: "Draw 2 cards. Keep one, discard the other."},
     harbinger: {name: "Harbinger", type: "Action", cost: 3, description: "+1 Card, +1 Action, look through your discard pile and put a card on top of your deck."},
 
   }    
