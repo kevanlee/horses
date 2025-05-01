@@ -92,6 +92,12 @@ export function playActionCardEffect(card, player) {
       player.log("Harbinger: +1 Card, +1 Action");
       handleHarbingerEffect(player, card); 
       break;
+    
+    case "Council Room":
+      drawCards(player, 4);
+      player.buys += 1;
+      player.log("Council Room: +4 Cards, +1 Buy");
+      break;
 
     default:
       player.log(`${card.name} has no effect yet.`);

@@ -33,6 +33,6 @@ Cards are working? A checklist
 * Library ⚠️
 * Laboratory ✅
 * Mine
-* Council Room
+* Council Room ✅
 * Treasury
 * Adventurer
