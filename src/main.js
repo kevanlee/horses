@@ -265,14 +265,19 @@ const nextTurnBtn = document.getElementById('next-turn');
 nextTurnBtn.addEventListener('click', nextTurn);
 
 function nextTurn() {
+  // Log the current state of the deck and discard
+  console.log("=== Starting New Turn ===");
+  console.log("Deck (top to bottom):", player.deck);
+  console.log("Discard (most recent first):", player.discard);
+
   player.actions = 1;
   player.buys = 1;
   player.bonusGold = 0;
 
-  player.discard.push(...player.hand);
+  player.discard.push(...player.hand);  // Move hand to discard
   player.hand = [];
 
-  drawCards(player, 5);
+  drawCards(player, 5);  // Draw 5 cards for the new turn
 
   renderDeckInventory();
   logMessage("You started a new turn.");
@@ -375,3 +380,21 @@ function updateVictoryPoints() {
 }
 
 window.updateVictoryPoints = updateVictoryPoints;
+
+function shuffleDiscardIntoDeck(player) {
+  if (player.discard.length === 0) return;
+
+  // Move all discard cards into the deck
+  player.deck = player.deck.concat(player.discard);
+  player.discard = [];
+
+  // Shuffle the deck
+  for (let i = player.deck.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [player.deck[i], player.deck[j]] = [player.deck[j], player.deck[i]];
+  }
+
+  player.log("Shuffled discard pile into deck.");
+}
+
+window.shuffleDiscardIntoDeck = shuffleDiscardIntoDeck;

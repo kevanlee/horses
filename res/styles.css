@@ -146,6 +146,28 @@ h1.title {
   opacity: 0.8;
 }
 
+.highlight-x2 {
+  border: 2px solid gold;
+  position: relative;
+}
+
+.x2-badge {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: gold;
+  color: black;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.8em;
+}
+
+.throne-select-button {
+  margin-top: 5px;
+}
+
+
 
 /* === Modal === */
 .modal {

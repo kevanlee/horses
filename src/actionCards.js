@@ -93,11 +93,6 @@ export function playActionCardEffect(card, player) {
       handleHarbingerEffect(player, card); 
       break;
 
-    case 'Throne Room':
-      player.log("Throne Room: Play an Action card twice.");
-      handleThroneRoomEffect(player);
-      break;
-
     default:
       player.log(`${card.name} has no effect yet.`);
   }
@@ -371,7 +366,6 @@ function handleWorkshopEffect(player, workshopCard) {
         <em>Type:</em> ${slot.card.type}<br>
         <em>Cost:</em> ${slot.card.cost}<br>
       `;
-
       cardEl.addEventListener('click', () => {
         // Deselect others
         Array.from(modalBody.children).forEach(c => c.classList.remove('selected'));
@@ -379,14 +373,11 @@ function handleWorkshopEffect(player, workshopCard) {
         cardEl.classList.add('selected');
         selectedCardIndex.value = idx;
       });
-
       modalBody.appendChild(cardEl);
     }
   });
 
-  // Show modal
   modal.classList.remove('hidden');
-
   modalConfirm.textContent = 'Gain Selected';
   modalConfirm.onclick = () => {
     if (selectedCardIndex.value !== null) {
@@ -405,7 +396,7 @@ function handleWorkshopEffect(player, workshopCard) {
     renderHand();
     renderMarketplace();
     renderDeckInventory();
-  };  
+  };
 }
 
 function handleVassalEffect(player, vassalCard) {
@@ -443,7 +434,7 @@ function handleVassalEffect(player, vassalCard) {
     return;
   }
 
-  const topCard = player.deck.pop();
+  const topCard = player.deck.shift();
 
   const cardEl = document.createElement('div');
   cardEl.className = 'card card-back'; // Initially styled as face-down
@@ -454,7 +445,7 @@ function handleVassalEffect(player, vassalCard) {
     cardEl.innerHTML = `
       <strong>${topCard.name}</strong><br>
       <em>Type:</em> ${topCard.type}<br>
-      <em>Cost:</em> ${topCard.cost}
+      <em>${topCard.description || ''}</em>
     `;
 
     if (topCard.type === 'Action') {
@@ -679,7 +670,7 @@ function handleHarbingerEffect(player, card) {
     const index = player.discard.indexOf(selectedCard);
     if (index !== -1) {
       player.discard.splice(index, 1);
-      player.deck.unshift(selectedCard);
+      player.deck.push(selectedCard);
     }
 
     // Cleanup
@@ -700,70 +691,3 @@ function handleHarbingerEffect(player, card) {
   confirmButton.addEventListener('click', confirmChoice);
 }
 
-function handleThroneRoomEffect(player) {
-  const actionCardsInHand = player.hand.filter(card => card.type === 'Action');
-  const modal = document.getElementById('card-modal');
-  const modalTitle = document.getElementById('modal-title');
-  const modalBody = document.getElementById('modal-body');
-  const confirmButton = document.getElementById('modal-confirm');
-
-  if (actionCardsInHand.length === 0) {
-    modalTitle.textContent = 'No Action Cards to Play';
-    modalBody.textContent = 'You have no action cards to play with Throne Room.';
-    modal.classList.remove('hidden');
-    return; // No Action cards, so return early
-  }
-
-  modalTitle.textContent = 'Choose an Action Card to Play Twice';
-  modalBody.innerHTML = '';  // Clear previous contents
-
-  // Add a "x2" label to each action card
-  actionCardsInHand.forEach(card => {
-    const cardDiv = document.createElement('div');
-    cardDiv.className = 'card';
-    cardDiv.innerHTML = `
-      <strong>${card.name}</strong><br>
-      <em>Type:</em> ${card.type}<br>
-      <em>Cost:</em> ${card.cost}<br>
-      <em>${card.description || ''}</em>
-      <br><button class="play-action-btn">Play</button>
-    `;
-
-    // Get the button within the card
-    const playButton = cardDiv.querySelector('.play-action-btn');
-
-    // Highlight the button when clicked
-    playButton.addEventListener('click', () => {
-      const selectedButton = modalBody.querySelector('.selected');
-      if (selectedButton) {
-        selectedButton.classList.remove('selected');
-      }
-      playButton.classList.add('selected');  // Highlight the selected button
-    });
-
-    modalBody.appendChild(cardDiv);
-  });
-
-  // Handle the confirm button logic
-  confirmButton.addEventListener('click', () => {
-    const selectedButton = modalBody.querySelector('.selected');
-    if (!selectedButton) {
-      alert('Please select an Action card to play!');
-      return;
-    }
-
-    const selectedCardName = selectedButton.closest('.card').querySelector('strong').textContent;
-    const selectedCard = player.hand.find(card => card.name === selectedCardName);
-
-    if (selectedCard) {
-      // Play the selected card twice
-      playActionCardEffect(player, selectedCard);  // Assuming this is how you play a card
-      playActionCardEffect(player, selectedCard);  // Play again for x2 effect
-
-      modal.classList.add('hidden');
-      modalBody.innerHTML = '';  // Clear modal after confirm
-    }
-  });
-
-  modal.classList.remove('hidden');
-}
