@@ -1,4 +1,4 @@
-import { createPlayer, drawCards } from './game.js';
+import { createPlayer, drawCards, incrementTurn } from './game.js';
 import { cards } from './cards.js';
 import { playActionCardEffect } from './actionCards.js';
 
@@ -278,6 +278,8 @@ function nextTurn() {
   player.hand = [];
 
   drawCards(player, 5);  // Draw 5 cards for the new turn
+
+  incrementTurn(); // ⬅️ Add this line
 
   renderDeckInventory();
   logMessage("You started a new turn.");
