@@ -274,11 +274,8 @@ function handleLibraryEffect(player, libraryCard) {
 }
 
 function handleChapelEffect(player, chapelCard) {
-  // Remove the Chapel card from the hand
-  const index = player.hand.indexOf(chapelCard);
-  if (index !== -1) {
-    player.hand.splice(index, 1);
-  }
+ // Remove Workshop from hand
+  playActionCard(player, chapelCard);
 
   const modal = document.getElementById('card-modal');
   const modalTitle = document.getElementById('modal-title');
@@ -327,15 +324,11 @@ function handleChapelEffect(player, chapelCard) {
       });
 
       // Remove the selected cards from hand and deck
-      cardsToTrash.forEach(card => {
-        const handIndex = player.hand.indexOf(card);
-        if (handIndex !== -1) {
-          player.hand.splice(handIndex, 1);
-        }
-        const deckIndex = player.deck.indexOf(card);
-        if (deckIndex !== -1) {
-          player.deck.splice(deckIndex, 1);
-        }
+      // Convert selected indices to array and sort descending to avoid index shifting issues
+      const cardIndicesToTrash = Array.from(selectedCards).sort((a, b) => b - a);
+
+      cardIndicesToTrash.forEach(i => {
+        player.hand.splice(i, 1); // Only remove from hand
       });
 
       // Close the modal and update the UI

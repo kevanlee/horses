@@ -1,15 +1,24 @@
 # cardio
 a card game
 
+Python code
+python3 -m http.server 5500
+
+
 Bug list: 
-* Add "trash none / cancel" option to Chapel
-* Add "discard none / cancel" option to Cellar
+* Harbinger - Sometimes Harbinger's button says Discard
+* Vassal - the Action card I draw does not get its effects applied
+* Turn counter is missing its colon
+* Randomize gold+VP at first hand
+* Masquerade - button says Trash / Discard Selected when it shouldn't, e.g. after a card with a modal is played on a previous hand, like Cellar
+* Masquerade - the card you don't choose gets lost somewhere (trashed? abandoned?)
+* Cellar and Chapel don't show up in my game inventory
+* Chapel gets trashed when you use it??
 
 To-do
-* Restyle
-* Rename and rewrite the cards and story
-* Add an inPlay state for Action cards 
-* Update the gold usage so it also goes into inPlay
+* Restyle 
+* Add win conditions
+* Add data tracker
 
 Cards are working? A checklist
 

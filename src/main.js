@@ -59,7 +59,7 @@ function renderHand() {
   const cardContainer = document.createElement('div');
   cardContainer.className = 'card-container'; // Add the class for styling
 
-  // Loop through each card in the player's hand and create a card element
+    // Loop through each card in the player's hand and create a card element
   player.hand.forEach((card, index) => {
     const cardEl = document.createElement('div');
     cardEl.className = 'card'; // Add the 'card' class for styling
@@ -69,8 +69,8 @@ function renderHand() {
       <em>Cost:</em> ${card.cost}<br>
       <em>${card.description || ''}</em>
     `;
-
-    // Add "Play" button only if player has actions left and card is an Action type
+  
+        // Add "Play" button only if player has actions left and card is an Action type
     if (player.actions > 0 && card.type.includes('Action')) {
       const playBtn = document.createElement('button');
       playBtn.textContent = 'Play';
@@ -82,7 +82,7 @@ function renderHand() {
     // Append the card element to the card container
     cardContainer.appendChild(cardEl);
   });
-
+  
   // Append the card container to the hand element
   handEl.appendChild(cardContainer);
 
@@ -265,7 +265,7 @@ const nextTurnBtn = document.getElementById('next-turn');
 nextTurnBtn.addEventListener('click', nextTurn);
 
 function nextTurn() {
-  // Log the current state of the deck and discard
+    // Log the current state of the deck and discard
   console.log("=== Starting New Turn ===");
   console.log("Deck (top to bottom):", player.deck);
   console.log("Discard (most recent first):", player.discard);
@@ -331,7 +331,7 @@ function playActionCard(card) {
     player.hand.splice(index, 1);
     player.discard.push(card);
   }
-
+  
   updateGoldDisplay();
   renderActionsAndBuys();
   renderHand();
