@@ -331,7 +331,7 @@ function playActionCard(card) {
     player.hand.splice(index, 1);
     player.discard.push(card);
   }
-  
+
   updateGoldDisplay();
   renderActionsAndBuys();
   renderHand();
@@ -343,28 +343,44 @@ function renderDeckInventory() {
   const deckListEl = document.getElementById('deck-list');
   deckListEl.innerHTML = '';
 
-  const cardCounts = {};
+  // Create a helper function to render the list of cards
+  const renderCardCounts = (cards, title) => {
+    const cardCounts = {};
 
-  [...player.deck, ...player.hand, ...player.discard].forEach(card => {
-    if (cardCounts[card.name]) {
-      cardCounts[card.name]++;
-    } else {
-      cardCounts[card.name] = 1;
+    // Count the occurrences of each card
+    cards.forEach(card => {
+      if (cardCounts[card.name]) {
+        cardCounts[card.name]++;
+      } else {
+        cardCounts[card.name] = 1;
+      }
+    });
+
+    // Add the list for this area (deck, discard, or trash)
+    const sectionTitle = document.createElement('h3');
+    sectionTitle.textContent = title;
+    deckListEl.appendChild(sectionTitle);
+
+    let totalCards = 0;
+    for (const cardName in cardCounts) {
+      const listItem = document.createElement('li');
+      listItem.textContent = `${cardName}: ${cardCounts[cardName]}`;
+      deckListEl.appendChild(listItem);
+      totalCards += cardCounts[cardName];
     }
-  });
 
-  let totalCards = 0;
-  for (const cardName in cardCounts) {
-    const listItem = document.createElement('li');
-    listItem.textContent = `${cardName}: ${cardCounts[cardName]}`;
-    deckListEl.appendChild(listItem);
-    totalCards += cardCounts[cardName];
-  }
+    const totalCountEl = document.createElement('li');
+    totalCountEl.textContent = `Total Cards: ${totalCards}`;
+    deckListEl.appendChild(totalCountEl);
+  };
 
-  const totalCountEl = document.createElement('li');
-  totalCountEl.textContent = `Total Cards: ${totalCards}`;
-  deckListEl.appendChild(totalCountEl);
+  // Render deck (all owned cards), discard, and trash
+  renderCardCounts(player.deck, 'Deck (All Cards)');
+  renderCardCounts(player.discard, 'Discard (Most Recent)');
+  renderCardCounts(player.trash, 'Trash');
 }
+
+
 
 window.renderDeckInventory = renderDeckInventory;
 

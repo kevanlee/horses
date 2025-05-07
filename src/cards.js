@@ -27,7 +27,7 @@ export const cardTypes = {
       description: '+2 Actions, +1 Buy, +2 Gold'
     },
     library: {
-      name: 'Library',
+      name: 'Library ⚫️',
       type: 'Action',
       cost: 5,
       description: 'Draw until you have 7 cards in hand. You may set aside Action cards.'
@@ -39,7 +39,7 @@ export const cardTypes = {
       description: '+2 Cards, +1 Action'
     },
     chapel: {name: "Chapel", type: "Action", cost: 2, description: "Trash up to 4 cards from your hand."},
-    throneRoom: {name: "Throne Room", type: "Action", cost: 4, description: "Choose an Action card in your hand. Play it twice."},
+    throneRoom: {name: "Throne Room ⚫️", type: "Action", cost: 4, description: "Choose an Action card in your hand. Play it twice."},
     workshop: {name: "Workshop", type: "Action", cost: 3, description: "Gain a card costing up to 4 coins."},
     woodcutter: {name: "Woodcutter", type: "Action", cost: 3, description: "+1 Buy, +2 coins."},
     vassal: {name: "Vassal", type: "Action", cost: 3, description: "+2 coins, reveal top card. If Action, play it."},

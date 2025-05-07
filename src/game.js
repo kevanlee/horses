@@ -9,6 +9,7 @@ export const createPlayer = () => {
     hand: [],
     discard: [],
     drawPile: [],
+    trash: [],
     gold: 0,
     actions: 1,  // 1 action by default
     buys: 1,     // 1 buy by default

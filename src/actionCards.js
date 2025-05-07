@@ -328,8 +328,10 @@ function handleChapelEffect(player, chapelCard) {
       const cardIndicesToTrash = Array.from(selectedCards).sort((a, b) => b - a);
 
       cardIndicesToTrash.forEach(i => {
-        player.hand.splice(i, 1); // Only remove from hand
+        const [removed] = player.hand.splice(i, 1);
+        player.trash.push(removed); 
       });
+      
 
       // Close the modal and update the UI
       modal.classList.add('hidden');

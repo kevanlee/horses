@@ -13,12 +13,13 @@ Bug list:
 * Masquerade - button says Trash / Discard Selected when it shouldn't, e.g. after a card with a modal is played on a previous hand, like Cellar
 * Masquerade - the card you don't choose gets lost somewhere (trashed? abandoned?)
 * Cellar and Chapel don't show up in my game inventory
-* Chapel gets trashed when you use it??
+* Add code so that any trashed card gets added to trash pile (Chapel)
 
 To-do
 * Restyle 
 * Add win conditions
 * Add data tracker
+* After troubleshooting, make sure that the Deck Inventory shows all cards you own and not what's in discard
 
 Cards are working? A checklist
 
