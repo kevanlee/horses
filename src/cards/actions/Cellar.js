@@ -20,18 +20,14 @@ export class Cellar extends ActionCard {
    * @param {GameState} gameState
    */
   async onPlay(player, gameState) {
-    console.log('Cellar: Starting onPlay');
     super.onPlay(player);
     
     // Add +1 Action
     player.state.actions += 1;
-    console.log('Cellar: Added +1 Action, current actions:', player.state.actions);
 
     if (!gameState.modalManager) {
       throw new Error('ModalManager not set up');
     }
-
-    console.log('Cellar: Current hand size before modal:', player.state.hand.length);
     
     // Create a promise to handle the modal interaction
     const selectedCards = await new Promise((resolve) => {
@@ -40,22 +36,15 @@ export class Cellar extends ActionCard {
         cards: player.state.hand,
         confirmText: 'Discard Selected',
         onConfirm: (cards) => {
-          console.log('Cellar: Modal confirmed, selected cards:', cards.length);
           resolve(cards);
         }
       });
     });
-
-    // Process the selected cards after modal is closed
-    console.log('Cellar: Processing selected cards:', selectedCards.length);
     
     // Discard selected cards
     for (const card of selectedCards) {
-      if (!card) {
-        console.error('Cellar: Attempted to discard undefined card');
-        continue;
-      }
-      console.log('Cellar: Discarding card:', card.name);
+      if (!card) continue;
+      
       const index = player.state.hand.indexOf(card);
       if (index !== -1) {
         const [discardedCard] = player.state.hand.splice(index, 1);
@@ -63,20 +52,15 @@ export class Cellar extends ActionCard {
         player.emit('cardDiscarded', { player, card: discardedCard });
       }
     }
-    console.log('Cellar: After discarding, hand size:', player.state.hand.length);
     
     // Draw new cards
     const numToDraw = selectedCards.length;
-    console.log('Cellar: Attempting to draw', numToDraw, 'cards');
     
     // Draw cards one at a time, handling reshuffling
     for (let i = 0; i < numToDraw; i++) {
       if (player.state.deck.length === 0) {
-        if (player.state.discard.length === 0) {
-          console.log('Cellar: No more cards to draw');
-          break;
-        }
-        console.log('Cellar: Reshuffling discard pile into deck');
+        if (player.state.discard.length === 0) break;
+        
         player.state.deck = [...player.state.discard];
         player.state.discard = [];
         shuffle(player.state.deck);
@@ -85,15 +69,11 @@ export class Cellar extends ActionCard {
       if (drawnCard) {
         player.state.hand.push(drawnCard);
         player.emit('cardsDrawn', { player, cards: [drawnCard] });
-        console.log('Cellar: Drew card:', drawnCard.name);
       }
     }
     
-    console.log('Cellar: Finished drawing, final hand size:', player.state.hand.length);
-    
-    // Update UI directly after all operations are complete
-    if (gameState.game && typeof gameState.game.updateUI === 'function') {
-      gameState.game.updateUI();
-    }
+    // Emit events to trigger UI updates
+    gameState.emit('cardPlayed', { player, card: this });
+    gameState.emit('stateChanged');
   }
 } 
