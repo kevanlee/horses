@@ -25,35 +25,35 @@ class Game {
     };
 
     this.gameState.on('cardPlayed', ({ player, card }) => {
-      this.logMessage(`${player.name} played ${card.name}`);
+      this.logMessage(`You played ${card.name}`);
       safeUpdateUI();
     });
 
     this.gameState.on('cardDiscarded', ({ player, card }) => {
-      this.logMessage(`${player.name} discarded ${card.name}`);
+      this.logMessage(`You discarded ${card.name}`);
       safeUpdateUI();
     });
 
     this.gameState.on('cardTrashed', ({ player, card }) => {
-      this.logMessage(`${player.name} trashed ${card.name}`);
+      this.logMessage(`You trashed ${card.name}`);
       safeUpdateUI();
     });
 
     this.gameState.on('cardGained', ({ player, card }) => {
-      this.logMessage(`${player.name} gained ${card.name}`);
+      this.logMessage(`You gained ${card.name}`);
       safeUpdateUI();
     });
 
-    this.gameState.on('turnChanged', ({ previousPlayer, currentPlayer }) => {
-      this.logMessage(`${currentPlayer.name}'s turn`);
+    this.gameState.on('turnChanged', ({ player, turnNumber }) => {
+      this.logMessage(`Your turn ${turnNumber}`);
       safeUpdateUI();
     });
 
     this.gameState.on('gameEnded', ({ reason }) => {
       const winner = this.gameState.determineWinner();
       this.logMessage(`Game Over! ${reason}`);
-      this.logMessage(`Winner: ${winner.name} with ${winner.calculateVictoryPoints()} points!`);
-      alert(`Game Over! ${reason}\nWinner: ${winner.name} with ${winner.calculateVictoryPoints()} points!`);
+      this.logMessage(`You won with ${winner.calculateVictoryPoints()} points!`);
+      alert(`Game Over! ${reason}\nYou won with ${winner.calculateVictoryPoints()} points!`);
     });
 
     // UI events
@@ -64,9 +64,8 @@ class Game {
   }
 
   initializeGame() {
-    // Add players
-    const player1 = this.gameState.addPlayer('Player 1');
-    const player2 = this.gameState.addPlayer('Player 2');
+    // Add single player
+    const player = this.gameState.addPlayer('Player');
 
     // Initialize supply piles
     const basicCards = [
@@ -81,7 +80,21 @@ class Game {
     const actionCards = [
       { name: 'Smithy', count: 10 },
       { name: 'Village', count: 10 },
-      { name: 'Cellar', count: 10 }
+      { name: 'Cellar', count: 10 },
+      { name: 'Remodel', count: 10 },
+      { name: 'Market', count: 10 },
+      { name: 'Festival', count: 10 },
+      { name: 'Laboratory', count: 10 },
+      { name: 'Woodcutter', count: 10 },
+      { name: 'Chapel', count: 10 },
+      { name: 'Workshop', count: 10 },
+      { name: 'Masquerade', count: 10 },
+      { name: 'Vassal', count: 10 },
+      { name: 'Council Room', count: 10 },
+      { name: 'Mine', count: 10 },
+      { name: 'Moneylender', count: 10 },
+      { name: 'Feast', count: 10 },
+      { name: 'Throne Room', count: 10 }
     ];
 
     // Add all cards to supply
@@ -90,37 +103,37 @@ class Game {
       this.gameState.addToSupply(card, count);
     });
 
-    // Start first player's turn
+    // Start the game
     this.gameState.getCurrentPlayer().startTurn();
     this.updateUI();
   }
 
   updateUI() {
-    const currentPlayer = this.gameState.getCurrentPlayer();
+    const player = this.gameState.getCurrentPlayer();
     
     // Update player stats
     document.getElementById('gold-display').textContent = 
-      `Gold: ${this.gameState.calculatePlayerGold(currentPlayer)}`;
+      `Gold: ${this.gameState.calculatePlayerGold(player)}`;
     document.getElementById('victory-display').textContent = 
-      `Victory Points: ${currentPlayer.calculateVictoryPoints()}`;
+      `Victory Points: ${player.calculateVictoryPoints()}`;
     document.getElementById('actions-left').textContent = 
-      `Actions: ${currentPlayer.state.actions}`;
+      `Actions: ${player.state.actions}`;
     document.getElementById('buys-left').textContent = 
-      `Buys: ${currentPlayer.state.buys}`;
+      `Buys: ${player.state.buys}`;
     document.getElementById('turn-counter').textContent = 
-      `Turn: ${this.gameState.currentPlayerIndex + 1}`;
+      `Turn: ${this.gameState.turnNumber}`;
     
     // Update hand
-    this.updateHand(currentPlayer);
+    this.updateHand(player);
     
     // Update deck and discard counts
-    this.updateDeckCounts(currentPlayer);
+    this.updateDeckCounts(player);
     
     // Update marketplace
     this.updateMarketplace();
     
     // Update deck inventory
-    this.updateDeckInventory(currentPlayer);
+    this.updateDeckInventory(player);
   }
 
   updateHand(player) {
@@ -134,11 +147,13 @@ class Game {
         <em>Type:</em> ${card.type}<br>
         <em>Cost:</em> ${card.cost}<br>
         ${card.description ? `<em>Effect:</em> ${card.description}` : ''}
+        ${card.type === 'Action' && player.state.actions > 0 ? '<button class="play-button">Play</button>' : ''}
       `;
       
       if (card.type === 'Action' && player.state.actions > 0) {
+        const playButton = cardEl.querySelector('.play-button');
         const playHandler = () => this.playCard(card);
-        cardEl.addEventListener('click', playHandler);
+        playButton.addEventListener('click', playHandler);
         // Store the handler on the element for cleanup
         cardEl._playHandler = playHandler;
       }
@@ -156,7 +171,7 @@ class Game {
 
   updateMarketplace() {
     const marketplace = document.getElementById('marketplace');
-    marketplace.innerHTML = '<h2>Marketplace</h2>';
+    marketplace.innerHTML = '<h2 class="marketplace-title">Marketplace</h2>';
     
     // Group cards by type
     const cardsByType = {
@@ -183,28 +198,61 @@ class Game {
       if (cards.length > 0) {
         const section = document.createElement('div');
         section.className = 'market-section';
+        if (type === 'Action') {
+          section.classList.add('action-section');
+        }
         section.innerHTML = `<h3>${type} Cards</h3>`;
         
-        cards.forEach(({ card, supply }) => {
-          const cardEl = document.createElement('div');
-          cardEl.className = 'card';
-          cardEl.innerHTML = `
-            <strong>${card.name}</strong><br>
-            <em>Type:</em> ${card.type}<br>
-            <em>Cost:</em> ${card.cost}<br>
-            ${card.description ? `<em>Effect:</em> ${card.description}` : ''}<br>
-            <em>Available:</em> ${supply.count}
-          `;
+        if (type === 'Action') {
+          const cardContainer = document.createElement('div');
+          cardContainer.className = 'card-container';
+          cards.forEach(({ card, supply }) => {
+            const cardEl = document.createElement('div');
+            cardEl.className = 'card';
+            if (!this.gameState.canBuyCard(card)) {
+              cardEl.classList.add('disabled');
+            }
+            cardEl.innerHTML = `
+              <strong>${card.name}</strong><br>
+              <em>Type:</em> ${card.type}<br>
+              <em>Cost:</em> ${card.cost}<br>
+              ${card.description ? `<em>Effect:</em> ${card.description}` : ''}<br>
+              <em>Available:</em> ${supply.count}
+            `;
 
-          if (this.gameState.canBuyCard(card)) {
-            const buyHandler = () => this.buyCard(card);
-            cardEl.addEventListener('click', buyHandler);
-            // Store the handler on the element for cleanup
-            cardEl._buyHandler = buyHandler;
-          }
+            if (this.gameState.canBuyCard(card)) {
+              const buyHandler = () => this.buyCard(card);
+              cardEl.addEventListener('click', buyHandler);
+              cardEl._buyHandler = buyHandler;
+            }
 
-          section.appendChild(cardEl);
-        });
+            cardContainer.appendChild(cardEl);
+          });
+          section.appendChild(cardContainer);
+        } else {
+          cards.forEach(({ card, supply }) => {
+            const cardEl = document.createElement('div');
+            cardEl.className = 'card';
+            if (!this.gameState.canBuyCard(card)) {
+              cardEl.classList.add('disabled');
+            }
+            cardEl.innerHTML = `
+              <strong>${card.name}</strong><br>
+              <em>Type:</em> ${card.type}<br>
+              <em>Cost:</em> ${card.cost}<br>
+              ${card.description ? `<em>Effect:</em> ${card.description}` : ''}<br>
+              <em>Available:</em> ${supply.count}
+            `;
+
+            if (this.gameState.canBuyCard(card)) {
+              const buyHandler = () => this.buyCard(card);
+              cardEl.addEventListener('click', buyHandler);
+              cardEl._buyHandler = buyHandler;
+            }
+
+            section.appendChild(cardEl);
+          });
+        }
         
         marketplace.appendChild(section);
       }

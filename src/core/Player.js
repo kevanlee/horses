@@ -151,6 +151,14 @@ export class Player extends EventEmitter {
   }
 
   /**
+   * @param {Card} card
+   * @returns {boolean}
+   */
+  canPlay(card) {
+    return this.state.actions > 0 && card.type === 'Action';
+  }
+
+  /**
    * @returns {number}
    */
   calculateVictoryPoints() {

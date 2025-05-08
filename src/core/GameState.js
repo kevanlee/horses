@@ -10,12 +10,12 @@ export class GameState extends EventEmitter {
    */
   constructor(cardRegistry) {
     super();
-    this.players = [];
-    this.currentPlayerIndex = 0;
+    this.player = null;
     this.supply = new Map();
     this.trash = [];
     this.modalManager = null;
     this.cardRegistry = cardRegistry;
+    this.turnNumber = 1;
   }
 
   /**
@@ -30,10 +30,9 @@ export class GameState extends EventEmitter {
    * @returns {Player}
    */
   addPlayer(name) {
-    const player = new Player(name, this.cardRegistry);
-    this.players.push(player);
-    this.setupPlayerListeners(player);
-    return player;
+    this.player = new Player(name, this.cardRegistry);
+    this.setupPlayerListeners(this.player);
+    return this.player;
   }
 
   /**
@@ -74,13 +73,12 @@ export class GameState extends EventEmitter {
    * @returns {boolean}
    */
   canBuyCard(card) {
-    const player = this.getCurrentPlayer();
     const supply = this.supply.get(card.name);
     
     if (!supply || supply.count <= 0) return false;
-    if (player.state.buys <= 0) return false;
+    if (this.player.state.buys <= 0) return false;
     
-    const totalGold = this.calculatePlayerGold(player);
+    const totalGold = this.calculatePlayerGold(this.player);
     return totalGold >= card.cost;
   }
 
@@ -102,20 +100,17 @@ export class GameState extends EventEmitter {
    * @returns {Player}
    */
   getCurrentPlayer() {
-    return this.players[this.currentPlayerIndex];
+    return this.player;
   }
 
   nextTurn() {
-    const currentPlayer = this.getCurrentPlayer();
-    currentPlayer.endTurn();
-    
-    this.currentPlayerIndex = (this.currentPlayerIndex + 1) % this.players.length;
-    const nextPlayer = this.getCurrentPlayer();
-    nextPlayer.startTurn();
+    this.player.endTurn();
+    this.turnNumber++;
+    this.player.startTurn();
     
     this.emit('turnChanged', { 
-      previousPlayer: currentPlayer,
-      currentPlayer: nextPlayer
+      player: this.player,
+      turnNumber: this.turnNumber
     });
   }
 
@@ -124,13 +119,11 @@ export class GameState extends EventEmitter {
    * @returns {boolean}
    */
   validatePlay(card) {
-    const player = this.getCurrentPlayer();
-    
-    if (!player.canPlay(card)) {
-      throw new Error('Cannot play card: No actions remaining');
+    if (!this.player.canPlay(card)) {
+      throw new Error('Cannot play card: No actions remaining or not an action card');
     }
     
-    if (!player.state.hand.includes(card)) {
+    if (!this.player.state.hand.includes(card)) {
       throw new Error('Cannot play card: Card not in hand');
     }
     
@@ -163,19 +156,6 @@ export class GameState extends EventEmitter {
    * @returns {Player}
    */
   determineWinner() {
-    let winner = this.players[0];
-    let highestPoints = winner.calculateVictoryPoints();
-    
-    for (let i = 1; i < this.players.length; i++) {
-      const player = this.players[i];
-      const points = player.calculateVictoryPoints();
-      
-      if (points > highestPoints) {
-        winner = player;
-        highestPoints = points;
-      }
-    }
-    
-    return winner;
+    return this.player;
   }
-} 
+}

@@ -119,6 +119,60 @@ h1.title {
   border: 1px solid #ccc;
   padding: 1rem;
   border-radius: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.marketplace-title {
+  width: 100%;
+  margin: 0 0 1rem 0;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 0.5rem;
+}
+
+.market-section {
+  flex: 1 1 300px; /* Allow sections to grow and shrink, with a base width of 300px */
+  min-width: 300px; /* Ensure sections don't get too narrow */
+  background-color: #f8f8f8;
+  border: 1px solid #ddd;
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+.market-section h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 0.5rem;
+}
+
+/* Make Action cards section take full width */
+.market-section.action-section {
+  flex: 1 1 100%;
+  min-width: 95%;
+}
+
+.market-section.action-section .card {
+  margin: 0;
+}
+
+/* Add a container for the cards within the action section */
+.market-section.action-section::after {
+  content: '';
+  display: block;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.market-section.action-section .card-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  width: 100%;
 }
 
 /* === Log Section === */
@@ -268,4 +322,60 @@ h1.title {
   padding: 0.25rem;
 }
 */
+
+.play-button {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 10px;
+  width: 100%;
+  font-size: 0.9em;
+  transition: background-color 0.2s;
+}
+
+.play-button:hover {
+  background-color: #2980b9;
+}
+
+.play-button:active {
+  transform: translateY(1px);
+}
+
+/* === Button Styles === */
+button {
+  background-color: #fefefe;
+  color: black;
+  border: 1px solid black;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: background-color 0.2s;
+}
+
+button:hover {
+  background-color: #dfdfdf;
+}
+
+button:active {
+  transform: translateY(1px);
+}
+
+/* Specific button overrides */
+#modal-discard {
+  background-color: #fefefe;
+  color: #c0392b;
+}
+
+#modal-discard:hover {
+  background-color: #dfdfdf;
+}
+
+.play-button {
+  width: 100%;
+  margin-top: 10px;
+}
 
