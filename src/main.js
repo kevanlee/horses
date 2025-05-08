@@ -132,19 +132,22 @@ class Game {
     handContainer.innerHTML = '';
     player.state.hand.forEach(card => {
       const cardEl = document.createElement('div');
-      cardEl.className = 'card';
+      cardEl.className = `card card-${card.type.toLowerCase()}`;
+      if (card.type === 'Action' && player.state.actions === 0) {
+        cardEl.classList.add('disabled');
+      }
       cardEl.innerHTML = `
-        <strong>${card.name}</strong><br>
-        <em>Type:</em> ${card.type}<br>
-        <em>Cost:</em> ${card.cost}<br>
-        ${card.description ? `<em>Effect:</em> ${card.description}` : ''}
-        ${card.type === 'Action' && player.state.actions > 0 ? '<button class="play-button">Play</button>' : ''}
+        <strong>${card.name}</strong>
+        ${card.description ? `<div class="card-description">${card.description}</div>` : ''}
+        ${card.type === 'Treasure' ? `<h4>${card.value}*</h4>` : ''}
+        ${card.type === 'Victory' ? `<h4>${card.points}pt</h4>` : ''}
+        <em>Cost: ${card.cost}</em>
+        ${card.type === 'Action' ? `<img src="${card.icon}" class="card-icon" alt="${card.name} icon">` : ''}
       `;
       
       if (card.type === 'Action' && player.state.actions > 0) {
-        const playButton = cardEl.querySelector('.play-button');
         const playHandler = () => this.playCard(card);
-        playButton.addEventListener('click', playHandler);
+        cardEl.addEventListener('click', playHandler);
         // Store the handler on the element for cleanup
         cardEl._playHandler = playHandler;
       }
@@ -154,10 +157,40 @@ class Game {
   }
 
   updateDeckCounts(player) {
-    document.getElementById('deck-count').textContent = 
-      `Deck: ${player.state.deck.length}`;
-    document.getElementById('discard-count').textContent = 
-      `Discard: ${player.state.discard.length}`;
+    const deckCountEl = document.getElementById('deck-count');
+    const discardCountEl = document.getElementById('discard-count');
+    
+    // Clear existing content
+    deckCountEl.innerHTML = '';
+    discardCountEl.innerHTML = '';
+    
+    // Create deck pile
+    const deckCard = document.createElement('div');
+    deckCard.className = `pile-card ${player.state.deck.length === 0 ? 'empty' : ''}`;
+    
+    const deckInfo = document.createElement('div');
+    deckInfo.className = 'pile-info';
+    deckInfo.innerHTML = `
+      <div class="pile-name">Deck</div>
+      <div class="pile-count">${player.state.deck.length} cards</div>
+    `;
+    
+    deckCountEl.appendChild(deckCard);
+    deckCountEl.appendChild(deckInfo);
+    
+    // Create discard pile
+    const discardCard = document.createElement('div');
+    discardCard.className = `pile-card ${player.state.discard.length === 0 ? 'empty' : ''}`;
+    
+    const discardInfo = document.createElement('div');
+    discardInfo.className = 'pile-info';
+    discardInfo.innerHTML = `
+      <div class="pile-name">Discard</div>
+      <div class="pile-count">${player.state.discard.length} cards</div>
+    `;
+    
+    discardCountEl.appendChild(discardCard);
+    discardCountEl.appendChild(discardInfo);
   }
 
   updateMarketplace() {
@@ -199,57 +232,43 @@ class Game {
         }
         section.innerHTML = `<h3>${type} Cards</h3>`;
         
-        if (type === 'Action') {
-          const cardContainer = document.createElement('div');
-          cardContainer.className = 'card-container';
-          cards.forEach(({ card, supply }) => {
-            const cardEl = document.createElement('div');
-            cardEl.className = 'card';
-            if (!this.gameState.canBuyCard(card)) {
-              cardEl.classList.add('disabled');
-            }
-            cardEl.innerHTML = `
-              <strong>${card.name}</strong><br>
-              <em>Type:</em> ${card.type}<br>
-              <em>Cost:</em> ${card.cost}<br>
-              ${card.description ? `<em>Effect:</em> ${card.description}` : ''}<br>
-              <em>Available:</em> ${supply.count}
-            `;
-
-            if (this.gameState.canBuyCard(card)) {
-              const buyHandler = () => this.buyCard(card);
-              cardEl.addEventListener('click', buyHandler);
-              cardEl._buyHandler = buyHandler;
-            }
-
-            cardContainer.appendChild(cardEl);
-          });
-          section.appendChild(cardContainer);
-        } else {
-          cards.forEach(({ card, supply }) => {
-            const cardEl = document.createElement('div');
-            cardEl.className = 'card';
-            if (!this.gameState.canBuyCard(card)) {
-              cardEl.classList.add('disabled');
-            }
-            cardEl.innerHTML = `
-              <strong>${card.name}</strong><br>
-              <em>Type:</em> ${card.type}<br>
-              <em>Cost:</em> ${card.cost}<br>
-              ${card.description ? `<em>Effect:</em> ${card.description}` : ''}<br>
-              <em>Available:</em> ${supply.count}
-            `;
-
-            if (this.gameState.canBuyCard(card)) {
-              const buyHandler = () => this.buyCard(card);
-              cardEl.addEventListener('click', buyHandler);
-              cardEl._buyHandler = buyHandler;
-            }
-
-            section.appendChild(cardEl);
-          });
-        }
+        const cardContainer = document.createElement('div');
+        cardContainer.className = 'card-container';
         
+        cards.forEach(({ card, supply }) => {
+          const cardWrapper = document.createElement('div');
+          cardWrapper.className = 'card-wrapper';
+          
+          const cardEl = document.createElement('div');
+          cardEl.className = `card card-${card.type.toLowerCase()}`;
+          if (!this.gameState.canBuyCard(card)) {
+            cardEl.classList.add('disabled');
+          }
+          cardEl.innerHTML = `
+            <strong>${card.name}</strong>
+            ${card.description ? `<div class="card-description">${card.description}</div>` : ''}
+            ${card.type === 'Treasure' ? `<h4>${card.value}*</h4>` : ''}
+            ${card.type === 'Victory' ? `<h4>${card.points}pt</h4>` : ''}
+            <em>Cost: ${card.cost}</em>
+            ${card.type === 'Action' ? `<img src="${card.icon}" class="card-icon" alt="${card.name} icon">` : ''}
+          `;
+
+          const availableText = document.createElement('div');
+          availableText.className = 'available-text';
+          availableText.textContent = `Available: ${supply.count}`;
+
+          if (this.gameState.canBuyCard(card)) {
+            const buyHandler = () => this.buyCard(card);
+            cardEl.addEventListener('click', buyHandler);
+            cardEl._buyHandler = buyHandler;
+          }
+
+          cardWrapper.appendChild(cardEl);
+          cardWrapper.appendChild(availableText);
+          cardContainer.appendChild(cardWrapper);
+        });
+        
+        section.appendChild(cardContainer);
         marketplace.appendChild(section);
       }
     });

@@ -118,12 +118,14 @@ export class ModalManager extends EventEmitter {
 
       options.cards.forEach((card, index) => {
         const cardEl = document.createElement('div');
-        cardEl.className = 'card';
+        cardEl.className = `card card-${card.type.toLowerCase()}`;
         cardEl.innerHTML = `
-          <strong>${card.name}</strong><br>
-          <em>Type:</em> ${card.type}<br>
-          <em>Cost:</em> ${card.cost}<br>
-          ${card.description ? `<em>Effect:</em> ${card.description}` : ''}
+          <strong>${card.name}</strong>
+          ${card.description ? `<div class="card-description">${card.description}</div>` : ''}
+          ${card.type === 'Treasure' ? `<h4>${card.value}*</h4>` : ''}
+          ${card.type === 'Victory' ? `<h4>${card.points}pt</h4>` : ''}
+          <em>Cost: ${card.cost}</em>
+          ${card.type === 'Action' ? `<img src="${card.icon}" class="card-icon" alt="${card.name} icon">` : ''}
         `;
         cardEl.dataset.index = index;
         

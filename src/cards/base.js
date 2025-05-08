@@ -6,6 +6,7 @@
  * @property {string} description - The description of the card's effect
  * @property {number} [value] - The coin value (for Treasure cards)
  * @property {number} [points] - The victory points (for Victory cards)
+ * @property {string} [icon] - The path to the card's icon (for Action cards)
  */
 
 export class Card {
@@ -19,6 +20,7 @@ export class Card {
     this.description = config.description;
     this.value = config.value || 0;
     this.points = config.points || 0;
+    this.icon = config.icon || null;
   }
 
   /**

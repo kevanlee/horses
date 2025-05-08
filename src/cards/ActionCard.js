@@ -9,11 +9,13 @@ export class ActionCard extends Card {
    * @param {string} config.name
    * @param {number} config.cost
    * @param {string} config.description
+   * @param {string} [config.icon] - Optional custom icon path
    */
   constructor(config) {
     super({
       ...config,
-      type: 'Action'
+      type: 'Action',
+      icon: config.icon || '/res/icons/action-icon.png' // Default icon path
     });
   }
 
