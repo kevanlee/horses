@@ -8,8 +8,24 @@ export class GameSetup {
     this.setupEventListeners();
   }
 
+  show() {
+    const setupModal = this.modalManager.modals.get('setup');
+    if (!setupModal) return;
+
+    // Reset selected cards
+    this.selectedCards.clear();
+    
+    // Populate card options
+    this.populateCardOptions();
+    
+    // Show the modal
+    setupModal.element.classList.remove('hidden');
+  }
+
   setupEventListeners() {
     const setupModal = this.modalManager.modals.get('setup');
+    if (!setupModal) return;
+
     const setupConfirm = setupModal.confirm;
     const setupBody = setupModal.body;
 
@@ -54,15 +70,6 @@ export class GameSetup {
         this.modalManager.emit('gameSetupComplete', config);
       });
     }
-  }
-
-  show() {
-    // Show the modal directly
-    const setupModal = this.modalManager.modals.get('setup');
-    setupModal.element.classList.remove('hidden');
-    
-    // Populate the card options
-    this.populateCardOptions();
   }
 
   populateCardOptions() {

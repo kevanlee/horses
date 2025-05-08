@@ -17,9 +17,11 @@ class Game {
 
   showSetup() {
     this.gameSetup.show();
-    this.modalManager.once('gameSetupComplete', (config) => {
+    const setupHandler = (config) => {
       this.initializeGame(config);
-    });
+      this.modalManager.off('gameSetupComplete', setupHandler);
+    };
+    this.modalManager.on('gameSetupComplete', setupHandler);
   }
 
   initializeGame(config = {}) {

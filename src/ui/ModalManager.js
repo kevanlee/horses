@@ -7,53 +7,42 @@ export class ModalManager extends EventEmitter {
   constructor() {
     super();
     this.modals = new Map();
-    this.setupModals();
+    this.initializeModals();
   }
 
-  setupModals() {
-    // Card selection modal
+  initializeModals() {
+    // Initialize card modal
     const cardModal = document.getElementById('card-modal');
-    const modalContent = cardModal.querySelector('.modal-content');
-    const modalTitle = modalContent.querySelector('#modal-title');
-    const modalBody = modalContent.querySelector('#modal-body');
-    const modalConfirm = modalContent.querySelector('#modal-confirm');
+    if (cardModal) {
+      this.modals.set('card', {
+        element: cardModal,
+        title: cardModal.querySelector('#modal-title'),
+        body: cardModal.querySelector('#modal-body'),
+        confirm: cardModal.querySelector('#modal-confirm')
+      });
+    }
 
-    this.modals.set('card', {
-      element: cardModal,
-      title: modalTitle,
-      body: modalBody,
-      confirm: modalConfirm
-    });
-
-    // Library modal
+    // Initialize library modal
     const libraryModal = document.getElementById('library-modal');
-    const libraryContent = libraryModal.querySelector('.modal-content');
-    const libraryTitle = libraryContent.querySelector('h2');
-    const libraryText = libraryContent.querySelector('#library-modal-text');
-    const libraryHand = libraryContent.querySelector('#library-hand');
-    const libraryConfirm = libraryContent.querySelector('#library-confirm');
+    if (libraryModal) {
+      this.modals.set('library', {
+        element: libraryModal,
+        title: libraryModal.querySelector('h2'),
+        body: libraryModal.querySelector('#library-modal-text'),
+        confirm: libraryModal.querySelector('#library-confirm')
+      });
+    }
 
-    this.modals.set('library', {
-      element: libraryModal,
-      title: libraryTitle,
-      text: libraryText,
-      body: libraryHand,
-      confirm: libraryConfirm
-    });
-
-    // Setup modal
+    // Initialize setup modal
     const setupModal = document.getElementById('setup-modal');
-    const setupContent = setupModal.querySelector('.modal-content');
-    const setupTitle = setupContent.querySelector('h2');
-    const setupBody = setupContent.querySelector('#setup-body');
-    const setupConfirm = setupContent.querySelector('#setup-confirm');
-
-    this.modals.set('setup', {
-      element: setupModal,
-      title: setupTitle,
-      body: setupBody,
-      confirm: setupConfirm
-    });
+    if (setupModal) {
+      this.modals.set('setup', {
+        element: setupModal,
+        title: setupModal.querySelector('h2'),
+        body: setupModal.querySelector('#setup-body'),
+        confirm: setupModal.querySelector('#setup-confirm')
+      });
+    }
   }
 
   /**
@@ -69,7 +58,7 @@ export class ModalManager extends EventEmitter {
    * @param {Object} [options.faceDownCard]
    * @param {Function} [options.onReveal]
    */
-  showModal(type, options) {
+  showModal(type, options = {}) {
     const modal = this.modals.get(type);
     if (!modal) {
       console.error(`Modal type ${type} not found. Available types: ${Array.from(this.modals.keys()).join(', ')}`);
@@ -148,7 +137,7 @@ export class ModalManager extends EventEmitter {
     }
 
     modal.confirm.textContent = options.confirmText || 'Confirm';
-    modal.confirm.onclick = () => {
+    const confirmHandler = () => {
       const selectedCards = Array.from(modal.body.querySelectorAll('.card.selected'))
         .map(el => options.cards[parseInt(el.dataset.index)]);
       
@@ -158,6 +147,7 @@ export class ModalManager extends EventEmitter {
         options.onConfirm(selectedCards);
       }, 0);
     };
+    modal.confirm.onclick = confirmHandler;
 
     if (options.onDiscard) {
       // Create discard button if it doesn't exist
