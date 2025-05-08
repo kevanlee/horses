@@ -13,9 +13,14 @@ import { EventEmitter } from '../utils/EventEmitter.js';
  */
 
 export class Player extends EventEmitter {
-  constructor(name) {
+  /**
+   * @param {string} name
+   * @param {CardRegistry} cardRegistry
+   */
+  constructor(name, cardRegistry) {
     super();
     this.name = name;
+    this.cardRegistry = cardRegistry;
     this.reset();
   }
 
@@ -31,6 +36,22 @@ export class Player extends EventEmitter {
       bonusGold: 0,
       victoryPoints: 0
     };
+
+    // Initialize starting deck with 7 Copper and 3 Estate
+    const copper = this.cardRegistry.getCard('Copper');
+    const estate = this.cardRegistry.getCard('Estate');
+    
+    if (!copper || !estate) {
+      throw new Error('Required starting cards not found in registry');
+    }
+
+    this.state.deck = [
+      ...Array(7).fill(copper),
+      ...Array(3).fill(estate)
+    ];
+
+    // Shuffle the deck
+    this.shuffleDeck();
   }
 
   /**

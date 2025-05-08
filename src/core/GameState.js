@@ -5,13 +5,17 @@ import { EventEmitter } from '../utils/EventEmitter.js';
  * Manages the overall game state and rules
  */
 export class GameState extends EventEmitter {
-  constructor() {
+  /**
+   * @param {CardRegistry} cardRegistry
+   */
+  constructor(cardRegistry) {
     super();
     this.players = [];
     this.currentPlayerIndex = 0;
     this.supply = new Map();
     this.trash = [];
     this.modalManager = null;
+    this.cardRegistry = cardRegistry;
   }
 
   /**
@@ -23,9 +27,10 @@ export class GameState extends EventEmitter {
 
   /**
    * @param {string} name
+   * @returns {Player}
    */
   addPlayer(name) {
-    const player = new Player(name);
+    const player = new Player(name, this.cardRegistry);
     this.players.push(player);
     this.setupPlayerListeners(player);
     return player;

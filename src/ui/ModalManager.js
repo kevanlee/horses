@@ -28,7 +28,7 @@ export class ModalManager {
     const libraryTitle = libraryContent.querySelector('h2');
     const libraryText = libraryContent.querySelector('#library-modal-text');
     const libraryHand = libraryContent.querySelector('#library-hand');
-    const libraryConfirm = libraryContent.querySelector('#modal-confirm');
+    const libraryConfirm = libraryContent.querySelector('#library-confirm');
 
     this.modals.set('library', {
       element: libraryModal,
@@ -36,24 +36,6 @@ export class ModalManager {
       text: libraryText,
       body: libraryHand,
       confirm: libraryConfirm
-    });
-
-    // Vassal reveal modal
-    const vassalModal = document.getElementById('vassal-modal');
-    const vassalContent = vassalModal.querySelector('.modal-content');
-    const vassalTitle = vassalContent.querySelector('h2');
-    const vassalText = vassalContent.querySelector('#vassal-modal-text');
-    const vassalCard = vassalContent.querySelector('#vassal-card');
-    const vassalConfirm = vassalContent.querySelector('#modal-confirm');
-    const vassalDiscard = vassalContent.querySelector('#modal-discard');
-
-    this.modals.set('vassal', {
-      element: vassalModal,
-      title: vassalTitle,
-      text: vassalText,
-      card: vassalCard,
-      confirm: vassalConfirm,
-      discard: vassalDiscard
     });
   }
 
@@ -72,7 +54,22 @@ export class ModalManager {
    */
   showModal(type, options) {
     const modal = this.modals.get(type);
-    if (!modal) throw new Error(`Modal type ${type} not found`);
+    if (!modal) {
+      console.error(`Modal type ${type} not found. Available types: ${Array.from(this.modals.keys()).join(', ')}`);
+      throw new Error(`Modal type ${type} not found`);
+    }
+
+    if (!options || typeof options !== 'object') {
+      throw new Error('Modal options must be an object');
+    }
+
+    if (!options.title) {
+      throw new Error('Modal title is required');
+    }
+
+    if (!options.onConfirm || typeof options.onConfirm !== 'function') {
+      throw new Error('Modal onConfirm callback is required and must be a function');
+    }
 
     modal.title.textContent = options.title;
     modal.body.innerHTML = '';
@@ -104,6 +101,9 @@ export class ModalManager {
     }
 
     if (options.cards) {
+      if (!Array.isArray(options.cards)) {
+        throw new Error('Modal cards must be an array');
+      }
       options.cards.forEach((card, index) => {
         const cardEl = document.createElement('div');
         cardEl.className = 'card';

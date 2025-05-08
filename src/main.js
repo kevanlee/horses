@@ -4,9 +4,9 @@ import { CardRegistry } from './cards/CardRegistry.js';
 
 class Game {
   constructor() {
-    this.gameState = new GameState();
-    this.modalManager = new ModalManager();
     this.cardRegistry = new CardRegistry();
+    this.gameState = new GameState(this.cardRegistry);
+    this.modalManager = new ModalManager();
     
     this.gameState.setModalManager(this.modalManager);
     this.setupEventListeners();
@@ -99,8 +99,6 @@ class Game {
     const currentPlayer = this.gameState.getCurrentPlayer();
     
     // Update player stats
-    document.getElementById('current-player').textContent = 
-      `Current Player: ${currentPlayer.name}`;
     document.getElementById('gold-display').textContent = 
       `Gold: ${this.gameState.calculatePlayerGold(currentPlayer)}`;
     document.getElementById('victory-display').textContent = 
@@ -139,7 +137,10 @@ class Game {
       `;
       
       if (card.type === 'Action' && player.state.actions > 0) {
-        cardEl.addEventListener('click', () => this.playCard(card));
+        const playHandler = () => this.playCard(card);
+        cardEl.addEventListener('click', playHandler);
+        // Store the handler on the element for cleanup
+        cardEl._playHandler = playHandler;
       }
       
       handContainer.appendChild(cardEl);
@@ -196,7 +197,10 @@ class Game {
           `;
 
           if (this.gameState.canBuyCard(card)) {
-            cardEl.addEventListener('click', () => this.buyCard(card));
+            const buyHandler = () => this.buyCard(card);
+            cardEl.addEventListener('click', buyHandler);
+            // Store the handler on the element for cleanup
+            cardEl._buyHandler = buyHandler;
           }
 
           section.appendChild(cardEl);
