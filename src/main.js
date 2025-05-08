@@ -1,16 +1,39 @@
 import { GameState } from './core/GameState.js';
 import { ModalManager } from './ui/ModalManager.js';
 import { CardRegistry } from './cards/CardRegistry.js';
+import { GameSetup } from './ui/GameSetup.js';
 
 class Game {
   constructor() {
     this.cardRegistry = new CardRegistry();
     this.gameState = new GameState(this.cardRegistry);
     this.modalManager = new ModalManager();
+    this.gameSetup = new GameSetup(this.modalManager, this.cardRegistry);
     
     this.gameState.setModalManager(this.modalManager);
     this.setupEventListeners();
-    this.initializeGame();
+    this.showSetup();
+  }
+
+  showSetup() {
+    this.gameSetup.show();
+    this.modalManager.once('gameSetupComplete', (config) => {
+      this.initializeGame(config);
+    });
+  }
+
+  initializeGame(config = {}) {
+    // Hide the game UI initially
+    document.getElementById('game').classList.add('hidden');
+    
+    // Initialize game state with config
+    this.gameState.initialize(config);
+    
+    // Show the game UI
+    document.getElementById('game').classList.remove('hidden');
+    
+    // Update UI
+    this.updateUI();
   }
 
   setupEventListeners() {
@@ -51,9 +74,20 @@ class Game {
 
     this.gameState.on('gameEnded', ({ reason }) => {
       const winner = this.gameState.determineWinner();
+      const finalScore = winner.calculateVictoryPoints();
       this.logMessage(`Game Over! ${reason}`);
-      this.logMessage(`You won with ${winner.calculateVictoryPoints()} points!`);
-      alert(`Game Over! ${reason}\nYou won with ${winner.calculateVictoryPoints()} points!`);
+      this.logMessage(`You won with ${finalScore} points!`);
+      
+      // Show game over modal with New Game button
+      this.modalManager.showModal('card', {
+        title: 'Game Over!',
+        message: `${reason}\nYou won with ${finalScore} points!`,
+        confirmText: 'New Game',
+        onConfirm: () => {
+          this.modalManager.hideModal('card');
+          this.showSetup();
+        }
+      });
     });
 
     // UI events
@@ -61,63 +95,6 @@ class Game {
       this.gameState.nextTurn();
       this.gameState.checkGameEnd();
     });
-  }
-
-  initializeGame() {
-    // Add single player
-    const player = this.gameState.addPlayer('Player');
-
-    // Initialize supply piles
-    const basicCards = [
-      { name: 'Copper', count: 60 },
-      { name: 'Silver', count: 40 },
-      { name: 'Gold', count: 30 },
-      { name: 'Estate', count: 24 },
-      { name: 'Duchy', count: 12 },
-      { name: 'Province', count: 12 }
-    ];
-
-    const actionCards = [
-      // Cost 2
-      { name: 'Test', count: 10 },
-      { name: 'Cellar', count: 10 },
-      { name: 'Chapel', count: 10 },
-      // Cost 3
-      { name: 'Village', count: 10 },
-      { name: 'Woodcutter', count: 10 },
-      { name: 'Workshop', count: 10 },
-      { name: 'Masquerade', count: 10 },
-      { name: 'Vassal', count: 10 },
-      { name: 'Great Hall', count: 10 },
-      { name: 'Harbinger', count: 10 },
-      // Cost 4
-      { name: 'Smithy', count: 10 },
-      { name: 'Remodel', count: 10 },
-      { name: 'Moneylender', count: 10 },
-      { name: 'Feast', count: 10 },
-      { name: 'Throne Room', count: 10 },
-      { name: 'Gardens', count: 10 },
-      // Cost 5
-      { name: 'Market', count: 10 },
-      { name: 'Festival', count: 10 },
-      { name: 'Laboratory', count: 10 },
-      { name: 'Mine', count: 10 },
-      { name: 'Council Room', count: 10 },
-      { name: 'Treasury', count: 10 },
-      { name: 'Library', count: 10 },
-      // Cost 6
-      { name: 'Adventurer', count: 10 }
-    ];
-
-    // Add all cards to supply
-    [...basicCards, ...actionCards].forEach(({ name, count }) => {
-      const card = this.cardRegistry.getCard(name);
-      this.gameState.addToSupply(card, count);
-    });
-
-    // Start the game
-    this.gameState.getCurrentPlayer().startTurn();
-    this.updateUI();
   }
 
   updateUI() {

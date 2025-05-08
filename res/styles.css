@@ -1,398 +1,530 @@
 /* === Global Styles === */
 body {
-  font-family: "Funnel Sans", sans-serif;
-  background-color: #f3f3f3;
-  padding: 1rem;
-}
-
-h1.title {
-  font-size: 4rem;
-  text-align: center;
-  border-bottom: 1px solid #000000;
-}
-
-/* === Grid Layout for #game === */
-#game {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr); /* 12 equal columns */
-  gap: 1rem;
-}
-
-/* === Header Section === */
-#header {
-  grid-column: span 12; /* Span the entire 12-column width */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-#scoreboard {
-  list-style: none;
-  display: flex;
-  gap: 1rem;
-  padding: 0;
-  margin: 0;
-}
-
-#scoreboard li {
-  display: flex;
-  align-items: center;
-}
-
-#header button {
-  margin-left: 1rem; /* Align button to the right */
-}
-
-/* === Hand Section === */
-#hand {
-  grid-column: span 12; /* Span the entire 12-column width */
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: 1rem;
-  padding-bottom: 15px;
-  border-bottom: 1px solid #000000; 
-}
-
-#deck-count {
-  grid-column: span 1; /* Deck count takes up 1 column */
-}
-
-#player-hand {
-  grid-column: span 10; /* Player hand takes up 10 columns */
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  background-color: white;
-  border: 1px solid #ccc;
-  padding: 1rem;
-  border-radius: 8px;
-  justify-content: center;
-  align-items: center;
-}
-
-#player-hand h2 {
-  margin: 0;
-  text-align: center;
-  font-size: 1.5rem;
-  width: 100%; /* Make the heading take full width */
-}
-
-.card-container {
-  display: flex; /* Aligns cards in a row */
-  flex-wrap: wrap; /* Cards will wrap to the next line if necessary */
-  gap: 0.5rem; /* Adds spacing between cards */
-  justify-content: center; /* Centers cards horizontally */
-  align-items: center; /* Centers cards vertically (optional) */
-}
-
-#discard-count {
-  grid-column: span 1; /* Discard count takes up 1 columns */
-}
-
-#deck-count,
-#discard-count {
-  display: flex;
-  align-items: flex-end; /* Align content to the bottom */
-  padding: 0.5rem; /* Add padding if necessary */
-}
-
-/* === Shop Section === */
-#shop {
-  grid-column: span 12; /* Span the entire 12-column width */
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: 1rem;
-}
-
-#deck-inventory {
-  grid-column: span 2; /* Deck inventory takes up 2 columns */
-  background-color: white;
-  border: 1px solid #ccc;
-  padding: 1rem;
-  border-radius: 8px;
-}
-
-#marketplace {
-  grid-column: span 10; /* Marketplace takes up 10 columns */
-  background-color: white;
-  border: 1px solid #ccc;
-  padding: 1rem;
-  border-radius: 8px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.marketplace-title {
-  width: 100%;
-  margin: 0 0 1rem 0;
-  text-align: center;
-  border-bottom: 1px solid #ddd;
-  padding-bottom: 0.5rem;
-}
-
-.market-section {
-  flex: 1 1 300px; /* Allow sections to grow and shrink, with a base width of 300px */
-  min-width: 300px; /* Ensure sections don't get too narrow */
-  background-color: #f8f8f8;
-  border: 1px solid #ddd;
-  padding: 1rem;
-  border-radius: 8px;
-}
-
-.market-section h3 {
-  margin-top: 0;
-  margin-bottom: 1rem;
-  text-align: center;
-  border-bottom: 1px solid #ddd;
-  padding-bottom: 0.5rem;
-}
-
-/* Make Action cards section take full width */
-.market-section.action-section {
-  flex: 1 1 100%;
-  min-width: 95%;
-}
-
-.market-section.action-section .card {
-  margin: 0;
-}
-
-/* Add a container for the cards within the action section */
-.market-section.action-section::after {
-  content: '';
-  display: block;
-  width: 100%;
-  margin-top: 1rem;
-}
-
-.market-section.action-section .card-container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 1rem;
-  width: 100%;
-}
-
-/* === Log Section === */
-#log {
-  grid-column: span 12; /* Span the entire 12-column width */
-}
-
-/* === Card Styles === */
-.card {
-  display: inline-block;
-  background: #eee;
-  border: 1px solid #999;
-  padding: 10px;
-  margin: 5px;
-  width: 100px;
-  text-align: center;
-  cursor: pointer;
-  border-radius: 5px;
-  flex: 0 0 auto; /* Don't grow or shrink, maintain size */
-}
-
-.card.disabled {
-  opacity: 0.5; /* Make cards that are too expensive semi-transparent */
-  pointer-events: none; /* Optional: Disable interactions (like clicks) with disabled cards */
-}
-
-.card.confirmed {
-  border: 2px solid green;
-  background-color: #eaffea;
-  opacity: 0.8;
-}
-
-.card-back {
-  background: #2c3e50;
-  color: white;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.card-back:hover {
-  transform: scale(1.05);
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-}
-
-.highlight-x2 {
-  border: 2px solid gold;
-  position: relative;
-}
-
-.x2-badge {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  background: gold;
-  color: black;
-  font-weight: bold;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 0.8em;
-}
-
-.throne-select-button {
-  margin-top: 5px;
-}
-
-/* === Modal === */
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.6);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.modal.hidden {
-  display: none;
-}
-
-.hidden {
-  display: none;
-}
-
-.modal-content {
-  background: white;
-  padding: 2rem;
-  border-radius: 10px;
-  max-width: 600px;
-  width: 90%;
-  text-align: center;
-}
-
-.card.selected {
-  outline: 2px solid #0077ff;
-  background-color: #eef6ff;
-}
-
-/* Vassal Modal Specific Styles */
-#vassal-card {
-  margin: 20px auto;
-  width: 150px;
-  height: 200px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.2em;
-  font-weight: bold;
-}
-
-#modal-discard {
-  margin-left: 10px;
-  background-color: #e74c3c;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-#modal-discard:hover {
-  background-color: #c0392b;
-}
-
-/* === Mobile === */
-
-@media (max-width: 768px) {
+    font-family: "Funnel Sans", sans-serif;
+    background-color: #f3f3f3;
+    padding: 1rem;
+  }
+  
+  h1.title {
+    font-size: 4rem;
+    text-align: center;
+    border-bottom: 1px solid #000000;
+  }
+  
+  /* === Grid Layout for #game === */
   #game {
-    grid-template-columns: 1fr; /* Make grid a single column */
+    display: grid;
+    grid-template-columns: repeat(12, 1fr); /* 12 equal columns */
+    gap: 1rem;
   }
-
-  #header, #hand, #shop, #log {
-    grid-column: span 1; /* Ensure these sections span the entire width */
+  
+  /* === Header Section === */
+  #header {
+    grid-column: span 12; /* Span the entire 12-column width */
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
-}
-
-
-/* === Debugging Styles (Outlines) === 
-#game > div {
-  outline: 1px dashed red; 
-}
-
-#game > div > div {
-  outline: 1px dotted blue; 
-  padding: 0.25rem;
-}
-*/
-
-.play-button {
-  background-color: #fefefe;
-  color: black;
-  border: 1px solid black;
-  padding: 5px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-top: 10px;
-  width: 100%;
-  font-size: 0.9em;
-  transition: background-color 0.2s;
-}
-
-.play-button:hover {
-  background-color: #dfdfdf;
-}
-
-.play-button:active {
-  transform: translateY(1px);
-}
-
-/* === Button Styles === */
-button {
-  background-color: #fefefe;
-  color: black;
-  border: 1px solid black;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.9em;
-  transition: background-color 0.2s;
-}
-
-button:hover {
-  background-color: #dfdfdf;
-}
-
-button:active {
-  transform: translateY(1px);
-}
-
-/* Specific button overrides */
-#modal-discard {
-  background-color: #fefefe;
-  color: #c0392b;
-}
-
-#modal-discard:hover {
-  background-color: #dfdfdf;
-}
-
-.play-button {
-  width: 100%;
-  margin-top: 10px;
-}
-
-/* Add styles for modal card container */
-.modal-content .card-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  justify-content: center;
-  padding: 10px;
-}
-
-/* Ensure modal body can scroll */
-#modal-body {
-  max-height: 70vh;
-  overflow-y: auto;
-  padding: 10px;
-}
-
+  
+  #scoreboard {
+    list-style: none;
+    display: flex;
+    gap: 1rem;
+    padding: 0;
+    margin: 0;
+  }
+  
+  #scoreboard li {
+    display: flex;
+    align-items: center;
+  }
+  
+  #header button {
+    margin-left: 1rem; /* Align button to the right */
+  }
+  
+  /* === Hand Section === */
+  #hand {
+    grid-column: span 12; /* Span the entire 12-column width */
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 1rem;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #000000; 
+  }
+  
+  #deck-count {
+    grid-column: span 1; /* Deck count takes up 1 column */
+  }
+  
+  #player-hand {
+    grid-column: span 10; /* Player hand takes up 10 columns */
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    background-color: white;
+    border: 1px solid #ccc;
+    padding: 1rem;
+    border-radius: 8px;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  #player-hand h2 {
+    margin: 0;
+    text-align: center;
+    font-size: 1.5rem;
+    width: 100%; /* Make the heading take full width */
+  }
+  
+  .card-container {
+    display: flex; /* Aligns cards in a row */
+    flex-wrap: wrap; /* Cards will wrap to the next line if necessary */
+    gap: 0.5rem; /* Adds spacing between cards */
+    justify-content: center; /* Centers cards horizontally */
+    align-items: center; /* Centers cards vertically (optional) */
+  }
+  
+  #discard-count {
+    grid-column: span 1; /* Discard count takes up 1 columns */
+  }
+  
+  #deck-count,
+  #discard-count {
+    display: flex;
+    align-items: flex-end; /* Align content to the bottom */
+    padding: 0.5rem; /* Add padding if necessary */
+  }
+  
+  /* === Shop Section === */
+  #shop {
+    grid-column: span 12; /* Span the entire 12-column width */
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 1rem;
+  }
+  
+  #deck-inventory {
+    grid-column: span 2; /* Deck inventory takes up 2 columns */
+    background-color: white;
+    border: 1px solid #ccc;
+    padding: 1rem;
+    border-radius: 8px;
+  }
+  
+  #marketplace {
+    grid-column: span 10; /* Marketplace takes up 10 columns */
+    background-color: white;
+    border: 1px solid #ccc;
+    padding: 1rem;
+    border-radius: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  
+  .marketplace-title {
+    width: 100%;
+    margin: 0 0 1rem 0;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 0.5rem;
+  }
+  
+  .market-section {
+    flex: 1 1 300px; /* Allow sections to grow and shrink, with a base width of 300px */
+    min-width: 300px; /* Ensure sections don't get too narrow */
+    background-color: #f8f8f8;
+    border: 1px solid #ddd;
+    padding: 1rem;
+    border-radius: 8px;
+  }
+  
+  .market-section h3 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 0.5rem;
+  }
+  
+  /* Make Action cards section take full width */
+  .market-section.action-section {
+    flex: 1 1 100%;
+    min-width: 95%;
+  }
+  
+  .market-section.action-section .card {
+    margin: 0;
+  }
+  
+  /* Add a container for the cards within the action section */
+  .market-section.action-section::after {
+    content: '';
+    display: block;
+    width: 100%;
+    margin-top: 1rem;
+  }
+  
+  .market-section.action-section .card-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+    width: 100%;
+  }
+  
+  /* === Log Section === */
+  #log {
+    grid-column: span 12; /* Span the entire 12-column width */
+  }
+  
+  /* === Card Styles === */
+  .card {
+    display: inline-block;
+    background: #eee;
+    border: 1px solid #999;
+    padding: 10px;
+    margin: 5px;
+    width: 100px;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 5px;
+    flex: 0 0 auto; /* Don't grow or shrink, maintain size */
+  }
+  
+  .card.disabled {
+    opacity: 0.5; /* Make cards that are too expensive semi-transparent */
+    pointer-events: none; /* Optional: Disable interactions (like clicks) with disabled cards */
+  }
+  
+  .card.confirmed {
+    border: 2px solid green;
+    background-color: #eaffea;
+    opacity: 0.8;
+  }
+  
+  .card-back {
+    background: #2c3e50;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .card-back:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  }
+  
+  .highlight-x2 {
+    border: 2px solid gold;
+    position: relative;
+  }
+  
+  .x2-badge {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: gold;
+    color: black;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.8em;
+  }
+  
+  .throne-select-button {
+    margin-top: 5px;
+  }
+  
+  /* === Modal === */
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .modal.hidden {
+    display: none;
+  }
+  
+  .hidden {
+    display: none;
+  }
+  
+  .modal-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    max-width: 600px;
+    width: 90%;
+    text-align: center;
+  }
+  
+  .card.selected {
+    outline: 2px solid #0077ff;
+    background-color: #eef6ff;
+  }
+  
+  /* Vassal Modal Specific Styles */
+  #vassal-card {
+    margin: 20px auto;
+    width: 150px;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2em;
+    font-weight: bold;
+  }
+  
+  #modal-discard {
+    margin-left: 10px;
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  #modal-discard:hover {
+    background-color: #c0392b;
+  }
+  
+  /* === Mobile === */
+  
+  @media (max-width: 768px) {
+    #game {
+      grid-template-columns: 1fr; /* Make grid a single column */
+    }
+  
+    #header, #hand, #shop, #log {
+      grid-column: span 1; /* Ensure these sections span the entire width */
+    }
+  }
+  
+  
+  /* === Debugging Styles (Outlines) === 
+  #game > div {
+    outline: 1px dashed red; 
+  }
+  
+  #game > div > div {
+    outline: 1px dotted blue; 
+    padding: 0.25rem;
+  }
+  */
+  
+  .play-button {
+    background-color: #fefefe;
+    color: black;
+    border: 1px solid black;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+    width: 100%;
+    font-size: 0.9em;
+    transition: background-color 0.2s;
+  }
+  
+  .play-button:hover {
+    background-color: #dfdfdf;
+  }
+  
+  .play-button:active {
+    transform: translateY(1px);
+  }
+  
+  /* === Button Styles === */
+  button {
+    background-color: #fefefe;
+    color: black;
+    border: 1px solid black;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.2s;
+  }
+  
+  button:hover {
+    background-color: #dfdfdf;
+  }
+  
+  button:active {
+    transform: translateY(1px);
+  }
+  
+  /* Specific button overrides */
+  #modal-discard {
+    background-color: #fefefe;
+    color: #c0392b;
+  }
+  
+  #modal-discard:hover {
+    background-color: #dfdfdf;
+  }
+  
+  .play-button {
+    width: 100%;
+    margin-top: 10px;
+  }
+  
+  /* Add styles for modal card container */
+  .modal-content .card-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    padding: 10px;
+  }
+  
+  /* Ensure modal body can scroll */
+  #modal-body {
+    max-height: 70vh;
+    overflow-y: auto;
+    padding: 10px;
+  }
+  
+  /* Setup Modal Styles */
+  .setup-modal {
+    max-width: 800px;
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 20px;
+  }
+  
+  .setup-section {
+    margin-bottom: 20px;
+  }
+  
+  .setup-section h3 {
+    margin-bottom: 10px;
+    color: #333;
+  }
+  
+  .config-options {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .config-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .config-option label {
+    white-space: nowrap;
+  }
+  
+  .config-option input[type="number"] {
+    width: 80px;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .card-selection {
+    display: flex;
+    gap: 20px;
+    max-height: 50vh;
+  }
+  
+  .card-list {
+    flex: 2;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 10px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  
+  .card-option {
+    display: flex;
+    align-items: center;
+    padding: 5px;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 0.9em;
+  }
+  
+  .card-option:hover {
+    background-color: #f0f0f0;
+  }
+  
+  .card-option.selected {
+    background-color: #e0e0e0;
+  }
+  
+  .card-option input[type="checkbox"] {
+    margin-right: 5px;
+  }
+  
+  .card-option label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    width: 100%;
+  }
+  
+  .card-option span {
+    color: #666;
+    font-size: 0.9em;
+  }
+  
+  .selected-cards {
+    flex: 1;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 10px;
+    overflow-y: auto;
+  }
+  
+  .selected-cards h4 {
+    margin-bottom: 10px;
+    color: #333;
+  }
+  
+  #selected-cards-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  #selected-cards-list .card-option {
+    background-color: #e0e0e0;
+    padding: 5px 10px;
+  }
+  
+  #setup-confirm {
+    margin-top: 20px;
+    width: 100%;
+    padding: 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  #setup-confirm:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+  }
+  
+  

@@ -52,6 +52,45 @@
       <button id="library-confirm" class="hidden">That's 7!</button>
     </div>
   </div>
+
+  <!-- Setup Modal -->
+  <div id="setup-modal" class="modal hidden">
+    <div class="modal-content setup-modal">
+      <h2>Game Setup</h2>
+      <div id="setup-body">
+        <div class="setup-section">
+          <h3>Game Configuration</h3>
+          <div class="config-options">
+            <div class="config-option">
+              <label for="vp-to-win">Victory Points to Win:</label>
+              <input type="number" id="vp-to-win" value="30" min="1" max="100">
+            </div>
+            <div class="config-option">
+              <label for="max-turns">Maximum Turns:</label>
+              <input type="number" id="max-turns" value="100" min="1" max="1000">
+            </div>
+          </div>
+        </div>
+        
+        <div class="setup-section">
+          <h3>Select Action Cards (10 required)</h3>
+          <div class="card-selection">
+            <div class="card-list">
+              <!-- Cards will be populated here -->
+            </div>
+            <div class="selected-cards">
+              <h4>Selected Cards (<span id="selected-count">0</span>/10)</h4>
+              <div id="selected-cards-list"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button id="setup-confirm" class="modal-button" disabled>Start Game</button>
+      <div class="default-game-option">
+        <a href="#" id="default-game-link">Play all cards and no limits</a>
+      </div>
+    </div>
+  </div>
   <script type="module" src="src/main.js"></script>
 </body>
 </html>

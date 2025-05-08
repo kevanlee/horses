@@ -1,8 +1,11 @@
+import { EventEmitter } from '../utils/EventEmitter.js';
+
 /**
  * Manages modal dialogs for card interactions
  */
-export class ModalManager {
+export class ModalManager extends EventEmitter {
   constructor() {
+    super();
     this.modals = new Map();
     this.setupModals();
   }
@@ -36,6 +39,20 @@ export class ModalManager {
       text: libraryText,
       body: libraryHand,
       confirm: libraryConfirm
+    });
+
+    // Setup modal
+    const setupModal = document.getElementById('setup-modal');
+    const setupContent = setupModal.querySelector('.modal-content');
+    const setupTitle = setupContent.querySelector('h2');
+    const setupBody = setupContent.querySelector('#setup-body');
+    const setupConfirm = setupContent.querySelector('#setup-confirm');
+
+    this.modals.set('setup', {
+      element: setupModal,
+      title: setupTitle,
+      body: setupBody,
+      confirm: setupConfirm
     });
   }
 

@@ -135,24 +135,92 @@ export class GameState extends EventEmitter {
   }
 
   /**
+   * @param {Object} config
+   * @param {number} [config.victoryPointsToWin]
+   * @param {number} [config.maxTurns]
+   * @param {number} [config.timeLimit]
+   * @param {number} [config.provinceThreshold]
+   * @param {string[]} [config.selectedCards]
+   */
+  initialize(config = {}) {
+    // Store custom config
+    this.victoryPointsToWin = config.victoryPointsToWin;
+    this.maxTurns = config.maxTurns;
+    this.timeLimit = config.timeLimit;
+    this.provinceThreshold = config.provinceThreshold;
+
+    // Add single player
+    const player = this.addPlayer('Player');
+
+    // Initialize supply piles
+    const basicCards = [
+      { name: 'Copper', count: 60 },
+      { name: 'Silver', count: 40 },
+      { name: 'Gold', count: 30 },
+      { name: 'Estate', count: 24 },
+      { name: 'Duchy', count: 12 },
+      { name: 'Province', count: 12 }
+    ];
+
+    // Add basic cards to supply
+    basicCards.forEach(({ name, count }) => {
+      const card = this.cardRegistry.getCard(name);
+      this.addToSupply(card, count);
+    });
+
+    // Add selected action cards to supply
+    if (config.selectedCards) {
+      config.selectedCards.forEach(cardName => {
+        const card = this.cardRegistry.getCard(cardName);
+        this.addToSupply(card, 10);
+      });
+    } else {
+      // Default action cards if none selected
+      const defaultActionCards = [
+        'Cellar', 'Chapel', 'Village', 'Woodcutter', 'Workshop',
+        'Smithy', 'Remodel', 'Moneylender', 'Market', 'Festival'
+      ];
+      defaultActionCards.forEach(cardName => {
+        const card = this.cardRegistry.getCard(cardName);
+        this.addToSupply(card, 10);
+      });
+    }
+
+    // Start the game
+    this.getCurrentPlayer().startTurn();
+  }
+
+  /**
+   * Check if the game should end
    * @returns {boolean}
    */
   checkGameEnd() {
-    // Check if any supply pile is empty
-    for (const [name, supply] of this.supply) {
-      if (supply.count <= 0) {
-        this.emit('gameEnded', { reason: `Supply pile ${name} is empty` });
+    // Check custom victory points threshold
+    if (this.victoryPointsToWin) {
+      const playerPoints = this.getCurrentPlayer().getVictoryPoints();
+      if (playerPoints >= this.victoryPointsToWin) {
         return true;
       }
     }
-    
-    // Check if Province pile is empty
-    const provinceSupply = this.supply.get('Province');
-    if (provinceSupply && provinceSupply.count <= 0) {
-      this.emit('gameEnded', { reason: 'Province supply pile is empty' });
+
+    // Check custom turn limit
+    if (this.maxTurns && this.turnNumber > this.maxTurns) {
       return true;
     }
-    
+
+    // Check custom province threshold
+    const provincePile = this.supply.get('Province');
+    if (this.provinceThreshold && provincePile && provincePile.count <= this.provinceThreshold) {
+      return true;
+    }
+
+    // Check if any supply pile is empty
+    for (const [cardName, pile] of this.supply) {
+      if (pile.count === 0) {
+        return true;
+      }
+    }
+
     return false;
   }
 
