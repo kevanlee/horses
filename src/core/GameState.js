@@ -55,6 +55,10 @@ export class GameState extends EventEmitter {
     player.on('cardGained', ({ card }) => {
       this.emit('cardGained', { player, card });
     });
+
+    player.on('cardsDrawn', ({ cards }) => {
+      this.emit('cardsDrawn', { player, cards });
+    });
   }
 
   /**
@@ -87,13 +91,13 @@ export class GameState extends EventEmitter {
    * @returns {number}
    */
   calculatePlayerGold(player) {
-    let gold = 0;
+    let gold = player.state.bonusGold;  // Start with bonus gold
     for (const card of player.state.hand) {
       if (card.type === 'Treasure') {
         gold += card.value;
       }
     }
-    return gold + player.state.bonusGold;
+    return gold;
   }
 
   /**

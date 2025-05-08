@@ -28,7 +28,16 @@ export class Masquerade extends ActionCard {
     // Draw 2 cards (reshuffle if needed)
     const drawnCards = [];
     for (let i = 0; i < 2; i++) {
-      if (player.state.deck.length === 0 && player.state.discard.length > 0) {
+      if (player.state.deck.length === 0) {
+        if (player.state.discard.length === 0) {
+          gameState.modalManager.showModal('card', {
+            title: 'Masquerade Effect',
+            message: 'Your deck is empty. No cards to draw.',
+            onConfirm: () => {} // Just close the modal
+          });
+          return;
+        }
+        // Reshuffle discard into deck
         player.state.deck = [...player.state.discard];
         player.state.discard = [];
         gameState.shuffle(player.state.deck);
@@ -41,7 +50,7 @@ export class Masquerade extends ActionCard {
     if (drawnCards.length === 0) {
       gameState.modalManager.showModal('card', {
         title: 'Masquerade Effect',
-        message: 'Your deck is empty. No cards to draw.',
+        message: 'No cards to draw.',
         onConfirm: () => {} // Just close the modal
       });
       return;
@@ -68,6 +77,10 @@ export class Masquerade extends ActionCard {
             player.state.discard.push(card);
           }
         });
+
+        // Update UI
+        gameState.emit('handUpdated', player);
+        gameState.emit('discardUpdated', player);
       }
     });
   }

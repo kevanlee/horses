@@ -104,6 +104,12 @@ export class ModalManager {
       if (!Array.isArray(options.cards)) {
         throw new Error('Modal cards must be an array');
       }
+      
+      // Create card container
+      const cardContainer = document.createElement('div');
+      cardContainer.className = 'card-container';
+      modal.body.appendChild(cardContainer);
+
       options.cards.forEach((card, index) => {
         const cardEl = document.createElement('div');
         cardEl.className = 'card';
@@ -114,7 +120,13 @@ export class ModalManager {
           ${card.description ? `<em>Effect:</em> ${card.description}` : ''}
         `;
         cardEl.dataset.index = index;
-        modal.body.appendChild(cardEl);
+        
+        // Add click handler for selection
+        cardEl.addEventListener('click', () => {
+          cardEl.classList.toggle('selected');
+        });
+        
+        cardContainer.appendChild(cardEl);
       });
     }
 
@@ -123,8 +135,11 @@ export class ModalManager {
       const selectedCards = Array.from(modal.body.querySelectorAll('.card.selected'))
         .map(el => options.cards[parseInt(el.dataset.index)]);
       
-      options.onConfirm(selectedCards);
       this.hideModal(type);
+      // Use setTimeout to ensure modal is hidden before processing
+      setTimeout(() => {
+        options.onConfirm(selectedCards);
+      }, 0);
     };
 
     if (options.onDiscard) {

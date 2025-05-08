@@ -51,6 +51,7 @@ export class Vassal extends ActionCard {
       title: 'Vassal Effect',
       message: 'Click the card below to reveal the top card of your deck.',
       faceDownCard: revealedCard,
+      onConfirm: () => {}, // Add empty onConfirm to satisfy the requirement
       onReveal: (card) => {
         // Show appropriate buttons based on card type
         if (card.type === 'Action') {
@@ -77,6 +78,7 @@ export class Vassal extends ActionCard {
             title: 'Vassal Effect',
             message: 'It\'s not an Action card. It will be discarded.',
             faceDownCard: card,
+            onConfirm: () => {}, // Add empty onConfirm to satisfy the requirement
             onDiscard: () => {
               // Discard the revealed card
               player.state.discard.push(card);

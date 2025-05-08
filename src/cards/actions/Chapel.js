@@ -19,7 +19,8 @@ export class Chapel extends ActionCard {
    * @param {GameState} gameState
    */
   onPlay(player, gameState) {
-    super.onPlay(player);
+    // Don't call super.onPlay since Chapel doesn't need to modify actions
+    // The action is already consumed when the card is played
 
     if (!gameState.modalManager) {
       throw new Error('ModalManager not set up');

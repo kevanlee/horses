@@ -29,6 +29,7 @@ export class ActionCard extends Card {
    * @param {Player} player
    */
   onPlay(player) {
-    player.state.actions--;
+    // Base implementation - override in subclasses
+    // Note: Action consumption is handled by Player.playCard()
   }
 } 

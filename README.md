@@ -23,46 +23,20 @@ To-do
 
 Cards are working? A checklist
 
-* Cellar ✅
-* Chapel ✅
-* Village ✅
-* Workshop ✅
-* Woodcutter ✅
-* Vassal ✅
-* Great Hall ✅
-* Masquerade ✅
-* Harbinger ✅
-* Smithy ✅
-* Throne Room ⚠️
-* Remodel
-* Moneylender
-* Feast
-* Gardens
-* Market ✅
-* Festival ✅
-* Library ⚠️
-* Laboratory ✅
-* Mine
-* Council Room ✅
-* Treasury
-* Adventurer
-
 ### Action Cards
 - ✅ Smithy (Cost: 4) - Draw 3 cards
 - ✅ Village (Cost: 3) - Draw 1 card, +2 Actions
-- ✅ Cellar (Cost: 2) - +1 Action, Discard any number of cards, then draw that many
+- ⚠️ Cellar (Cost: 2) - +1 Action, Discard any number of cards, then draw that many
 - ✅ Remodel (Cost: 4) - Trash a card from your hand. Gain a card costing up to $2 more
 - ✅ Market (Cost: 5) - +1 Card, +1 Action, +1 Buy, +1 Gold
 - ✅ Festival (Cost: 5) - +2 Actions, +1 Buy, +2 Gold
 - ✅ Laboratory (Cost: 5) - +2 Cards, +1 Action
 - ✅ Woodcutter (Cost: 3) - +1 Buy, +2 Gold
 - ✅ Chapel (Cost: 2) - Trash up to 4 cards from your hand
-- ✅ Workshop (Cost: 3) - Gain a card costing up to 4
-- ✅ Masquerade (Cost: 3) - Draw 2 cards, choose one to keep and discard the other
-- ✅ Vassal (Cost: 3) - +2 Gold. Reveal the top card of your deck. If it's an Action card, you may play it for free
+- ⚠️ Workshop (Cost: 3) - Gain a card costing up to 4
+- ⚠️ Masquerade (Cost: 3) - Draw 2 cards, choose one to keep and discard the other
+-  Vassal (Cost: 3) - +2 Gold. Reveal the top card of your deck. If it's an Action card, you may play it for free
 - ✅ Council Room (Cost: 5) - +4 Cards, +1 Buy
-
-### Cards To Be Implemented
 - Great Hall (Cost: 3) - +1 Card, +1 Action, worth 1 VP
 - Harbinger (Cost: 3) - +1 Card, +1 Action, look through your discard pile and put a card on top of your deck
 - Library (Cost: 5) - Draw until you have 7 cards in hand. You may set aside Action cards

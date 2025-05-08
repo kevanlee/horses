@@ -23,6 +23,7 @@ import { Harbinger } from './actions/Harbinger.js';
 import { Library } from './actions/Library.js';
 import { Adventurer } from './actions/Adventurer.js';
 import { Gardens } from './actions/Gardens.js';
+import { Test } from './actions/Test.js';
 
 /**
  * Registry of all available cards in the game
@@ -96,6 +97,7 @@ export class CardRegistry {
     this.registerCard(new Library());
     this.registerCard(new Adventurer());
     this.registerCard(new Gardens());
+    this.registerCard(new Test());
   }
 
   /**

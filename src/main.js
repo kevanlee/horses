@@ -78,23 +78,35 @@ class Game {
     ];
 
     const actionCards = [
-      { name: 'Smithy', count: 10 },
-      { name: 'Village', count: 10 },
+      // Cost 2
+      { name: 'Test', count: 10 },
       { name: 'Cellar', count: 10 },
-      { name: 'Remodel', count: 10 },
-      { name: 'Market', count: 10 },
-      { name: 'Festival', count: 10 },
-      { name: 'Laboratory', count: 10 },
-      { name: 'Woodcutter', count: 10 },
       { name: 'Chapel', count: 10 },
+      // Cost 3
+      { name: 'Village', count: 10 },
+      { name: 'Woodcutter', count: 10 },
       { name: 'Workshop', count: 10 },
       { name: 'Masquerade', count: 10 },
       { name: 'Vassal', count: 10 },
-      { name: 'Council Room', count: 10 },
-      { name: 'Mine', count: 10 },
+      { name: 'Great Hall', count: 10 },
+      { name: 'Harbinger', count: 10 },
+      // Cost 4
+      { name: 'Smithy', count: 10 },
+      { name: 'Remodel', count: 10 },
       { name: 'Moneylender', count: 10 },
       { name: 'Feast', count: 10 },
-      { name: 'Throne Room', count: 10 }
+      { name: 'Throne Room', count: 10 },
+      { name: 'Gardens', count: 10 },
+      // Cost 5
+      { name: 'Market', count: 10 },
+      { name: 'Festival', count: 10 },
+      { name: 'Laboratory', count: 10 },
+      { name: 'Mine', count: 10 },
+      { name: 'Council Room', count: 10 },
+      { name: 'Treasury', count: 10 },
+      { name: 'Library', count: 10 },
+      // Cost 6
+      { name: 'Adventurer', count: 10 }
     ];
 
     // Add all cards to supply
@@ -193,6 +205,11 @@ class Game {
       }
     });
 
+    // Sort each type's cards by cost
+    Object.values(cardsByType).forEach(cards => {
+      cards.sort((a, b) => a.card.cost - b.card.cost);
+    });
+
     // Render each section
     Object.entries(cardsByType).forEach(([type, cards]) => {
       if (cards.length > 0) {
@@ -288,6 +305,7 @@ class Game {
     renderCardCounts(player.state.deck, 'Deck');
     renderCardCounts(player.state.discard, 'Discard');
     renderCardCounts(player.state.playArea, 'Play Area');
+    renderCardCounts(this.gameState.trash, 'Trash');
   }
 
   logMessage(message) {
@@ -304,8 +322,11 @@ class Game {
     try {
       if (this.gameState.validatePlay(card)) {
         const player = this.gameState.getCurrentPlayer();
-        player.playCard(card);
-        card.onPlay(player, this.gameState);
+        player.playCard(card);  // This moves the card to play area
+        card.onPlay(player, this.gameState);  // This applies the effect
+        
+        // Update UI immediately after card effect
+        this.updateUI();
       }
     } catch (error) {
       this.logMessage(`Error: ${error.message}`);
@@ -325,6 +346,24 @@ class Game {
         const totalGold = this.gameState.calculatePlayerGold(player);
         if (totalGold < card.cost) {
           throw new Error(`Not enough gold to buy ${card.name}`);
+        }
+        
+        // Move only the treasure cards needed to pay for the card
+        let remainingCost = card.cost;
+        const treasureCards = player.state.hand.filter(c => c.type === 'Treasure');
+        
+        // Sort treasure cards by value in descending order to use highest value cards first
+        treasureCards.sort((a, b) => b.value - a.value);
+        
+        for (const treasure of treasureCards) {
+          if (remainingCost <= 0) break;
+          
+          const index = player.state.hand.indexOf(treasure);
+          if (index !== -1) {
+            player.state.hand.splice(index, 1);
+            player.state.playArea.push(treasure);
+            remainingCost -= treasure.value;
+          }
         }
         
         supply.count--;
