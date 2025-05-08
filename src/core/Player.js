@@ -167,7 +167,12 @@ export class Player extends EventEmitter {
     
     for (const card of allCards) {
       if (card.type === 'Victory' || card.type === 'Action-Victory') {
-        points += card.points;
+        // If the card has a getPoints method, use it for dynamic calculation
+        if (typeof card.getPoints === 'function') {
+          points += card.getPoints(this);
+        } else {
+          points += card.points;
+        }
       }
     }
     

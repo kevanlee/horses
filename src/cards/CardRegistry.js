@@ -17,6 +17,12 @@ import { Mine } from './actions/Mine.js';
 import { Moneylender } from './actions/Moneylender.js';
 import { Feast } from './actions/Feast.js';
 import { ThroneRoom } from './actions/ThroneRoom.js';
+import { GreatHall } from './actions/GreatHall.js';
+import { Treasury } from './actions/Treasury.js';
+import { Harbinger } from './actions/Harbinger.js';
+import { Library } from './actions/Library.js';
+import { Adventurer } from './actions/Adventurer.js';
+import { Gardens } from './actions/Gardens.js';
 
 /**
  * Registry of all available cards in the game
@@ -84,6 +90,12 @@ export class CardRegistry {
     this.registerCard(new Moneylender());
     this.registerCard(new Feast());
     this.registerCard(new ThroneRoom());
+    this.registerCard(new GreatHall());
+    this.registerCard(new Treasury());
+    this.registerCard(new Harbinger());
+    this.registerCard(new Library());
+    this.registerCard(new Adventurer());
+    this.registerCard(new Gardens());
   }
 
   /**

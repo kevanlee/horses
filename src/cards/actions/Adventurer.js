@@ -1,0 +1,79 @@
+import { ActionCard } from '../ActionCard.js';
+
+export class Adventurer extends ActionCard {
+  constructor() {
+    super({
+      name: 'Adventurer',
+      type: 'Action',
+      cost: 6,
+      description: 'Reveal cards until you reveal 2 Treasures. Add them to your hand.'
+    });
+  }
+
+  /**
+   * @param {Player} player
+   * @param {GameState} gameState
+   */
+  onPlay(player, gameState) {
+    super.onPlay(player);
+
+    if (!gameState.modalManager) {
+      throw new Error('ModalManager not set up');
+    }
+
+    const treasuresFound = [];
+    const revealNextCard = () => {
+      // Check if we need to shuffle
+      if (player.state.deck.length === 0) {
+        if (player.state.discard.length === 0) {
+          // No more cards to reveal
+          gameState.modalManager.showModal('card', {
+            title: 'Adventurer Effect',
+            message: `No more cards to reveal. Found ${treasuresFound.length} Treasure${treasuresFound.length === 1 ? '' : 's'}.`,
+            onConfirm: () => {} // Just close the modal
+          });
+          return;
+        }
+        // Shuffle discard into deck
+        player.state.deck = [...player.state.discard];
+        player.state.discard = [];
+        gameState.shuffle(player.state.deck);
+      }
+
+      // Reveal a card
+      const revealedCard = player.state.deck.shift();
+
+      // If we've found 2 treasures, end the effect
+      if (treasuresFound.length >= 2) {
+        gameState.modalManager.showModal('card', {
+          title: 'Adventurer Effect',
+          message: 'Found 2 Treasures! Adding them to your hand.',
+          onConfirm: () => {
+            // Add treasures to hand
+            player.state.hand.push(...treasuresFound);
+          }
+        });
+        return;
+      }
+
+      // Show modal for the revealed card
+      gameState.modalManager.showModal('card', {
+        title: 'Adventurer Effect',
+        message: `You revealed ${revealedCard.name}. ${revealedCard.type === 'Treasure' ? 'Adding to hand.' : 'Discarding.'} (Found ${treasuresFound.length} Treasure${treasuresFound.length === 1 ? '' : 's'})`,
+        cards: [revealedCard],
+        confirmText: 'Continue',
+        onConfirm: () => {
+          if (revealedCard.type === 'Treasure') {
+            treasuresFound.push(revealedCard);
+          } else {
+            player.state.discard.push(revealedCard);
+          }
+          revealNextCard();
+        }
+      });
+    };
+
+    // Start the revealing process
+    revealNextCard();
+  }
+} 

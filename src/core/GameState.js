@@ -158,4 +158,14 @@ export class GameState extends EventEmitter {
   determineWinner() {
     return this.player;
   }
-}
+
+  /**
+   * Updates victory points for a player and triggers UI update
+   * @param {Player} player
+   * @param {number} points
+   */
+  updateVictoryPoints(player, points) {
+    player.state.victoryPoints = points;
+    this.emit('victoryPointsUpdated', { player, points });
+  }
+} 
