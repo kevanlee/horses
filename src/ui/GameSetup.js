@@ -18,6 +18,28 @@ export class GameSetup {
     // Populate card options
     this.populateCardOptions();
     
+    // Auto-select 10 random cards
+    const actionCards = this.cardRegistry.getAllCards()
+      .filter(card => card.type === 'Action')
+      .sort(() => Math.random() - 0.5) // Shuffle the cards
+      .slice(0, 10); // Take first 10 cards
+    
+    actionCards.forEach(card => {
+      this.selectedCards.add(card.name);
+      const cardOption = document.querySelector(`.card-option[data-card-name="${card.name}"]`);
+      if (cardOption) {
+        cardOption.classList.add('selected');
+        const checkbox = cardOption.querySelector('input[type="checkbox"]');
+        if (checkbox) {
+          checkbox.checked = true;
+        }
+      }
+    });
+    
+    // Update the UI
+    this.updateSelectedCardsList();
+    this.updateConfirmButton();
+    
     // Show the modal
     setupModal.element.classList.remove('hidden');
   }

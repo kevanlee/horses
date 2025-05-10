@@ -58,6 +58,10 @@ export class Moneylender extends ActionCard {
         
         // Add 3 coins
         player.state.bonusGold += 3;
+        
+        // Emit events to update UI
+        player.emit('cardPlayed', { card: this });
+        gameState.emit('stateChanged');
       }
     });
   }

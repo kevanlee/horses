@@ -16,6 +16,7 @@ export class GameState extends EventEmitter {
     this.modalManager = null;
     this.cardRegistry = cardRegistry;
     this.turnNumber = 1;
+    this.gameEnded = false;
   }
 
   /**
@@ -77,6 +78,8 @@ export class GameState extends EventEmitter {
    * @returns {boolean}
    */
   canBuyCard(card) {
+    if (this.gameEnded) return false;
+    
     const supply = this.supply.get(card.name);
     
     if (!supply || supply.count <= 0) return false;
@@ -108,6 +111,8 @@ export class GameState extends EventEmitter {
   }
 
   nextTurn() {
+    if (this.gameEnded) return;
+    
     this.player.endTurn();
     this.turnNumber++;
     this.player.startTurn();
@@ -123,6 +128,10 @@ export class GameState extends EventEmitter {
    * @returns {boolean}
    */
   validatePlay(card) {
+    if (this.gameEnded) {
+      throw new Error('Cannot play card: Game is over');
+    }
+    
     if (!this.player.canPlay(card)) {
       throw new Error('Cannot play card: No actions remaining or not an action card');
     }
@@ -197,7 +206,12 @@ export class GameState extends EventEmitter {
   checkGameEnd() {
     // Check custom victory points threshold
     if (this.victoryPointsToWin) {
-      const playerPoints = this.getCurrentPlayer().getVictoryPoints();
+      const playerPoints = this.getCurrentPlayer().calculateVictoryPoints();
+      console.log('Checking victory points:', {
+        currentPoints: playerPoints,
+        threshold: this.victoryPointsToWin,
+        shouldEnd: playerPoints >= this.victoryPointsToWin
+      });
       if (playerPoints >= this.victoryPointsToWin) {
         return true;
       }
@@ -237,7 +251,25 @@ export class GameState extends EventEmitter {
    * @param {number} points
    */
   updateVictoryPoints(player, points) {
+    if (this.gameEnded) return; // Don't update if game is over
+    
+    console.log('Updating victory points:', {
+      oldPoints: player.state.victoryPoints,
+      newPoints: points,
+      threshold: this.victoryPointsToWin
+    });
+    
     player.state.victoryPoints = points;
     this.emit('victoryPointsUpdated', { player, points });
+    
+    // Check if game should end after updating points
+    const shouldEnd = this.checkGameEnd();
+    console.log('Game end check result:', shouldEnd);
+    
+    if (shouldEnd) {
+      console.log('Game should end - emitting gameEnded event');
+      this.gameEnded = true;
+      this.emit('gameEnded', { reason: 'Victory points threshold reached!' });
+    }
   }
 } 

@@ -315,20 +315,29 @@ h1.title {
   left: 10px;
 }
 
-/* Play button styling */
-.card .play-button {
-  margin-top: 8px;
-  padding: 4px 8px;
+/* Play button styles */
+.play-button {
+  position: absolute;
+  bottom: 5px;
+  left: 50%;
+  transform: translateX(-50%);
   background-color: #4CAF50;
   color: white;
   border: none;
+  padding: 5px 10px;
   border-radius: 4px;
   cursor: pointer;
+  font-size: 0.8em;
+  width: 80%;
   transition: background-color 0.2s;
 }
 
-.card .play-button:hover {
+.play-button:hover {
   background-color: #45a049;
+}
+
+.play-button:active {
+  background-color: #3d8b40;
 }
 
 /* Card hover effects */
@@ -461,26 +470,6 @@ h1.title {
 }
 */
 
-.play-button {
-  background-color: #fefefe;
-  color: black;
-  border: 1px solid black;
-  padding: 2px 8px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.8em;
-  margin: 0;
-  transition: background-color 0.2s;
-}
-
-.play-button:hover {
-  background-color: #dfdfdf;
-}
-
-.play-button:active {
-  transform: translateY(1px);
-}
-
 /* === Button Styles === */
 button {
   background-color: #fefefe;
@@ -540,6 +529,10 @@ button:active {
   padding: 20px;
 }
 
+.setup-modal h2 {
+  margin-top: 0;
+}
+
 .setup-section {
   margin-bottom: 20px;
 }
@@ -547,6 +540,7 @@ button:active {
 .setup-section h3 {
   margin-bottom: 10px;
   color: #333;
+  text-align: left;
 }
 
 .config-options {
@@ -566,10 +560,18 @@ button:active {
 }
 
 .config-option input[type="number"] {
-  width: 80px;
+  width: auto;
   padding: 5px;
   border: 1px solid #ccc;
   border-radius: 4px;
+  -moz-appearance: textfield; /* Firefox */
+}
+
+/* Show arrows by default */
+.config-option input[type="number"]::-webkit-inner-spin-button,
+.config-option input[type="number"]::-webkit-outer-spin-button {
+  opacity: 1;
+  height: 20px;
 }
 
 .card-selection {
@@ -586,7 +588,7 @@ button:active {
   padding: 10px;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
+  gap: 2px;
 }
 
 .card-option {
@@ -632,24 +634,28 @@ button:active {
 }
 
 .selected-cards h4 {
-  margin-bottom: 10px;
+  margin: 0 0 10px 0;
   color: #333;
 }
 
 #selected-cards-list {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
   gap: 5px;
+  padding: 5px;
 }
 
 #selected-cards-list .card-option {
   background-color: #e0e0e0;
   padding: 5px 10px;
+  display: inline-block;
+  width: auto;
+  border-radius: 4px;
 }
 
 #setup-confirm {
   margin-top: 20px;
-  width: 100%;
+  width: auto;
   padding: 10px;
   background-color: #4CAF50;
   color: white;
@@ -681,7 +687,7 @@ button:active {
   height: 65px; 
   border: 2px solid #ddd;
   border-radius: 8px;
-  background: #f5f5f5;
+  background: #c4c4c4;
   transition: all 0.3s ease;
 }
 
@@ -775,5 +781,39 @@ button:active {
   gap: 10px;
   justify-content: center;
   padding: 10px;
+}
+
+.setup-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.setup-buttons .modal-button {
+  padding: 10px 20px;
+  width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 0;
+}
+
+#setup-confirm {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  margin-top: 0;
+}
+
+#setup-confirm:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+#default-game-link {
+  background-color: #fefefe;
+  color: black;
+  border: 1px solid black;
 }
 

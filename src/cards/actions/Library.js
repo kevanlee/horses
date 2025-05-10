@@ -43,6 +43,8 @@ export class Library extends ActionCard {
             onConfirm: () => {
               // Return set-aside cards to discard
               player.state.discard.push(...setAsideCards);
+              player.emit('cardDiscarded', { player, cards: setAsideCards });
+              gameState.emit('stateChanged');
             }
           });
           return;
@@ -64,6 +66,8 @@ export class Library extends ActionCard {
           onConfirm: () => {
             // Return set-aside cards to discard
             player.state.discard.push(...setAsideCards);
+            player.emit('cardDiscarded', { player, cards: setAsideCards });
+            gameState.emit('stateChanged');
           }
         });
         return;
@@ -81,13 +85,51 @@ export class Library extends ActionCard {
           if (drawnCard.type === 'Action') {
             setAsideCards.push(drawnCard);
           } else {
+            // Add to hand and emit events
             player.state.hand.push(drawnCard);
+            player.emit('cardsDrawn', { player, cards: [drawnCard] });
+            gameState.emit('handUpdated', player);
           }
-          drawNextCard();
+          // Continue drawing until we have 7 cards
+          if (player.state.hand.length < 7) {
+            drawNextCard();
+          } else {
+            // We've reached 7 cards, handle set-aside cards
+            if (setAsideCards.length > 0) {
+              gameState.modalManager.showModal('card', {
+                title: 'Library Effect',
+                message: 'You now have 7 cards in hand. Returning set-aside cards to discard.',
+                onConfirm: () => {
+                  player.state.discard.push(...setAsideCards);
+                  player.emit('cardDiscarded', { player, cards: setAsideCards });
+                  gameState.emit('stateChanged');
+                }
+              });
+            }
+          }
         },
         onCancel: () => {
+          // Add to hand and emit events
           player.state.hand.push(drawnCard);
-          drawNextCard();
+          player.emit('cardsDrawn', { player, cards: [drawnCard] });
+          gameState.emit('handUpdated', player);
+          // Continue drawing until we have 7 cards
+          if (player.state.hand.length < 7) {
+            drawNextCard();
+          } else {
+            // We've reached 7 cards, handle set-aside cards
+            if (setAsideCards.length > 0) {
+              gameState.modalManager.showModal('card', {
+                title: 'Library Effect',
+                message: 'You now have 7 cards in hand. Returning set-aside cards to discard.',
+                onConfirm: () => {
+                  player.state.discard.push(...setAsideCards);
+                  player.emit('cardDiscarded', { player, cards: setAsideCards });
+                  gameState.emit('stateChanged');
+                }
+              });
+            }
+          }
         }
       });
     };

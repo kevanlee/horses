@@ -25,12 +25,13 @@ export class Feast extends ActionCard {
       throw new Error('ModalManager not set up');
     }
 
-    // First, trash this card
-    const feastCard = player.state.playArea.find(card => card.name === 'Feast');
-    if (!feastCard) {
+    // First, trash this card from the play area
+    const feastIndex = player.state.playArea.findIndex(card => card.name === 'Feast');
+    if (feastIndex === -1) {
       throw new Error('Feast card not found in play area');
     }
-    player.trashCard(feastCard);
+    const feastCard = player.state.playArea.splice(feastIndex, 1)[0];
+    player.emit('cardTrashed', { card: feastCard });
 
     // Then show modal to gain a card
     const availableCards = gameState.cardRegistry.getAllCards()
@@ -72,6 +73,10 @@ export class Feast extends ActionCard {
         // Gain the selected card
         supply.count--;
         player.gainCard(gainedCard);
+        
+        // Emit events to update UI
+        player.emit('cardPlayed', { card: this });
+        gameState.emit('stateChanged');
       }
     });
   }
