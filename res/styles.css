@@ -500,11 +500,6 @@ button:active {
   background-color: #dfdfdf;
 }
 
-.play-button {
-  width: 100%;
-  margin-top: 10px;
-}
-
 /* Add styles for modal card container */
 .modal-content .card-container {
   display: flex;
@@ -565,6 +560,7 @@ button:active {
   border: 1px solid #ccc;
   border-radius: 4px;
   -moz-appearance: textfield; /* Firefox */
+  appearance: textfield; /* Standard */
 }
 
 /* Show arrows by default */

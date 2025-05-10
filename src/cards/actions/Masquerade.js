@@ -18,7 +18,7 @@ export class Masquerade extends ActionCard {
    * @param {Player} player
    * @param {GameState} gameState
    */
-  onPlay(player, gameState) {
+  async onPlay(player, gameState) {
     super.onPlay(player);
 
     if (!gameState.modalManager) {
@@ -43,7 +43,9 @@ export class Masquerade extends ActionCard {
         gameState.shuffle(player.state.deck);
       }
       if (player.state.deck.length > 0) {
-        drawnCards.push(player.state.deck.shift());
+        const drawnCard = player.state.deck.shift();
+        drawnCards.push(drawnCard);
+        player.emit('cardsDrawn', { player, cards: [drawnCard] });
       }
     }
 
@@ -56,32 +58,49 @@ export class Masquerade extends ActionCard {
       return;
     }
 
-    gameState.modalManager.showModal('card', {
-      title: 'Masquerade: Choose a card to keep',
-      message: 'Select one card to keep. The other will be discarded.',
-      cards: drawnCards,
-      confirmText: 'Keep Selected',
-      onConfirm: (selectedCards) => {
-        if (selectedCards.length !== 1) {
-          throw new Error('Must select exactly one card to keep');
+    // Create a promise to handle the modal interaction
+    const selectedCards = await new Promise((resolve) => {
+      gameState.modalManager.showModal('card', {
+        title: 'Masquerade: Choose a card to keep',
+        message: 'Select one card to keep. The other will be discarded.',
+        cards: drawnCards,
+        confirmText: 'Keep Selected',
+        onConfirm: (cards) => {
+          resolve(cards);
+        },
+        onCardClick: (clickedCard, allCards) => {
+          // Deselect all other cards
+          allCards.forEach(card => {
+            if (card !== clickedCard) {
+              card.classList.remove('selected');
+            }
+          });
+          // Toggle the clicked card
+          clickedCard.classList.toggle('selected');
         }
+      });
+    });
 
-        const cardToKeep = selectedCards[0];
-        
-        // Add the selected card to hand
-        player.state.hand.push(cardToKeep);
+    if (selectedCards.length !== 1) {
+      throw new Error('Must select exactly one card to keep');
+    }
 
-        // Discard the other card
-        drawnCards.forEach(card => {
-          if (card !== cardToKeep) {
-            player.state.discard.push(card);
-          }
-        });
+    const cardToKeep = selectedCards[0];
+    
+    // Add the selected card to hand
+    player.state.hand.push(cardToKeep);
+    player.emit('cardsDrawn', { player, cards: [cardToKeep] });
 
-        // Update UI
-        gameState.emit('handUpdated', player);
-        gameState.emit('discardUpdated', player);
+    // Discard the other card
+    drawnCards.forEach(card => {
+      if (card !== cardToKeep) {
+        player.state.discard.push(card);
+        player.emit('cardDiscarded', { player, card });
       }
     });
+
+    // Emit events to trigger UI updates
+    gameState.emit('cardPlayed', { player, card: this });
+    gameState.emit('stateChanged');
   }
 } 

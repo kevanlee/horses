@@ -131,7 +131,13 @@ export class ModalManager extends EventEmitter {
         
         // Add click handler for selection
         cardEl.addEventListener('click', () => {
-          cardEl.classList.toggle('selected');
+          if (options.onCardClick) {
+            // Use custom click handler if provided
+            options.onCardClick(cardEl, Array.from(cardContainer.querySelectorAll('.card')));
+          } else {
+            // Default toggle behavior
+            cardEl.classList.toggle('selected');
+          }
         });
         
         cardContainer.appendChild(cardEl);
