@@ -32,7 +32,13 @@ export class ThroneRoom extends ActionCard {
       gameState.modalManager.showModal('card', {
         title: 'Throne Room Effect',
         message: 'You have no Action cards in your hand to play.',
-        onConfirm: () => {} // Just close the modal
+        onConfirm: () => {
+          gameState.emit('cardPlayed', this);
+          gameState.emit('stateChanged', {
+            type: 'handUpdated',
+            player: player
+          });
+        }
       });
       return;
     }
@@ -67,6 +73,13 @@ export class ThroneRoom extends ActionCard {
         if (player.state.hand.includes(cardToPlay)) {
           await this.playActionCard(cardToPlay, player, gameState);
         }
+
+        // Emit final events after both plays are complete
+        gameState.emit('cardPlayed', this);
+        gameState.emit('stateChanged', {
+          type: 'handUpdated',
+          player: player
+        });
       }
     });
   }
@@ -85,6 +98,13 @@ export class ThroneRoom extends ActionCard {
 
     // Add to play area
     player.state.playArea.push(card);
+
+    // Emit events for the card being played
+    player.emit('cardPlayed', { player, card });
+    gameState.emit('stateChanged', {
+      type: 'handUpdated',
+      player: player
+    });
 
     // Play the card
     if (card.onPlay) {

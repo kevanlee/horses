@@ -235,9 +235,9 @@ h1.title {
   border-color: #ce93d8;      /* Dark purple */
 }
 
-#player-hand .card-victory {
+#player-hand .card-victory, #player-hand .card-treasure {
   border-style: dashed;
-  cursor: not-allowed;
+  cursor: not-allowed !important;
 }
 
 .card-victory:hover {
@@ -360,6 +360,18 @@ h1.title {
 /* Card hover effects */
 .card:not(.disabled):hover {
   cursor: pointer;
+}
+
+/* Override cursor for Victory and Treasure cards in hand only */
+#player-hand .card-victory, 
+#player-hand .card-treasure {
+  border-style: dashed;
+  cursor: not-allowed !important;
+}
+
+#player-hand .card-victory:hover, 
+#player-hand .card-treasure:hover {
+  cursor: not-allowed !important;
 }
 
 .card.confirmed {
@@ -843,8 +855,8 @@ button:active {
   width: 100px;
   height: 170px;
   margin: 20px auto;
-  background: #2c3e50;
-  color: white;
+  background: #ababab;
+  color: black;
   display: flex;
   align-items: center;
   justify-content: center;

@@ -170,30 +170,18 @@ export class Player extends EventEmitter {
     let points = 0;
     const allCards = [...this.state.deck, ...this.state.hand, ...this.state.discard, ...this.state.playArea];
     
-    console.log('Calculating victory points:', {
-      deckSize: this.state.deck.length,
-      handSize: this.state.hand.length,
-      discardSize: this.state.discard.length,
-      playAreaSize: this.state.playArea.length,
-      totalCards: allCards.length
-    });
-    
     for (const card of allCards) {
       if (card.type === 'Victory' || card.type === 'Action-Victory') {
         // If the card has a getPoints method, use it for dynamic calculation
         if (typeof card.getPoints === 'function') {
-          const cardPoints = card.getPoints(this);
-          console.log(`${card.name} points:`, cardPoints);
-          points += cardPoints;
+          points += card.getPoints(this);
         } else {
-          console.log(`${card.name} points:`, card.points);
           points += card.points;
         }
       }
     }
     
     this.state.victoryPoints = points;
-    console.log('Total victory points:', points);
     return points;
   }
 } 

@@ -204,38 +204,26 @@ export class GameState extends EventEmitter {
    * @returns {boolean}
    */
   checkGameEnd() {
-    // Check custom victory points threshold
-    if (this.victoryPointsToWin) {
-      const playerPoints = this.getCurrentPlayer().calculateVictoryPoints();
-      console.log('Checking victory points:', {
-        currentPoints: playerPoints,
-        threshold: this.victoryPointsToWin,
-        shouldEnd: playerPoints >= this.victoryPointsToWin
-      });
-      if (playerPoints >= this.victoryPointsToWin) {
-        return true;
-      }
-    }
-
-    // Check custom turn limit
-    if (this.maxTurns && this.turnNumber > this.maxTurns) {
-      return true;
-    }
-
-    // Check custom province threshold
-    const provincePile = this.supply.get('Province');
-    if (this.provinceThreshold && provincePile && provincePile.count <= this.provinceThreshold) {
-      return true;
-    }
-
     // Check if any supply pile is empty
-    for (const [cardName, pile] of this.supply) {
-      if (pile.count === 0) {
-        return true;
+    for (const [cardName, supply] of this.supply) {
+      if (supply.count === 0) {
+        this.endGame(`Supply pile for ${cardName} is empty.`);
+        return;
       }
     }
 
-    return false;
+    // Check if player has 8 or more provinces
+    const provinces = [
+      ...this.player.state.deck,
+      ...this.player.state.hand,
+      ...this.player.state.discard,
+      ...this.player.state.playArea
+    ].filter(card => card.name === 'Province').length;
+
+    if (provinces >= 8) {
+      this.endGame(`${this.player.name} has 8 or more Provinces.`);
+      return;
+    }
   }
 
   /**

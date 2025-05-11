@@ -59,6 +59,13 @@ export class Harbinger extends ActionCard {
         
         // Put the card on top of the deck
         player.state.deck.unshift(selectedCard);
+
+        // Emit events to update UI
+        gameState.emit('cardPlayed', this);
+        gameState.emit('stateChanged', {
+          type: 'deckUpdated',
+          player: player
+        });
       }
     });
   }
