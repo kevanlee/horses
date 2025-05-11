@@ -49,7 +49,7 @@ export const cardTypes = {
     feast: {name: "Feast ⚫️", type: "Action", cost: 4, description: "Trash this card. Gain a card costing up to 5 coins."},
     councilRoom: {name: "Council Room", type: "Action", cost: 5, description: "+4 Cards, +1 Buy."},
     adventurer: {name: "Adventurer ⚫️", type: "Action", cost: 6, description: "Reveal cards until you reveal 2 Treasures. Add them to hand."},
-    gardens: {name: "Gardens ⚫️", type: "Action", cost: 4, description: "Worth 1 VP for every 10 cards in your deck (rounded down)."},
+    gardens: {name: "Gardens ⚫️", type: "Action-Victory", cost: 4, description: "+1 Coin. Worth 1 VP per 10 cards in your deck."},
     treasury: {name: "Treasury ⚫️", type: "Action", cost: 5, description: "+1 Card, +1 Action, +1 Coin, when you buy it, you may put it on top of your deck."},
     greatHall: {name: "Great Hall", type: "Action-Victory", cost: 3, points: 1, description: "+1 Card, +1 Action, worth 1 VP."},
     masquerade: {name: "Masquerade", type: "Action", cost: 3, description: "Draw 2 cards. Keep one, discard the other."},

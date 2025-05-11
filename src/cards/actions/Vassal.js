@@ -53,12 +53,16 @@ export class Vassal extends ActionCard {
       faceDownCard: revealedCard,
       onConfirm: () => {}, // Add empty onConfirm to satisfy the requirement
       onReveal: (card) => {
-        // Show appropriate buttons based on card type
+        // Show a new modal with the revealed card
         if (card.type === 'Action') {
           gameState.modalManager.showModal('card', {
             title: 'Vassal Effect',
             message: 'It\'s an Action card! Play it or discard it?',
-            faceDownCard: card,
+            cards: [{
+              ...card,
+              description: card.description || '',
+              icon: card.icon || '/res/icons/action-icon.png'
+            }],
             confirmText: 'Play This Card',
             onConfirm: () => {
               // Temporarily increment actions to allow free play
@@ -77,7 +81,11 @@ export class Vassal extends ActionCard {
           gameState.modalManager.showModal('card', {
             title: 'Vassal Effect',
             message: 'It\'s not an Action card. It will be discarded.',
-            faceDownCard: card,
+            cards: [{
+              ...card,
+              description: card.description || '',
+              icon: card.icon || '/res/icons/action-icon.png'
+            }],
             onConfirm: () => {}, // Add empty onConfirm to satisfy the requirement
             onDiscard: () => {
               // Discard the revealed card

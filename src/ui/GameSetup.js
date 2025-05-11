@@ -20,7 +20,7 @@ export class GameSetup {
     
     // Auto-select 10 random cards
     const actionCards = this.cardRegistry.getAllCards()
-      .filter(card => card.type === 'Action')
+      .filter(card => card.type === 'Action' || card.type === 'Action-Victory')
       .sort(() => Math.random() - 0.5) // Shuffle the cards
       .slice(0, 10); // Take first 10 cards
     
@@ -96,7 +96,7 @@ export class GameSetup {
 
   populateCardOptions() {
     const actionCards = this.cardRegistry.getAllCards()
-      .filter(card => card.type === 'Action')
+      .filter(card => card.type === 'Action' || card.type === 'Action-Victory')
       .sort((a, b) => a.name.localeCompare(b.name));
 
     const cardList = document.querySelector('.card-list');
@@ -159,7 +159,7 @@ export class GameSetup {
 
   getDefaultGameConfig() {
     const allActionCards = this.cardRegistry.getAllCards()
-      .filter(card => card.type === 'Action')
+      .filter(card => card.type === 'Action' || card.type === 'Action-Victory')
       .map(card => card.name);
 
     const config = {

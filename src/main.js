@@ -133,19 +133,19 @@ class Game {
     player.state.hand.forEach(card => {
       const cardEl = document.createElement('div');
       cardEl.className = `card card-${card.type.toLowerCase()}`;
-      if (card.type === 'Action' && player.state.actions === 0) {
+      if ((card.type === 'Action' || card.type === 'Action-Victory') && player.state.actions === 0) {
         cardEl.classList.add('disabled');
       }
       cardEl.innerHTML = `
         <strong>${card.name}</strong>
         ${card.description ? `<div class="card-description">${card.description}</div>` : ''}
         ${card.type === 'Treasure' ? `<h4>${card.value}*</h4>` : ''}
-        ${card.type === 'Victory' ? `<h4>${card.points}pt</h4>` : ''}
+        ${(card.type === 'Victory' || card.type === 'Action-Victory') ? `<h4>${card.points}pt</h4>` : ''}
         <em>Cost: ${card.cost}</em>
-        ${card.type === 'Action' ? `<img src="${card.icon}" class="card-icon" alt="${card.name} icon">` : ''}
+        ${(card.type === 'Action' || card.type === 'Action-Victory') ? `<img src="${card.icon}" class="card-icon" alt="${card.name} icon">` : ''}
       `;
       
-      if (card.type === 'Action' && player.state.actions > 0) {
+      if ((card.type === 'Action' || card.type === 'Action-Victory') && player.state.actions > 0) {
         const playHandler = () => this.playCard(card);
         cardEl.addEventListener('click', playHandler);
         // Store the handler on the element for cleanup
@@ -212,7 +212,7 @@ class Game {
         cardsByType.Treasure.push({ card, supply });
       } else if (card.type === 'Victory') {
         cardsByType.Victory.push({ card, supply });
-      } else if (card.type === 'Action') {
+      } else if (card.type === 'Action' || card.type === 'Action-Victory') {
         cardsByType.Action.push({ card, supply });
       }
     });
@@ -248,9 +248,9 @@ class Game {
             <strong>${card.name}</strong>
             ${card.description ? `<div class="card-description">${card.description}</div>` : ''}
             ${card.type === 'Treasure' ? `<h4>${card.value}*</h4>` : ''}
-            ${card.type === 'Victory' ? `<h4>${card.points}pt</h4>` : ''}
+            ${(card.type === 'Victory' || card.type === 'Action-Victory') ? `<h4>${card.points}pt</h4>` : ''}
             <em>Cost: ${card.cost}</em>
-            ${card.type === 'Action' ? `<img src="${card.icon}" class="card-icon" alt="${card.name} icon">` : ''}
+            ${(card.type === 'Action' || card.type === 'Action-Victory') ? `<img src="${card.icon}" class="card-icon" alt="${card.name} icon">` : ''}
           `;
 
           const availableText = document.createElement('div');

@@ -1,5 +1,10 @@
 import { ActionCard } from '../ActionCard.js';
 
+/**
+ * Great Hall card implementation
+ * Cost: 3
+ * Effect: +1 Card, +1 Action, worth 1 VP
+ */
 export class GreatHall extends ActionCard {
   constructor() {
     super({

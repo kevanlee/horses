@@ -222,7 +222,6 @@ h1.title {
 .card-treasure {
   background-color: #fff8e1;  /* Light gold */
   border-color: #ffd54f;      /* Darker gold */
-  cursor: not-allowed;
 }
 
 .card-treasure:hover {
@@ -234,6 +233,9 @@ h1.title {
 .card-victory {
   background-color: #f3e5f5;  /* Light purple */
   border-color: #ce93d8;      /* Dark purple */
+}
+
+#player-hand .card-victory {
   border-style: dashed;
   cursor: not-allowed;
 }
@@ -254,6 +256,20 @@ h1.title {
 .card-action:hover:not(.disabled) {
   background-color: #f8bbd0;  /* Slightly darker pink on hover */
   border-color: #f48fb1;      /* Even darker pink on hover */
+  transform: translateY(-2px);
+}
+
+/* Action-Victory cards */
+.card-action-victory {
+  background: linear-gradient(to bottom, #fce4ec 0%, #f3e5f5 100%);  /* Gradient from Action pink to Victory purple */
+  border-color: #ce93d8;      /* Victory purple border */
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.card-action-victory:hover:not(.disabled) {
+  background: linear-gradient(to bottom, #f8bbd0 0%, #e1bee7 100%);  /* Darker gradient on hover */
+  border-color: #ba68c8;      /* Darker purple border on hover */
   transform: translateY(-2px);
 }
 
@@ -280,7 +296,8 @@ h1.title {
 }
 
 .card-treasure .card-description,
-.card-victory .card-description {
+.card-victory .card-description,
+.card-action-victory .card-description {
   flex-grow: 0;
   margin-bottom: 4px;
 }
@@ -352,15 +369,23 @@ h1.title {
 }
 
 .card-back {
-  background: #2c3e50;
+  background: #ababab;
   color: white;
   cursor: pointer;
   transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 1.2em;
+  font-weight: bold;
+  padding: 20px;
 }
 
 .card-back:hover {
   transform: scale(1.05);
   box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  background: #34495e;
 }
 
 .highlight-x2 {
@@ -811,5 +836,30 @@ button:active {
   background-color: #fefefe;
   color: black;
   border: 1px solid black;
+}
+
+/* Vassal Modal Specific Styles */
+.modal-content .card-back {
+  width: 100px;
+  height: 170px;
+  margin: 20px auto;
+  background: #2c3e50;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 1.2em;
+  font-weight: bold;
+  padding: 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.modal-content .card-back:hover {
+  transform: scale(1.05);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  background: #34495e;
 }
 

@@ -1,4 +1,5 @@
 import { EventEmitter } from '../utils/EventEmitter.js';
+import { Gardens } from '../cards/actions/Gardens.js';
 
 /**
  * @typedef {Object} PlayerState
@@ -100,6 +101,7 @@ export class Player extends EventEmitter {
     this.state.discard.push(card);
     
     this.emit('cardDiscarded', { player: this, card });
+    Gardens.updateAllPoints(this);
   }
 
   /**
@@ -111,6 +113,7 @@ export class Player extends EventEmitter {
     
     this.state.hand.splice(index, 1);
     this.emit('cardTrashed', { player: this, card });
+    Gardens.updateAllPoints(this);
   }
 
   /**
@@ -119,6 +122,7 @@ export class Player extends EventEmitter {
   gainCard(card) {
     this.state.discard.push(card);
     this.emit('cardGained', { player: this, card });
+    Gardens.updateAllPoints(this);
   }
 
   shuffleDiscardIntoDeck() {
@@ -148,6 +152,7 @@ export class Player extends EventEmitter {
     this.state.hand = [];
     this.state.playArea = [];
     this.emit('turnEnded', { player: this });
+    Gardens.updateAllPoints(this);
   }
 
   /**
@@ -155,7 +160,7 @@ export class Player extends EventEmitter {
    * @returns {boolean}
    */
   canPlay(card) {
-    return this.state.actions > 0 && card.type === 'Action';
+    return this.state.actions > 0 && (card.type === 'Action' || card.type === 'Action-Victory');
   }
 
   /**
@@ -165,18 +170,30 @@ export class Player extends EventEmitter {
     let points = 0;
     const allCards = [...this.state.deck, ...this.state.hand, ...this.state.discard, ...this.state.playArea];
     
+    console.log('Calculating victory points:', {
+      deckSize: this.state.deck.length,
+      handSize: this.state.hand.length,
+      discardSize: this.state.discard.length,
+      playAreaSize: this.state.playArea.length,
+      totalCards: allCards.length
+    });
+    
     for (const card of allCards) {
       if (card.type === 'Victory' || card.type === 'Action-Victory') {
         // If the card has a getPoints method, use it for dynamic calculation
         if (typeof card.getPoints === 'function') {
-          points += card.getPoints(this);
+          const cardPoints = card.getPoints(this);
+          console.log(`${card.name} points:`, cardPoints);
+          points += cardPoints;
         } else {
+          console.log(`${card.name} points:`, card.points);
           points += card.points;
         }
       }
     }
     
     this.state.victoryPoints = points;
+    console.log('Total victory points:', points);
     return points;
   }
 } 

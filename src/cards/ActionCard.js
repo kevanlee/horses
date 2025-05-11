@@ -14,7 +14,7 @@ export class ActionCard extends Card {
   constructor(config) {
     super({
       ...config,
-      type: 'Action',
+      type: config.type || 'Action',  // Only use 'Action' as default if no type provided
       icon: config.icon || '/res/icons/action-icon.png' // Default icon path
     });
   }
