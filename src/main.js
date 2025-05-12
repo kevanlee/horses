@@ -74,16 +74,14 @@ class Game {
       safeUpdateUI();
     });
 
-    this.gameState.on('gameEnded', ({ reason }) => {
-      const winner = this.gameState.determineWinner();
-      const finalScore = winner.calculateVictoryPoints();
+    this.gameState.on('gameEnded', ({ reason, finalScore, isLoss }) => {
       this.logMessage(`Game Over! ${reason}`);
-      this.logMessage(`You won with ${finalScore} points!`);
+      this.logMessage(`Final Score: ${finalScore} points!`);
       
       // Show game over modal with New Game button
       this.modalManager.showModal('card', {
-        title: 'Game Over!',
-        message: `${reason}\nYou won with ${finalScore} points!`,
+        title: isLoss ? 'Game Over - You Lost!' : 'Game Over - You Won!',
+        message: `${reason}\nFinal Score: ${finalScore} points!`,
         confirmText: 'New Game',
         onConfirm: () => {
           this.modalManager.hideModal('card');
@@ -325,6 +323,9 @@ class Game {
         
         // Update UI immediately after card effect
         this.updateUI();
+        
+        // Check for game end after playing card
+        this.gameState.checkGameEnd();
       }
     } catch (error) {
       this.logMessage(`Error: ${error.message}`);
@@ -369,6 +370,9 @@ class Game {
         player.gainCard(card);
         
         this.updateUI();
+        
+        // Check for game end after buying card
+        this.gameState.checkGameEnd();
       }
     } catch (error) {
       this.logMessage(`Error: ${error.message}`);

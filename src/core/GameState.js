@@ -113,6 +113,13 @@ export class GameState extends EventEmitter {
   nextTurn() {
     if (this.gameEnded) return;
     
+    // Check if we've reached max turns before incrementing
+    if (this.maxTurns && this.turnNumber > this.maxTurns) {
+      console.log('Maximum turns reached, ending game');
+      this.checkGameEnd(); // This will trigger the game end with loss condition
+      return;
+    }
+    
     this.player.endTurn();
     this.turnNumber++;
     this.player.startTurn();
@@ -150,13 +157,23 @@ export class GameState extends EventEmitter {
    * @param {number} [config.timeLimit]
    * @param {number} [config.provinceThreshold]
    * @param {string[]} [config.selectedCards]
+   * @param {boolean} [config.useProvinceEndCondition=false] - Whether to use Province pile as end condition
+   * @param {boolean} [config.useSupplyPileEndCondition=false] - Whether to use empty supply piles as end condition
    */
   initialize(config = {}) {
+    // Reset game state
+    this.gameEnded = false;
+    this.turnNumber = 1;
+    this.trash = [];
+    this.supply = new Map();
+    
     // Store custom config
     this.victoryPointsToWin = config.victoryPointsToWin;
     this.maxTurns = config.maxTurns;
     this.timeLimit = config.timeLimit;
     this.provinceThreshold = config.provinceThreshold;
+    this.useProvinceEndCondition = config.useProvinceEndCondition || false;
+    this.useSupplyPileEndCondition = config.useSupplyPileEndCondition || false;
 
     // Add single player
     const player = this.addPlayer('Player');
@@ -204,33 +221,73 @@ export class GameState extends EventEmitter {
    * @returns {boolean}
    */
   checkGameEnd() {
-    // Check if any supply pile is empty
-    for (const [cardName, supply] of this.supply) {
-      if (supply.count === 0) {
-        this.endGame(`Supply pile for ${cardName} is empty.`);
-        return;
+    const player = this.getCurrentPlayer();
+    const vp = player.calculateVictoryPoints();
+    
+    console.log('Checking game end conditions:', {
+      currentVP: vp,
+      neededVP: this.victoryPointsToWin,
+      provincesLeft: this.supply.get('Province')?.length || 0,
+      useProvinceEndCondition: this.useProvinceEndCondition,
+      useSupplyPileEndCondition: this.useSupplyPileEndCondition,
+      currentTurn: this.turnNumber,
+      maxTurns: this.maxTurns
+    });
+
+    // Check if max turns reached (loss condition)
+    if (this.maxTurns && this.turnNumber > this.maxTurns) {
+      console.log('Game end: Maximum turns reached!');
+      this.gameEnded = true;
+      this.emit('gameEnded', { 
+        reason: 'Maximum turns reached!',
+        finalScore: vp,
+        isLoss: true
+      });
+      return true;
+    }
+
+    // Check if player has reached victory points threshold (win condition)
+    if (this.victoryPointsToWin && vp >= this.victoryPointsToWin) {
+      console.log('Game end: Victory points threshold reached!');
+      this.gameEnded = true;
+      this.emit('gameEnded', { 
+        reason: 'Victory points threshold reached!',
+        finalScore: vp,
+        isLoss: false
+      });
+      return true;
+    }
+
+    // Check if Province pile is empty (if enabled) (win condition)
+    if (this.useProvinceEndCondition && this.supply.get('Province')?.length === 0) {
+      console.log('Game end: Province pile is empty!');
+      this.gameEnded = true;
+      this.emit('gameEnded', { 
+        reason: 'Province pile is empty!',
+        finalScore: vp,
+        isLoss: false
+      });
+      return true;
+    }
+
+    // Check if any three supply piles are empty (if enabled) (win condition)
+    if (this.useSupplyPileEndCondition) {
+      const emptyPiles = Array.from(this.supply.values())
+        .filter(pile => pile.length === 0).length;
+      
+      if (emptyPiles >= 3) {
+        console.log('Game end: Three or more supply piles are empty!');
+        this.gameEnded = true;
+        this.emit('gameEnded', { 
+          reason: 'Three or more supply piles are empty!',
+          finalScore: vp,
+          isLoss: false
+        });
+        return true;
       }
     }
 
-    // Check if player has 8 or more provinces
-    const provinces = [
-      ...this.player.state.deck,
-      ...this.player.state.hand,
-      ...this.player.state.discard,
-      ...this.player.state.playArea
-    ].filter(card => card.name === 'Province').length;
-
-    if (provinces >= 8) {
-      this.endGame(`${this.player.name} has 8 or more Provinces.`);
-      return;
-    }
-  }
-
-  /**
-   * @returns {Player}
-   */
-  determineWinner() {
-    return this.player;
+    return false;
   }
 
   /**
@@ -242,9 +299,11 @@ export class GameState extends EventEmitter {
     if (this.gameEnded) return; // Don't update if game is over
     
     console.log('Updating victory points:', {
+      player: player.name,
       oldPoints: player.state.victoryPoints,
       newPoints: points,
-      threshold: this.victoryPointsToWin
+      neededToWin: this.victoryPointsToWin,
+      provincesLeft: this.supply.get('Province')?.length || 0
     });
     
     player.state.victoryPoints = points;
@@ -252,12 +311,23 @@ export class GameState extends EventEmitter {
     
     // Check if game should end after updating points
     const shouldEnd = this.checkGameEnd();
-    console.log('Game end check result:', shouldEnd);
     
     if (shouldEnd) {
       console.log('Game should end - emitting gameEnded event');
       this.gameEnded = true;
-      this.emit('gameEnded', { reason: 'Victory points threshold reached!' });
+      let reason = 'Game Over!';
+      if (this.victoryPointsToWin && points >= this.victoryPointsToWin) {
+        reason = 'Victory points threshold reached!';
+      } else if (this.useProvinceEndCondition && this.supply.get('Province')?.length === 0) {
+        reason = 'Province pile is empty!';
+      } else if (this.useSupplyPileEndCondition) {
+        const emptyPiles = Array.from(this.supply.values())
+          .filter(pile => pile.length === 0).length;
+        if (emptyPiles >= 3) {
+          reason = 'Three or more supply piles are empty!';
+        }
+      }
+      this.emit('gameEnded', { reason, finalScore: points });
     }
   }
 } 
