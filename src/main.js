@@ -2,6 +2,8 @@ import { GameState } from './core/GameState.js';
 import { ModalManager } from './ui/ModalManager.js';
 import { CardRegistry } from './cards/CardRegistry.js';
 import { GameSetup } from './ui/GameSetup.js';
+import { PlayerStats } from './core/PlayerStats.js';
+import { StatsUI } from './ui/StatsUI.js';
 
 class Game {
   constructor() {
@@ -13,6 +15,27 @@ class Game {
     this.gameState.setModalManager(this.modalManager);
     this.setupEventListeners();
     this.showSetup();
+
+    // Initialize stats system
+    this.playerStats = new PlayerStats();
+    this.statsUI = new StatsUI(this.playerStats, this.modalManager);
+
+    // Add stats button to header
+    this.addStatsButton();
+  }
+
+  addStatsButton() {
+    const header = document.getElementById('header');
+    if (!header) return;
+
+    const statsButton = document.createElement('button');
+    statsButton.id = 'stats-button';
+    statsButton.textContent = '📊 Stats';
+    statsButton.addEventListener('click', () => {
+      this.statsUI.show();
+    });
+
+    header.appendChild(statsButton);
   }
 
   showSetup() {
@@ -385,6 +408,28 @@ class Game {
     this.modalManager = null;
     this.gameState = null;
     this.cardRegistry = null;
+  }
+
+  handleGameEnd(gameEndData) {
+    // Record game stats
+    this.playerStats.recordGame({
+      victoryPoints: gameEndData.finalScore,
+      turns: this.gameState.turnNumber,
+      isWin: !gameEndData.isLoss,
+      gameConfig: {
+        victoryPointsToWin: this.gameState.victoryPointsToWin,
+        maxTurns: this.gameState.maxTurns,
+        selectedCards: Array.from(this.gameState.supply.keys())
+      }
+    });
+
+    // Show game end modal
+    this.modalManager.showModal('game-end', {
+      title: gameEndData.isLoss ? 'Game Over!' : 'Victory!',
+      message: gameEndData.reason,
+      score: gameEndData.finalScore,
+      turns: this.gameState.turnNumber
+    });
   }
 }
 

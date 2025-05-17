@@ -43,6 +43,17 @@ export class ModalManager extends EventEmitter {
         confirm: setupModal.querySelector('#setup-confirm')
       });
     }
+
+    // Initialize stats modal
+    const statsModal = document.getElementById('stats-modal');
+    if (statsModal) {
+      this.modals.set('stats', {
+        element: statsModal,
+        title: statsModal.querySelector('h2'),
+        body: statsModal.querySelector('#stats-content'),
+        confirm: statsModal.querySelector('#close-stats')
+      });
+    }
   }
 
   /**
@@ -78,70 +89,80 @@ export class ModalManager extends EventEmitter {
     }
 
     modal.title.textContent = options.title;
-    modal.body.innerHTML = '';
-
-    if (options.message) {
-      const messageEl = document.createElement('p');
-      messageEl.textContent = options.message;
-      modal.body.appendChild(messageEl);
+    
+    // Special handling for stats modal
+    if (type === 'stats') {
+      modal.element.classList.remove('hidden');
+      return;
     }
+    
+    // Only clear and update body if it exists and it's not the stats modal
+    if (modal.body) {
+      modal.body.innerHTML = '';
 
-    if (options.faceDownCard) {
-      const cardEl = document.createElement('div');
-      cardEl.className = 'card card-back';
-      cardEl.textContent = 'Click to reveal';
-      cardEl.onclick = () => {
-        cardEl.classList.remove('card-back');
-        cardEl.innerHTML = `
-          <strong>${options.faceDownCard.name}</strong><br>
-          <em>Type:</em> ${options.faceDownCard.type}<br>
-          <em>Cost:</em> ${options.faceDownCard.cost}<br>
-          ${options.faceDownCard.description ? `<em>Effect:</em> ${options.faceDownCard.description}` : ''}
-        `;
-        cardEl.onclick = null;
-        if (options.onReveal) {
-          options.onReveal(options.faceDownCard);
-        }
-      };
-      modal.body.appendChild(cardEl);
-    }
-
-    if (options.cards) {
-      if (!Array.isArray(options.cards)) {
-        throw new Error('Modal cards must be an array');
+      if (options.message) {
+        const messageEl = document.createElement('p');
+        messageEl.textContent = options.message;
+        modal.body.appendChild(messageEl);
       }
-      
-      // Create card container
-      const cardContainer = document.createElement('div');
-      cardContainer.className = 'card-container';
-      modal.body.appendChild(cardContainer);
 
-      options.cards.forEach((card, index) => {
+      if (options.faceDownCard) {
         const cardEl = document.createElement('div');
-        cardEl.className = `card card-${card.type.toLowerCase()}`;
-        cardEl.innerHTML = `
-          <strong>${card.name}</strong>
-          ${card.description ? `<div class="card-description">${card.description}</div>` : ''}
-          ${card.type === 'Treasure' ? `<h4>${card.value}*</h4>` : ''}
-          ${card.type === 'Victory' ? `<h4>${card.points}pt</h4>` : ''}
-          <em>Cost: ${card.cost}</em>
-          ${card.type === 'Action' ? `<img src="${card.icon}" class="card-icon" alt="${card.name} icon">` : ''}
-        `;
-        cardEl.dataset.index = index;
-        
-        // Add click handler for selection
-        cardEl.addEventListener('click', () => {
-          if (options.onCardClick) {
-            // Use custom click handler if provided
-            options.onCardClick(cardEl, Array.from(cardContainer.querySelectorAll('.card')));
-          } else {
-            // Default toggle behavior
-            cardEl.classList.toggle('selected');
+        cardEl.className = 'card card-back';
+        cardEl.textContent = 'Click to reveal';
+        cardEl.onclick = () => {
+          cardEl.classList.remove('card-back');
+          cardEl.innerHTML = `
+            <strong>${options.faceDownCard.name}</strong><br>
+            <em>Type:</em> ${options.faceDownCard.type}<br>
+            <em>Cost:</em> ${options.faceDownCard.cost}<br>
+            ${options.faceDownCard.description ? `<em>Effect:</em> ${options.faceDownCard.description}` : ''}
+          `;
+          cardEl.onclick = null;
+          if (options.onReveal) {
+            options.onReveal(options.faceDownCard);
           }
-        });
+        };
+        modal.body.appendChild(cardEl);
+      }
+
+      if (options.cards) {
+        if (!Array.isArray(options.cards)) {
+          throw new Error('Modal cards must be an array');
+        }
         
-        cardContainer.appendChild(cardEl);
-      });
+        // Create card container
+        const cardContainer = document.createElement('div');
+        cardContainer.className = 'card-container';
+        modal.body.appendChild(cardContainer);
+
+        options.cards.forEach((card, index) => {
+          const cardEl = document.createElement('div');
+          cardEl.className = `card card-${card.type.toLowerCase()}`;
+          cardEl.innerHTML = `
+            <strong>${card.name}</strong>
+            ${card.description ? `<div class="card-description">${card.description}</div>` : ''}
+            ${card.type === 'Treasure' ? `<h4>${card.value}*</h4>` : ''}
+            ${card.type === 'Victory' ? `<h4>${card.points}pt</h4>` : ''}
+            <em>Cost: ${card.cost}</em>
+            ${card.type === 'Action' ? `<img src="${card.icon}" class="card-icon" alt="${card.name} icon">` : ''}
+          `;
+          cardEl.dataset.index = index;
+          
+          // Add click handler for selection
+          cardEl.addEventListener('click', () => {
+            if (options.onCardClick) {
+              // Use custom click handler if provided
+              options.onCardClick(cardEl, Array.from(cardContainer.querySelectorAll('.card')));
+            } else {
+              // Default toggle behavior
+              cardEl.classList.toggle('selected');
+            }
+          });
+          
+          cardContainer.appendChild(cardEl);
+        });
+      }
     }
 
     modal.confirm.textContent = options.confirmText || 'Confirm';

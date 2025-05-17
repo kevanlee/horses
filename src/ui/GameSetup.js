@@ -5,6 +5,62 @@ export class GameSetup {
     this.modalManager = modalManager;
     this.cardRegistry = cardRegistry;
     this.selectedCards = new Set();
+    this.currentPreset = null;
+    
+    // Define preset configurations
+    this.presets = {
+      quickGame: {
+        name: "Quick Game",
+        victoryPointsToWin: 20,
+        maxTurns: 30,
+        selectedCards: [
+          'Smithy',      // Simple draw
+          'Village',     // Simple action
+          'Market',      // Simple economy
+          'Festival',    // Simple action + buy
+          'Cellar',      // Simple discard
+          'Chapel',      // Simple trashing
+          'Workshop',    // Simple gaining
+          'Woodcutter',  // Simple economy
+          'Militia',     // Simple attack
+          'Moneylender'  // Simple treasure upgrade
+        ]
+      },
+      standardGame: {
+        name: "Standard Game",
+        victoryPointsToWin: 30,
+        maxTurns: 50,
+        selectedCards: [
+          'Smithy',      // Draw
+          'Village',     // Action
+          'Market',      // Economy
+          'Festival',    // Action + buy
+          'Cellar',      // Discard
+          'Library',     // Complex draw
+          'Laboratory',  // Draw + action
+          'Chapel',      // Trashing
+          'Workshop',    // Gaining
+          'Woodcutter'   // Economy
+        ]
+      },
+      longGame: {
+        name: "Long Game",
+        victoryPointsToWin: 40,
+        maxTurns: 100,
+        selectedCards: [
+          'Smithy',      // Draw
+          'Village',     // Action
+          'Market',      // Economy
+          'Festival',    // Action + buy
+          'Cellar',      // Discard
+          'Library',     // Complex draw
+          'Laboratory',  // Draw + action
+          'Chapel',      // Trashing
+          'Throne Room', // Complex action
+          'Remodel'      // Complex gaining
+        ]
+      }
+    };
     this.setupEventListeners();
   }
 
@@ -12,29 +68,15 @@ export class GameSetup {
     const setupModal = this.modalManager.modals.get('setup');
     if (!setupModal) return;
 
-    // Reset selected cards
+    // Reset selected cards and current preset
     this.selectedCards.clear();
+    this.currentPreset = null;
+    
+    // Add preset buttons
+    this.addPresetButtons();
     
     // Populate card options
     this.populateCardOptions();
-    
-    // Auto-select 10 random cards
-    const actionCards = this.cardRegistry.getAllCards()
-      .filter(card => card.type === 'Action' || card.type === 'Action-Victory')
-      .sort(() => Math.random() - 0.5) // Shuffle the cards
-      .slice(0, 10); // Take first 10 cards
-    
-    actionCards.forEach(card => {
-      this.selectedCards.add(card.name);
-      const cardOption = document.querySelector(`.card-option[data-card-name="${card.name}"]`);
-      if (cardOption) {
-        cardOption.classList.add('selected');
-        const checkbox = cardOption.querySelector('input[type="checkbox"]');
-        if (checkbox) {
-          checkbox.checked = true;
-        }
-      }
-    });
     
     // Update the UI
     this.updateSelectedCardsList();
@@ -182,5 +224,65 @@ export class GameSetup {
     }
 
     return config;
+  }
+
+  addPresetButtons() {
+    const setupBody = document.getElementById('setup-body');
+    if (!setupBody) return;
+
+    // Create preset section if it doesn't exist
+    let presetSection = document.querySelector('.preset-section');
+    if (!presetSection) {
+      presetSection = document.createElement('div');
+      presetSection.className = 'setup-section preset-section';
+      setupBody.insertBefore(presetSection, setupBody.firstChild);
+    }
+
+    // Clear and update preset section content
+    presetSection.innerHTML = '<h3>Preset Games</h3><div class="preset-buttons"></div>';
+    const buttonsContainer = presetSection.querySelector('.preset-buttons');
+
+    Object.entries(this.presets).forEach(([key, preset]) => {
+      const button = document.createElement('button');
+      button.className = 'preset-button';
+      button.textContent = preset.name;
+      button.addEventListener('click', () => {
+        // Remove active class from all buttons
+        buttonsContainer.querySelectorAll('.preset-button').forEach(btn => {
+          btn.classList.remove('active');
+        });
+        
+        // Add active class to clicked button
+        button.classList.add('active');
+        
+        // Clear previous selection and apply new preset
+        this.selectedCards.clear();
+        this.currentPreset = key;
+        
+        // Update checkboxes and card options
+        const cardOptions = document.querySelectorAll('.card-option');
+        cardOptions.forEach(option => {
+          const checkbox = option.querySelector('input[type="checkbox"]');
+          const cardName = option.dataset.cardName;
+          const isSelected = preset.selectedCards.includes(cardName);
+          
+          if (checkbox) {
+            checkbox.checked = isSelected;
+          }
+          
+          if (isSelected) {
+            option.classList.add('selected');
+            this.selectedCards.add(cardName);
+          } else {
+            option.classList.remove('selected');
+          }
+        });
+        
+        // Update UI
+        this.updateSelectedCardsList();
+        this.updateConfirmButton();
+      });
+      buttonsContainer.appendChild(button);
+    });
   }
 } 

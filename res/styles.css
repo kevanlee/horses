@@ -875,3 +875,161 @@ button:active {
   background: #34495e;
 }
 
+.preset-section {
+  margin-bottom: 20px;
+}
+
+.preset-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.preset-button {
+  padding: 8px 16px;
+  background-color: #2c3e50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+  margin: 0 5px;
+}
+
+.preset-button:hover {
+  background-color: #34495e;
+}
+
+.preset-button.active {
+  background-color: #27ae60;
+  box-shadow: 0 0 5px rgba(39, 174, 96, 0.5);
+}
+
+.preset-button.active:hover {
+  background-color: #2ecc71;
+}
+
+.stats-modal {
+  max-width: 800px;
+}
+
+.stats-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.stats-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 20px;
+  padding: 20px;
+  background: #f5f5f5;
+  border-radius: 8px;
+}
+
+.stat-item {
+  text-align: center;
+  padding: 15px;
+  background: white;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.stat-item h3 {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.stat-item p {
+  margin: 0;
+  font-size: 24px;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.game-history {
+  padding: 20px;
+  background: #f5f5f5;
+  border-radius: 8px;
+}
+
+.game-history h3 {
+  margin: 0 0 15px 0;
+  color: #2c3e50;
+}
+
+#game-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.game-history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  background: white;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.game-history-item.win {
+  border-left: 4px solid #2ecc71;
+}
+
+.game-history-item.loss {
+  border-left: 4px solid #e74c3c;
+}
+
+.game-history-item .date {
+  color: #666;
+  font-size: 12px;
+}
+
+.game-history-item .result {
+  font-weight: bold;
+}
+
+.stats-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+#reset-stats {
+  background-color: #e74c3c;
+}
+
+#reset-stats:hover {
+  background-color: #c0392b;
+}
+
+#stats-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 8px 16px;
+  background-color: rgba(44, 62, 80, 0.8);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  z-index: 100;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+#stats-button:hover {
+  background-color: rgba(52, 73, 94, 0.9);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+

@@ -91,6 +91,46 @@
       </div>
     </div>
   </div>
+
+  <!-- Stats Modal -->
+  <div id="stats-modal" class="modal hidden">
+    <div class="modal-content stats-modal">
+      <h2>Player Statistics</h2>
+      <div class="stats-content">
+        <div class="stats-summary">
+          <div class="stat-item">
+            <h3>Games Played</h3>
+            <p id="games-played">0</p>
+          </div>
+          <div class="stat-item">
+            <h3>Win Rate</h3>
+            <p id="win-rate">0%</p>
+          </div>
+          <div class="stat-item">
+            <h3>Highest Score</h3>
+            <p id="highest-score">0</p>
+          </div>
+          <div class="stat-item">
+            <h3>Average Score</h3>
+            <p id="average-score">0</p>
+          </div>
+          <div class="stat-item">
+            <h3>Fastest Win</h3>
+            <p id="fastest-win">-</p>
+          </div>
+        </div>
+        <div class="game-history">
+          <h3>Recent Games</h3>
+          <div id="game-history-list"></div>
+        </div>
+      </div>
+      <div class="stats-buttons">
+        <button id="reset-stats" class="modal-button">Reset Statistics</button>
+        <button id="close-stats" class="modal-button">Close</button>
+      </div>
+    </div>
+  </div>
+
   <script type="module" src="src/main.js"></script>
 </body>
 </html>
