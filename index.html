@@ -13,29 +13,41 @@
   <!--<h1 class="title">✌️ Dominion-Inspired Deck Builder ✌️</h1>-->
   <div id="game">
     <div id="header">
-      <ul id="scoreboard">
-        <li><div id="gold-display"></div></li>
-        <li><div id="victory-display">Victory Points: 0</div></li>
-        <li><div id="actions-left">Actions: 1</div></li>
-        <li><div id="buys-left">Buys: 1</div></li>
-        <li><div id="turn-counter">Turn: 1</div></li>
-      </ul>
-      <button id="next-turn">Next Turn</button>
+      <div id="progress-indicators">
+        <div id="victory-display">VP: <span id="current-vp">0</span>/<span id="target-vp">30</span></div>
+        <div id="turn-counter">Turn: <span id="current-turn">1</span>/<span id="max-turns">100</span></div>
+      </div>
+      <div id="scoreboard">
+        <div id="gold-display"></div>
+        <div id="actions-left">Actions: 1</div>
+        <div id="buys-left">Buys: 1</div>
+      </div>
+      <div id="header-actions">
+        <button id="next-turn">Next Turn</button>
+      </div>
     </div>
     <div id="hand">
       <div id="deck-count"></div>
       <div id="player-hand"></div>
       <div id="discard-count"></div>
     </div>
-    <div id="shop">
+    <div id="marketplace"></div>
+    <div id="bottom-section">
       <div id="deck-inventory">
         <h2>Deck Inventory</h2>
         <ul id="deck-list"></ul>
-      </div> 
-      <div id="marketplace"></div>
+      </div>
+      <div id="log">
+        <h2>Game Log</h2>
+      </div>
     </div>
   </div> 
-  <div id="log"><h2>Game Log</h2></div> 
+  <div id="game-controls">
+    <img id="game-logo" src="res/placeholder-logo.png" alt="Game Logo">
+    <div id="game-mode">You vs. Custom</div>
+    <button id="new-game">New Game</button>
+    <button id="stats-button">Stats</button>
+  </div>
   <div id="card-modal" class="modal hidden">
     <div class="modal-content">
       <h2 id="modal-title">Choose cards</h2>
@@ -66,8 +78,8 @@
               <input type="number" id="vp-to-win" value="30" min="1" max="100">
             </div>
             <div class="config-option">
-              <label for="max-turns">Maximum Turns:</label>
-              <input type="number" id="max-turns" value="100" min="1" max="1000">
+              <label for="max-turns-input">Maximum Turns:</label>
+              <input type="number" id="max-turns-input" value="100" min="1" max="1000">
             </div>
           </div>
         </div>

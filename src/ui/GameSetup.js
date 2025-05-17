@@ -6,6 +6,7 @@ export class GameSetup {
     this.cardRegistry = cardRegistry;
     this.selectedCards = new Set();
     this.currentPreset = null;
+    this.isCustomSettings = true;
     
     // Define preset configurations
     this.presets = {
@@ -22,7 +23,7 @@ export class GameSetup {
           'Chapel',      // Simple trashing
           'Workshop',    // Simple gaining
           'Woodcutter',  // Simple economy
-          'Militia',     // Simple attack
+          'Council Room', // Draw + buy
           'Moneylender'  // Simple treasure upgrade
         ]
       },
@@ -114,8 +115,20 @@ export class GameSetup {
 
         this.updateSelectedCardsList();
         this.updateConfirmButton();
+        this.checkIfSettingsMatchPreset();
       }
     });
+
+    // Handle VP and turns input changes
+    const vpInput = document.getElementById('vp-to-win');
+    const turnsInput = document.getElementById('max-turns-input');
+    
+    if (vpInput) {
+      vpInput.addEventListener('change', () => this.checkIfSettingsMatchPreset());
+    }
+    if (turnsInput) {
+      turnsInput.addEventListener('change', () => this.checkIfSettingsMatchPreset());
+    }
 
     // Handle confirm button
     setupConfirm.addEventListener('click', () => {
@@ -129,6 +142,9 @@ export class GameSetup {
     if (defaultGameLink) {
       defaultGameLink.addEventListener('click', (e) => {
         e.preventDefault();
+        this.isCustomSettings = true;
+        this.currentPreset = null;
+        this.updateGameMode();
         const config = this.getDefaultGameConfig();
         this.modalManager.hideModal('setup');
         this.modalManager.emit('gameSetupComplete', config);
@@ -179,7 +195,7 @@ export class GameSetup {
   getGameConfig() {
     const config = {
       victoryPointsToWin: parseInt(document.getElementById('vp-to-win')?.value) || 30,
-      maxTurns: parseInt(document.getElementById('max-turns')?.value) || 100,
+      maxTurns: parseInt(document.getElementById('max-turns-input')?.value) || 100,
       selectedCards: Array.from(this.selectedCards)
     };
 
@@ -258,6 +274,24 @@ export class GameSetup {
         // Clear previous selection and apply new preset
         this.selectedCards.clear();
         this.currentPreset = key;
+        this.isCustomSettings = false;
+        
+        // Update VP and Turns input fields
+        const vpInput = document.getElementById('vp-to-win');
+        const turnsInput = document.getElementById('max-turns-input');
+        
+        if (vpInput) {
+          vpInput.value = preset.victoryPointsToWin;
+          console.log(`Setting VP to ${preset.victoryPointsToWin}`);
+        }
+        
+        if (turnsInput) {
+          turnsInput.value = preset.maxTurns;
+          console.log(`Setting max turns to ${preset.maxTurns}`);
+          
+          // Force the input to update by dispatching an input event
+          turnsInput.dispatchEvent(new Event('input', { bubbles: true }));
+        }
         
         // Update checkboxes and card options
         const cardOptions = document.querySelectorAll('.card-option');
@@ -281,8 +315,42 @@ export class GameSetup {
         // Update UI
         this.updateSelectedCardsList();
         this.updateConfirmButton();
+        this.updateGameMode();
       });
       buttonsContainer.appendChild(button);
     });
+  }
+
+  updateGameMode() {
+    const gameMode = document.getElementById('game-mode');
+    if (!gameMode) return;
+
+    if (this.isCustomSettings) {
+      gameMode.textContent = 'You vs. Custom';
+    } else if (this.currentPreset) {
+      gameMode.textContent = `You vs. ${this.presets[this.currentPreset].name}`;
+    }
+  }
+
+  checkIfSettingsMatchPreset() {
+    if (!this.currentPreset) {
+      this.isCustomSettings = true;
+      return;
+    }
+
+    const preset = this.presets[this.currentPreset];
+    const vpInput = document.getElementById('vp-to-win');
+    const turnsInput = document.getElementById('max-turns-input');
+    
+    // Check if VP and turns match
+    const vpMatch = vpInput && parseInt(vpInput.value) === preset.victoryPointsToWin;
+    const turnsMatch = turnsInput && parseInt(turnsInput.value) === preset.maxTurns;
+    
+    // Check if selected cards match
+    const cardsMatch = preset.selectedCards.length === this.selectedCards.size &&
+      preset.selectedCards.every(card => this.selectedCards.has(card));
+    
+    this.isCustomSettings = !(vpMatch && turnsMatch && cardsMatch);
+    this.updateGameMode();
   }
 } 

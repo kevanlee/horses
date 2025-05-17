@@ -22,16 +22,20 @@ h1.title {
 #header {
   grid-column: span 12; /* Span the entire 12-column width */
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
+  gap: 1rem;
 }
 
 #scoreboard {
-  list-style: none;
   display: flex;
-  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+  list-style: none;
   padding: 0;
   margin: 0;
+  width: 100%;
 }
 
 #scoreboard li {
@@ -39,8 +43,21 @@ h1.title {
   align-items: center;
 }
 
-#header button {
-  margin-left: 1rem; /* Align button to the right */
+#next-turn {
+  padding: 0.5rem 1rem;
+  background-color: #fefefe;
+  color: black;
+  border: 1px solid black;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+#next-turn:hover {
+  background-color: #dfdfdf;
 }
 
 /* === Hand Section === */
@@ -123,14 +140,14 @@ h1.title {
 }
 
 #deck-inventory {
-  grid-column: span 2; /* Deck inventory takes up 2 columns */
+  grid-column: span 2;
   background-color: white;
   border: 1px solid #ccc;
   padding: 1rem;
   border-radius: 8px;
 }
 
-#deck-inventory h3 {
+#deck-inventory h2 {
   margin-top: 0;
   margin-bottom: 0.5rem;
   text-align: left;
@@ -144,7 +161,7 @@ h1.title {
 }
 
 #marketplace {
-  grid-column: span 10; /* Marketplace takes up 10 columns */
+  grid-column: span 12; /* Marketplace takes full width */
   background-color: white;
   border: 1px solid #ccc;
   padding: 1rem;
@@ -152,6 +169,7 @@ h1.title {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
+  margin-bottom: 1rem;
 }
 
 .marketplace-title {
@@ -201,7 +219,17 @@ h1.title {
 
 /* === Log Section === */
 #log {
-  grid-column: span 12; /* Span the entire 12-column width */
+  grid-column: span 10;
+  background-color: white;
+  border: 1px solid #ccc;
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+#log h2 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  text-align: left;
 }
 
 /* === Card Styles === */
@@ -470,17 +498,18 @@ h1.title {
 }
 
 #modal-discard {
-  margin-left: 10px;
-  background-color: #e74c3c;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
+  background-color: #f8f8f8;
+  border: 1px solid #ddd;
+  padding: 1rem;
+  border-radius: 8px;
   cursor: pointer;
+  transition: background-color 0.2s;
+  margin-top: 1rem;
+  text-align: center;
 }
 
 #modal-discard:hover {
-  background-color: #c0392b;
+  background-color: #e8e8e8;
 }
 
 /* === Mobile === */
@@ -811,9 +840,12 @@ button:active {
 .modal-content .card-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 1rem;
   justify-content: center;
-  padding: 10px;
+  align-items: center;
+  padding: 1rem;
+  max-height: 60vh;
+  overflow-y: auto;
 }
 
 .setup-buttons {
@@ -1011,25 +1043,109 @@ button:active {
   background-color: #c0392b;
 }
 
-#stats-button {
+#game-controls {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
-  padding: 8px 16px;
-  background-color: rgba(44, 62, 80, 0.8);
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: all 0.2s ease;
+  top: 20px;
+  left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   z-index: 100;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  max-width: 300px;
 }
 
+#game-controls #game-logo {
+  width: 50px !important;
+  height: 50px !important;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  background-color: #f8f8f8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+  object-fit: contain;
+}
+
+#game-mode {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #333;
+  margin: -5px 0 5px 0;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#new-game,
+#stats-button {
+  color: #333;
+  padding: 0;
+  border: 0;
+  background-color: transparent;
+  text-decoration: none;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: color 0.2s;
+  text-align: left;
+}
+
+#new-game:hover,
 #stats-button:hover {
-  background-color: rgba(52, 73, 94, 0.9);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  color: #666;
+  text-decoration: none;
+  background-color: transparent;
+}
+
+#progress-indicators {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  padding: 0.5rem;
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+}
+
+#progress-indicators > div {
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+#progress-indicators span {
+  font-weight: 700;
+}
+
+#progress-indicators #current-vp,
+#progress-indicators #current-turn {
+  color: #333333;
+}
+
+#progress-indicators #target-vp,
+#progress-indicators #max-turns {
+  color: #9E9E9E;
+}
+
+#next-turn {
+  padding: 0.5rem 1rem;
+  background-color: #fefefe;
+  color: black;
+  border: 1px solid black;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+#next-turn:hover {
+  background-color: #dfdfdf;
+}
+
+#bottom-section {
+  grid-column: span 12;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 1rem;
 }
 

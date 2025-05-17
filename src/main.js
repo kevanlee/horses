@@ -19,23 +19,6 @@ class Game {
     // Initialize stats system
     this.playerStats = new PlayerStats();
     this.statsUI = new StatsUI(this.playerStats, this.modalManager);
-
-    // Add stats button to header
-    this.addStatsButton();
-  }
-
-  addStatsButton() {
-    const header = document.getElementById('header');
-    if (!header) return;
-
-    const statsButton = document.createElement('button');
-    statsButton.id = 'stats-button';
-    statsButton.textContent = '📊 Stats';
-    statsButton.addEventListener('click', () => {
-      this.statsUI.show();
-    });
-
-    header.appendChild(statsButton);
   }
 
   showSetup() {
@@ -101,16 +84,8 @@ class Game {
       this.logMessage(`Game Over! ${reason}`);
       this.logMessage(`Final Score: ${finalScore} points!`);
       
-      // Show game over modal with New Game button
-      this.modalManager.showModal('card', {
-        title: isLoss ? 'Game Over - You Lost!' : 'Game Over - You Won!',
-        message: `${reason}\nFinal Score: ${finalScore} points!`,
-        confirmText: 'New Game',
-        onConfirm: () => {
-          this.modalManager.hideModal('card');
-          this.showSetup();
-        }
-      });
+      // Record game stats
+      this.handleGameEnd({ reason, finalScore, isLoss });
     });
 
     // UI events
@@ -118,6 +93,31 @@ class Game {
       this.gameState.nextTurn();
       this.gameState.checkGameEnd();
     });
+
+    // New game button
+    document.getElementById('new-game').addEventListener('click', () => {
+      this.modalManager.showModal('card', {
+        title: 'Start New Game?',
+        message: 'Are you sure you want to start a new game? Your current progress will be lost.',
+        confirmText: 'Continue to New Game',
+        onConfirm: () => {
+          this.startNewGame();
+        },
+        onDiscard: () => {
+          this.modalManager.hideModal('card');
+        },
+        discardText: 'Never Mind'
+      });
+    });
+
+    // Stats button
+    document.getElementById('stats-button').addEventListener('click', () => {
+      this.showStats();
+    });
+  }
+
+  showStats() {
+    this.statsUI.show();
   }
 
   updateUI() {
@@ -126,14 +126,18 @@ class Game {
     // Update player stats
     document.getElementById('gold-display').textContent = 
       `Gold: ${this.gameState.calculatePlayerGold(player)}`;
-    document.getElementById('victory-display').textContent = 
-      `Victory Points: ${player.calculateVictoryPoints()}`;
+    document.getElementById('current-vp').textContent = 
+      player.calculateVictoryPoints();
+    document.getElementById('target-vp').textContent = 
+      this.gameState.victoryPointsToWin || '∞';
     document.getElementById('actions-left').textContent = 
       `Actions: ${player.state.actions}`;
     document.getElementById('buys-left').textContent = 
       `Buys: ${player.state.buys}`;
-    document.getElementById('turn-counter').textContent = 
-      `Turn: ${this.gameState.turnNumber}`;
+    document.getElementById('current-turn').textContent = 
+      this.gameState.turnNumber;
+    document.getElementById('max-turns').textContent = 
+      this.gameState.maxTurns || '∞';
     
     // Update hand
     this.updateHand(player);
@@ -216,7 +220,7 @@ class Game {
 
   updateMarketplace() {
     const marketplace = document.getElementById('marketplace');
-    marketplace.innerHTML = '<h2 class="marketplace-title">Marketplace</h2>';
+    marketplace.innerHTML = '<h2 class="marketplace-title">Store</h2>';
     
     // Group cards by type
     const cardsByType = {
@@ -424,12 +428,38 @@ class Game {
     });
 
     // Show game end modal
-    this.modalManager.showModal('game-end', {
-      title: gameEndData.isLoss ? 'Game Over!' : 'Victory!',
-      message: gameEndData.reason,
-      score: gameEndData.finalScore,
-      turns: this.gameState.turnNumber
+    this.modalManager.showModal('card', {
+      title: gameEndData.isLoss ? 'Game Over - You Lost!' : 'Game Over - You Won!',
+      message: `${gameEndData.reason}\nFinal Score: ${gameEndData.finalScore} points!`,
+      confirmText: 'New Game',
+      onConfirm: () => {
+        this.modalManager.hideModal('card');
+        this.startNewGame();
+      }
     });
+  }
+
+  startNewGame() {
+    // Reset game state
+    this.gameState = new GameState(this.cardRegistry);
+    this.gameState.setModalManager(this.modalManager);
+    
+    // Set up event listeners for the new game state
+    this.setupEventListeners();
+    
+    // Hide the game UI
+    document.getElementById('game').classList.add('hidden');
+    
+    // Clear the game log
+    document.getElementById('log').innerHTML = '<h2>Game Log</h2>';
+    
+    // Show the setup modal and wait for configuration
+    this.gameSetup.show();
+    const setupHandler = (config) => {
+      this.initializeGame(config);
+      this.modalManager.off('gameSetupComplete', setupHandler);
+    };
+    this.modalManager.on('gameSetupComplete', setupHandler);
   }
 }
 
