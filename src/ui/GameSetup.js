@@ -258,9 +258,11 @@ export class GameSetup {
     presetSection.innerHTML = '<h3>Preset Games</h3><div class="preset-buttons"></div>';
     const buttonsContainer = presetSection.querySelector('.preset-buttons');
 
+    // Add the original three presets
     Object.entries(this.presets).forEach(([key, preset]) => {
       const button = document.createElement('button');
       button.className = 'preset-button';
+      button.dataset.preset = key;
       button.textContent = preset.name;
       button.addEventListener('click', () => {
         // Remove active class from all buttons
@@ -319,6 +321,34 @@ export class GameSetup {
       });
       buttonsContainer.appendChild(button);
     });
+
+    // Add the additional preset buttons
+    for (let i = 1; i <= 15; i++) {
+      const button = document.createElement('button');
+      button.className = 'preset-button';
+      button.dataset.preset = i.toString();
+      button.textContent = `Preset ${i}`;
+      button.addEventListener('click', () => {
+        // Remove active class from all buttons
+        buttonsContainer.querySelectorAll('.preset-button').forEach(btn => {
+          btn.classList.remove('active');
+        });
+        
+        // Add active class to clicked button
+        button.classList.add('active');
+        
+        // Clear previous selection
+        this.selectedCards.clear();
+        this.currentPreset = null;
+        this.isCustomSettings = true;
+        
+        // Update UI
+        this.updateSelectedCardsList();
+        this.updateConfirmButton();
+        this.updateGameMode();
+      });
+      buttonsContainer.appendChild(button);
+    }
   }
 
   updateGameMode() {
