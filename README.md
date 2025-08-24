@@ -1,43 +1,150 @@
-# cardio
-a card game
+# HORSES - Dominion-Inspired Deck Builder
 
-Python code
-python3 -m http.server 1000
+A single-player deck-building game inspired by Dominion, built with vanilla JavaScript and modern web technologies.
 
+## 🎮 Game Overview
 
-Bug list: 
-* End game win conditions do not work
+HORSES is a strategic deck-building game where you start with a basic deck of 10 cards (7 Coppers + 3 Estates) and build your collection through strategic purchases and clever card play. The goal is to accumulate victory points by buying powerful cards and creating synergistic combinations.
 
-To-do
-* Is it horse-themed? 
-* When bonusGodl is added, how do we tell this to the player in the UI
-* Turn off hover state and hand-cursor for Treasure and Victory cards in hand
-* Add data tracker
-* After troubleshooting, make sure that the Deck Inventory shows all cards you own and not what's in discard
+## 🚀 Quick Start
 
-Cards are working? A checklist
+1. **Start the server:**
+   ```bash
+   python3 -m http.server 3000
+   ```
+
+2. **Open your browser:**
+   Navigate to `http://localhost:3000`
+
+3. **Play the game:**
+   - Click "Start New Game" on the landing page
+   - Configure your game settings (optional)
+   - Begin building your deck!
+
+## 📁 Project Structure
+
+### Core JavaScript Files
+
+#### `src/main.js` - Main Application Controller
+The central orchestrator that manages the entire application flow.
+- **ScreenManager**: Handles navigation between landing page, setup, and game screens
+- **GameController**: Coordinates game logic and UI updates
+- **GameUI**: Manages all user interface rendering and interactions
+- **Event Handling**: Processes user clicks, card plays, and game actions
+- **Error Management**: Provides user-friendly error messages and validation
+
+#### `src/game.js` - Game State & Logic Engine
+The heart of the game mechanics and state management.
+- **GameState**: Main game controller with turn management and phase progression
+- **Player**: Player state management (deck, hand, discard, play area, resources)
+- **SupplyPile**: Supply management with card counts and availability
+- **GameFactory**: Creates new games with proper initialization
+- **Game Phases**: SETUP → DEALING → ACTION → BUY → CLEANUP → GAME_OVER
+- **Effect System**: Executes card effects (draw, actions, buys, money)
+- **Game End Conditions**: Checks for victory conditions and determines winners
+
+#### `src/cards.js` - Card Definitions & Registry
+Comprehensive card system with definitions, effects, and management.
+- **Card Definitions**: Complete card library with properties, costs, and effects
+- **CardType System**: TREASURE, VICTORY, ACTION, ACTION_TREASURE, ACTION_VICTORY, CURSE
+- **Effect System**: String-based effects (e.g., "draw:3", "actions:2", "money:1")
+- **CardRegistry**: Centralized card lookup and filtering system
+- **Supply Management**: Default supply setups and card availability
+- **Complex Cards**: Support for cards requiring targeting or special handling
+
+### Supporting Files
+
+#### `index.html` - Multi-Screen Interface
+Single-page application with three main screens:
+- **Landing Page**: Welcome screen with game introduction and start options
+- **Setup Screen**: Game configuration and card selection interface
+- **Game Screen**: Full gameplay interface with all game elements
+
+#### `styles.css` - Comprehensive Styling
+Modern, responsive design system:
+- **Screen Management**: CSS-based screen switching and transitions
+- **Card Styling**: Visual design for different card types and states
+- **Responsive Layout**: Mobile-friendly grid and flexbox layouts
+- **Interactive Elements**: Hover effects, animations, and visual feedback
+- **Typography**: Outfit font integration with proper hierarchy
+
+## 🎯 Game Mechanics
+
+### Core Loop
+1. **Draw Phase**: Draw 5 cards from your deck
+2. **Action Phase**: Play action cards (if you have actions remaining)
+3. **Buy Phase**: Use treasure to buy new cards from the supply
+4. **Cleanup**: Discard played cards and cards in hand, draw new hand
+
+### Card Types
+- **Treasure Cards**: Provide money for buying (Copper, Silver, Gold)
+- **Victory Cards**: Worth points at game end (Estate, Duchy, Province)
+- **Action Cards**: Provide various effects (draw cards, gain actions, etc.)
+- **Action-Treasure/Victory**: Hybrid cards that serve multiple purposes
+
+### Victory Conditions
+- **Primary**: Accumulate the most victory points
+- **Alternative**: Game ends when 3+ supply piles are empty
+- **Province Rule**: Game ends immediately if Province pile is empty
+
+## 🃏 Available Cards
+
+### Base Cards
+- **Copper** (0 cost) - Worth 1 money
+- **Silver** (3 cost) - Worth 2 money  
+- **Gold** (6 cost) - Worth 3 money
+- **Estate** (2 cost) - Worth 1 VP
+- **Duchy** (5 cost) - Worth 3 VP
+- **Province** (8 cost) - Worth 6 VP
 
 ### Action Cards
-- ✅ Smithy (Cost: 4) - Draw 3 cards
-- ✅ Village (Cost: 3) - Draw 1 card, +2 Actions
-- ✅ Cellar (Cost: 2) - +1 Action, Discard any number of cards, then draw that many
-- ✅ Remodel (Cost: 4) - Trash a card from your hand. Gain a card costing up to $2 more
-- ✅ Market (Cost: 5) - +1 Card, +1 Action, +1 Buy, +1 Gold
-- ✅ Festival (Cost: 5) - +2 Actions, +1 Buy, +2 Gold
-- ✅ Laboratory (Cost: 5) - +2 Cards, +1 Action
-- ✅ Woodcutter (Cost: 3) - +1 Buy, +2 Gold
-- ✅ Chapel (Cost: 2) - Trash up to 4 cards from your hand
-- ✅ Workshop (Cost: 3) - Gain a card costing up to 4
-- ✅ Masquerade (Cost: 3) - Draw 2 cards, choose one to keep and discard the other
-- ✅ Vassal (Cost: 3) - +2 Gold. Reveal the top card of your deck. If it's an Action card, you may play it for free
-- ✅ Council Room (Cost: 5) - +4 Cards, +1 Buy
-- ✅ Great Hall (Cost: 3) - +1 Card, +1 Action, worth 1 VP
-- ✅ Harbinger (Cost: 3) - +1 Card, +1 Action, look through your discard pile and put a card on top of your deck
-- ✅ Library (Cost: 5) - Draw until you have 7 cards in hand. You may set aside Action cards
-- ✅ Throne Room (Cost: 4) - Choose an Action card in your hand. Play it twice
-- ✅ Mine (Cost: 5) - Trash a Treasure from your hand. Gain a Treasure costing up to 3 more
-- ✅ Moneylender (Cost: 4) - Trash a Copper from your hand for +3 coins
-- ✅ Feast (Cost: 4) - Trash this card. Gain a card costing up to 5 coins
-- ✅ Adventurer (Cost: 6) - Reveal cards until you reveal 2 Treasures. Add them to hand
-- ✅ Gardens (Cost: 4) - +1 Coin. Worth 1 VP per 10 cards in your deck
-- ✅ Treasury (Cost: 5) - +1 Card, +1 Action, +1 Coin
+- **Smithy** (4 cost) - Draw 3 cards
+- **Village** (3 cost) - Draw 1 card, +2 Actions
+- **Market** (5 cost) - Draw 1 card, +1 Action, +1 Buy, +1 Gold
+- **Festival** (5 cost) - +2 Actions, +1 Buy, +2 Gold
+- **Laboratory** (5 cost) - +2 Cards, +1 Action
+- **Workshop** (3 cost) - Gain a card costing up to 4
+- **Woodcutter** (3 cost) - +1 Buy, +2 Gold
+- **Council Room** (5 cost) - +4 Cards, +1 Buy
+- **And many more...**
+
+## 🔧 Development
+
+### Architecture Highlights
+- **Single-Page Application**: Smooth navigation without page reloads
+- **Modular Design**: Clean separation of concerns between files
+- **Event-Driven**: Responsive UI with proper event handling
+- **State Management**: Centralized game state with clear data flow
+- **Extensible**: Easy to add new cards, effects, and game modes
+
+### Key Features
+- **Real-time Updates**: UI automatically reflects game state changes
+- **Error Handling**: User-friendly error messages and validation
+- **Responsive Design**: Works on desktop and mobile devices
+- **Modern UI**: Clean, professional interface with smooth animations
+- **Debug Support**: Global access to controllers for development
+
+## 🐛 Known Issues
+
+- End game win conditions need refinement
+- Some complex card interactions require additional UI implementation
+- Deck inventory display needs optimization
+
+## 📋 To-Do List
+
+- [ ] Implement save/load game functionality
+- [ ] Add card selection UI for complex cards (Chapel, Throne Room, etc.)
+- [ ] Create card animations and visual effects
+- [ ] Add sound effects and music
+- [ ] Implement statistics tracking
+- [ ] Add tutorial mode for new players
+- [ ] Create additional card sets and expansions
+- [ ] Add AI opponent for multiplayer simulation
+
+## 🎨 Design Notes
+
+The game uses the **Outfit** font family from Google Fonts for a modern, clean appearance. The color scheme emphasizes readability and accessibility while maintaining visual appeal. The interface is designed to be intuitive for both new and experienced deck-building game players.
+
+---
+
+*Built with vanilla JavaScript, HTML5, and CSS3. No frameworks required!*

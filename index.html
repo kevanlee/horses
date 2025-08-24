@@ -4,86 +4,81 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Deck Builder</title>
-  <link rel="stylesheet" href="res/styles.css" />
+  <link rel="stylesheet" href="styles.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Funnel+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 </head>
 <body>
-  <!--<h1 class="title">✌️ Dominion-Inspired Deck Builder ✌️</h1>-->
-  <div id="game">
-    <div id="header">
-      <div id="progress-indicators">
-        <div id="victory-display">VP: <span id="current-vp">0</span>/<span id="target-vp">30</span></div>
-        <div id="turn-counter">Turn: <span id="current-turn">1</span>/<span id="max-turns">100</span></div>
+  <div id="game-container">
+    <img src="./images/logo.svg" alt="Game Logo" class="landing-logo">
+  
+  <!-- Landing Page Screen -->
+  <div id="landing-screen" class="screen active">
+    <div class="landing-container">
+      <div class="landing-header">
+        <h1 class="landing-title">Giddy up!</h1>
+        <p class="landing-subtitle">HORSES is a Dominion-like deck-building game for a single player: you.</p>
       </div>
-      <div id="scoreboard">
-        <div id="gold-display"></div>
-        <div id="actions-left">Actions: 1</div>
-        <div id="buys-left">Buys: 1</div>
-      </div>
-      <div id="header-actions">
-        <button id="next-turn">Next Turn</button>
-      </div>
-    </div>
-    <div id="hand">
-      <div id="deck-count"></div>
-      <div id="player-hand"></div>
-      <div id="discard-count"></div>
-    </div>
-    <div id="marketplace"></div>
-    <div id="bottom-section">
-      <div id="deck-inventory">
-        <h2>Deck Inventory</h2>
-        <ul id="deck-list"></ul>
-      </div>
-      <div id="log">
-        <h2>Game Log</h2>
-      </div>
-    </div>
-  </div> 
-  <div id="game-controls">
-    <img id="game-logo" src="res/img/horse-head-logo.png" alt="Game Logo">
-    <div id="game-mode">You vs. Custom</div>
-    <button id="new-game">New Game</button>
-    <button id="stats-button">Stats</button>
-  </div>
-  <div id="card-modal" class="modal hidden">
-    <div class="modal-content">
-      <h2 id="modal-title">Choose cards</h2>
-      <div id="modal-body" class="card-container"></div>
-      <button id="modal-confirm">Confirm</button>
-    </div>
-  </div>
-  <!-- Library Modal -->
-  <div id="library-modal" class="modal hidden">
-    <div class="modal-content">
-      <h2>Library - Draw Cards</h2>
-      <p id="library-modal-text">You currently have X cards. You need to draw Y more cards.</p>
-      <div id="library-hand" class="card-container"></div>
-      <button id="library-confirm" class="hidden">That's 7!</button>
+      
+              <div class="landing-actions">
+          <button id="start-game-btn" class="primary-button">Start New Game</button>
+          <button id="quick-start-btn" class="secondary-button">Quick Start</button>
+          <button id="continue-game-btn" class="secondary-button" disabled>Continue Game</button>
+        </div>
     </div>
   </div>
 
-  <!-- Setup Modal -->
-  <div id="setup-modal" class="modal hidden">
-    <div class="modal-content setup-modal">
-      <div class="modal-header">
-        <img src="res/img/horse-head-logo.png" alt="Game Logo" class="modal-logo">
-        <h1>Hay Day</h1>
+  <!-- Level Selection Screen -->
+  <div id="level-screen" class="screen">
+    <div class="level-container">
+      <div class="level-header">
+        <button id="back-to-landing-from-level" class="back-button">← Back to Menu</button>
+        <h2>Choose Your Challenge</h2>
       </div>
-      <p>Come horse around with this Dominion-inspired deck builder. Play your way through the gauntlet, or craft a custom sandbox. <a href="https://github.com/jason-m-hicks/dominion-deck-builder">Here are the rules</a>. Go have fun!</p>
-      <div id="setup-body">
+      
+      <div class="level-grid">
+        <!-- Level cards will be populated here -->
+      </div>
+      
+      <div class="level-actions">
+        <button id="custom-game-btn" class="secondary-button">Create Custom Game</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Game Setup Screen -->
+  <div id="custom-setup-screen" class="screen">
+    <div class="setup-container">
+      <div class="setup-header">
+        <button id="back-to-level" class="back-button">← Back to Levels</button>
+        <h2>Custom Game Setup</h2>
+      </div>
+      
+      <div class="setup-content">
         <div class="setup-section">
-          <h3>Game Configuration</h3>
+          <h3>End Game Conditions</h3>
+          <p class="setup-description">Set one or more conditions. Game ends when ANY condition is met.</p>
           <div class="config-options">
             <div class="config-option">
               <label for="vp-to-win">Victory Points to Win:</label>
-              <input type="number" id="vp-to-win" value="30" min="1" max="100">
+              <input type="number" id="vp-to-win" placeholder="Leave empty for no limit" min="1" max="100">
             </div>
             <div class="config-option">
-              <label for="max-turns-input">Maximum Turns:</label>
-              <input type="number" id="max-turns-input" value="100" min="1" max="1000">
+              <label for="max-turns">Maximum Turns:</label>
+              <input type="number" id="max-turns" placeholder="Leave empty for no limit" min="1" max="1000">
+            </div>
+            <div class="config-option">
+              <label for="cards-in-hand">Cards in Hand:</label>
+              <input type="number" id="cards-in-hand" placeholder="Leave empty for no limit" min="1" max="20">
+            </div>
+            <div class="config-option">
+              <label for="money-in-hand">Money in Hand:</label>
+              <input type="number" id="money-in-hand" placeholder="Leave empty for no limit" min="1" max="50">
+            </div>
+            <div class="config-option">
+              <label for="time-limit">Time Limit (minutes):</label>
+              <input type="number" id="time-limit" placeholder="Leave empty for no limit" min="1" max="120">
             </div>
           </div>
         </div>
@@ -92,7 +87,7 @@
           <h3>Select Action Cards (10 required)</h3>
           <div class="card-selection">
             <div class="card-list">
-              <!-- Cards will be populated here -->
+              <!-- Action cards will be populated here -->
             </div>
             <div class="selected-cards">
               <h4>Selected Cards (<span id="selected-count">0</span>/10)</h4>
@@ -101,52 +96,63 @@
           </div>
         </div>
       </div>
-      <div class="setup-buttons">
-        <button id="setup-confirm" class="modal-button" disabled>Start Game</button>
-        <button id="default-game-link" class="modal-button">Play all cards and no limits</button>
+      
+      <div class="setup-actions">
+        <button id="start-custom-game-btn" class="primary-button" disabled>Start Custom Game</button>
       </div>
     </div>
   </div>
 
-  <!-- Stats Modal -->
-  <div id="stats-modal" class="modal hidden">
-    <div class="modal-content stats-modal">
-      <h2>Player Statistics</h2>
-      <div class="stats-content">
-        <div class="stats-summary">
-          <div class="stat-item">
-            <h3>Games Played</h3>
-            <p id="games-played">0</p>
-          </div>
-          <div class="stat-item">
-            <h3>Win Rate</h3>
-            <p id="win-rate">0%</p>
-          </div>
-          <div class="stat-item">
-            <h3>Highest Score</h3>
-            <p id="highest-score">0</p>
-          </div>
-          <div class="stat-item">
-            <h3>Average Score</h3>
-            <p id="average-score">0</p>
-          </div>
-          <div class="stat-item">
-            <h3>Fastest Win</h3>
-            <p id="fastest-win">-</p>
-          </div>
-        </div>
-        <div class="game-history">
-          <h3>Recent Games</h3>
-          <div id="game-history-list"></div>
+  <!-- Game Screen -->
+  <div id="game-screen" class="screen">
+    <div id="game-container">
+      <div id="game-header">
+        <div id="game-menu">
+          <button id="back-to-setup" class="menu-button">Menu</button>
         </div>
       </div>
-      <div class="stats-buttons">
-        <button id="reset-stats" class="modal-button">Reset Statistics</button>
-        <button id="close-stats" class="modal-button">Close</button>
+      
+      <div id="game-body">
+        <div id="game">
+          <div id="header">
+            <div id="progress-indicators">
+              <div id="victory-display">VP: <span id="current-vp">0</span>/<span id="target-vp">30</span></div>
+              <div id="turn-counter">Turn: <span id="current-turn">1</span>/<span id="max-turns">100</span></div>
+            </div>
+            <div id="scoreboard">
+              <div id="gold-display"></div>
+              <div id="actions-left">Actions: 1</div>
+              <div id="buys-left">Buys: 1</div>
+            </div>
+            <div id="header-actions">
+              <button id="next-turn">Next Turn</button>
+            </div>
+          </div>
+          
+          <div id="hand">
+            <div id="deck-count"></div>
+            <div id="player-hand"></div>
+            <div id="discard-count"></div>
+          </div>
+          
+          <div id="marketplace"></div>
+          
+          <div id="bottom-section">
+            <div id="deck-inventory">
+              <h2>Deck Inventory</h2>
+              <ul id="deck-list"></ul>
+            </div>
+            <div id="log">
+              <h2>Game Log</h2>
+            </div>
+          </div>
+        </div>
       </div>
+      
+      <div id="game-footer"></div>
     </div>
   </div>
-
+</div>
   <script type="module" src="src/main.js"></script>
 </body>
 </html>

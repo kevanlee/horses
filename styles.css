@@ -1,10 +1,254 @@
 /* === Global Styles === */
 body {
-  font-family: "Funnel Sans", sans-serif;
+  font-family: "Outfit", sans-serif;
   background-color: #f3f3f3;
-  padding: 1rem;
+  margin: 0;
+  padding: 0;
   background-image: radial-gradient(circle at 1px 1px, #e7e7e7 1px, transparent 0);
   background-size: 8px 8px;
+  min-height: 100vh;
+}
+
+/* === Screen Management === */
+.screen {
+  display: none;
+  min-height: 100vh;
+  width: 100%;
+}
+
+.screen.active {
+  display: block;
+}
+
+/* === Landing Page Styles === */
+.landing-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.landing-header {
+  margin-bottom: 3rem;
+}
+
+.landing-logo {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 1rem;
+}
+
+.landing-title {
+  font-size: 3.5rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  color: #2c3e50;
+}
+
+.landing-subtitle {
+  font-size: 1.2rem;
+  color: #7f8c8d;
+  margin: 0;
+}
+
+.landing-content {
+  margin-bottom: 3rem;
+}
+
+.landing-description {
+  max-width: 600px;
+  margin: 0 auto 3rem auto;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: #34495e;
+}
+
+.landing-features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.feature {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.feature:hover {
+  transform: translateY(-4px);
+}
+
+.feature h3 {
+  margin: 0 0 1rem 0;
+  color: #2c3e50;
+  font-size: 1.3rem;
+}
+
+.feature p {
+  margin: 0;
+  color: #7f8c8d;
+  line-height: 1.5;
+}
+
+.landing-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* === Setup Screen Styles === */
+.setup-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.setup-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #ecf0f1;
+}
+
+.setup-header h2 {
+  margin: 0;
+  color: #2c3e50;
+}
+
+.setup-content {
+  margin-bottom: 2rem;
+}
+
+.setup-section {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+.setup-section h3 {
+  margin: 0 0 1.5rem 0;
+  color: #2c3e50;
+  font-size: 1.5rem;
+}
+
+.setup-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* === Button Styles === */
+.primary-button {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.primary-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.primary-button:disabled {
+  background: #bdc3c7;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.secondary-button {
+  background: white;
+  color: #2c3e50;
+  border: 2px solid #3498db;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.secondary-button:hover {
+  background: #3498db;
+  color: white;
+  transform: translateY(-2px);
+}
+
+.secondary-button:disabled {
+  border-color: #bdc3c7;
+  color: #bdc3c7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.back-button {
+  background: transparent;
+  color: #7f8c8d;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.back-button:hover {
+  background: #ecf0f1;
+  color: #2c3e50;
+}
+
+.menu-button {
+  background: transparent;
+  color: #2c3e50;
+  border: 1px solid #bdc3c7;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.menu-button:hover {
+  background: #ecf0f1;
+  border-color: #95a5a6;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Outfit", sans-serif;
+  font-weight: 600;
+}
+
+h1 {
+  font-weight: 700;
+  font-size: 2.5rem;
+}
+
+h2 {
+  font-weight: 600;
+  font-size: 2rem;
+}
+
+h3 {
+  font-weight: 600;
+  font-size: 1.5rem;
 }
 
 h1.title {
@@ -345,14 +589,32 @@ h1.title {
   margin: 4px 0;
 }
 
-.card em {
-  display: block;
-  color: #666;
-  font-style: normal;
-  font-size: 0.9em;
-  text-align: right;
-  margin-top: auto;
-}
+ .card em {
+   display: block;
+   color: #666;
+   font-style: normal;
+   font-size: 0.9em;
+   text-align: right;
+   margin-top: auto;
+ }
+
+ .card-count {
+   position: absolute;
+   top: 5px;
+   right: 5px;
+   background: rgba(0, 0, 0, 0.7);
+   color: white;
+   padding: 2px 6px;
+   border-radius: 4px;
+   font-size: 0.8em;
+   font-weight: bold;
+ }
+
+ .log-entry {
+   padding: 2px 0;
+   border-bottom: 1px solid #eee;
+   font-size: 0.9em;
+ }
 
 .card-icon {
   width: 25px;
@@ -633,9 +895,17 @@ button:active {
 }
 
 .config-options {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 20px;
   margin-bottom: 20px;
+}
+
+.setup-description {
+  color: #7f8c8d;
+  font-size: 0.9rem;
+  margin-bottom: 15px;
+  font-style: italic;
 }
 
 .config-option {
