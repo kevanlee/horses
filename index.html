@@ -22,17 +22,41 @@
       </ul>
       <button id="next-turn">Next Turn</button>
     </div>
+
     <div id="hand">
       <div id="deck-count"></div>
       <div id="player-hand"></div>
       <div id="discard-count"></div>
+    </div>
+    <div id="play-area">
+      <h2>Play Area</h2>
+      <div id="played-cards" class="card-container"></div>
+    </div>
+    <div id="phase-controls">
+      <div id="phase-display">
+        <span class="phase-item completed">New Deal</span>
+        <span class="phase-separator">|</span>
+        <span class="phase-item current">Action</span>
+        <span class="phase-separator">|</span>
+        <span class="phase-item">Buy</span>
+        <span class="phase-separator">|</span>
+        <span class="phase-item">Clean Up</span>
+      </div>
+      <button id="next-phase">Next Phase</button>
     </div>
     <div id="shop">
       <div id="deck-inventory">
         <h2>Deck Inventory</h2>
         <ul id="deck-list"></ul>
       </div> 
-      <div id="marketplace"></div>
+      <div id="marketplace">
+        <h2>Marketplace</h2>
+        <div id="marketplace-top">
+          <div id="money-cards"></div>
+          <div id="victory-cards"></div>
+        </div>
+        <div id="action-cards"></div>
+      </div>
     </div>
   </div> 
   <div id="log"><h2>Game Log</h2></div> 

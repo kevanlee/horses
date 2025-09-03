@@ -26,6 +26,52 @@ h1.title {
   align-items: center;
 }
 
+/* === Phase Controls === */
+#phase-controls {
+  grid-column: span 12;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 20px;
+}
+
+#phase-display {
+  display: flex;
+  align-items: center;
+  font-size: 1rem;
+}
+
+.phase-item {
+  padding: 0.25rem 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.phase-item.current {
+  text-decoration: underline;
+  font-weight: bold;
+  color: #000;
+}
+
+.phase-item.completed {
+  color: #888;
+  font-style: italic;
+}
+
+.phase-item:not(.current):not(.completed) {
+  color: #666;
+}
+
+.phase-separator {
+  color: #ccc;
+  margin: 0 0.5rem;
+  font-weight: normal;
+}
+
+#next-phase {
+  cursor: pointer;
+}
+
 #scoreboard {
   list-style: none;
   display: flex;
@@ -51,6 +97,27 @@ h1.title {
   gap: 1rem;
   padding-bottom: 15px;
   border-bottom: 1px solid #000000; 
+}
+
+/* === Play Area Section === */
+#play-area {
+  grid-column: span 12;
+  background-color: white;
+  border: 1px solid #ccc;
+  padding: 1rem;
+  border-radius: 8px;
+  margin: 1rem 0;
+}
+
+#play-area h2 {
+  margin: 0 0 1rem 0;
+  text-align: center;
+  font-size: 1.5rem;
+}
+
+.played-card {
+  background-color: #e8f5e8;
+  border-color: #4CAF50;
 }
 
 #deck-count {
@@ -115,6 +182,41 @@ h1.title {
   border: 1px solid #ccc;
   padding: 1rem;
   border-radius: 8px;
+}
+
+#marketplace h2 {
+  margin: 0 0 1rem 0;
+  text-align: center;
+}
+
+#marketplace-top {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 1rem;
+}
+
+#money-cards, #victory-cards, #action-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+#money-cards h3, #victory-cards h3, #action-cards h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+#money-cards .card-container, #victory-cards .card-container, #action-cards .card-container {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+#action-cards .card-container {
+  justify-content: flex-start;
 }
 
 /* === Log Section === */

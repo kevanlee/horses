@@ -1,5 +1,4 @@
-import { drawCards, shuffle } from './game.js';
-import { marketSupply } from './main.js';
+import { GAME_CONFIG } from './constants.js';
 
 function playActionCard(player, card) {
   const index = player.hand.indexOf(card);
@@ -14,18 +13,18 @@ function playActionCard(player, card) {
 export function playActionCardEffect(card, player) {
   switch (card.name) {
     case "Smithy":
-      drawCards(player, 3);
+      window.gameEngine.drawCards(player, 3);
       player.log("Smithy: +3 Cards");
       break;
       
     case "Village":
-      drawCards(player, 1);
+      window.gameEngine.drawCards(player, 1);
       player.actions += 2;
       player.log("Village: +1 Card, +2 Actions");
       break;
       
     case "Market":
-      drawCards(player, 1);
+      window.gameEngine.drawCards(player, 1);
       player.actions += 1;
       player.buys += 1;
       player.bonusGold += 1; 
@@ -51,7 +50,7 @@ export function playActionCardEffect(card, player) {
       break;
 
     case "Laboratory":
-      drawCards(player, 2);
+      window.gameEngine.drawCards(player, 2);
       player.actions += 1;
       player.log("Laboratory: +2 Cards, +1 Action");
       break;
@@ -75,10 +74,10 @@ export function playActionCardEffect(card, player) {
       break;    
 
     case "Great Hall":
-      drawCards(player, 1);
+      window.gameEngine.drawCards(player, 1);
       player.actions += 1;
       player.log("Great Hall: +1 Card, +1 Action");
-      updateVictoryPoints(); // 🏆 Recalculate VP immediately
+      window.uiManager.updateVictoryPoints(); // 🏆 Recalculate VP immediately
       break;
 
     case 'Masquerade':
@@ -87,14 +86,14 @@ export function playActionCardEffect(card, player) {
       break;
     
     case 'Harbinger':
-      drawCards(player, 1);
+      window.gameEngine.drawCards(player, 1);
       player.actions += 1;
       player.log("Harbinger: +1 Card, +1 Action");
       handleHarbingerEffect(player, card); 
       break;
     
     case "Council Room":
-      drawCards(player, 4);
+      window.gameEngine.drawCards(player, 4);
       player.buys += 1;
       player.log("Council Room: +4 Cards, +1 Buy");
       break;
@@ -157,13 +156,11 @@ function handleCellarEffect(player, cellarCard) {
     });
 
     player.hand = kept;
-    drawCards(player, numToDraw);
+    window.gameEngine.drawCards(player, numToDraw);
 
     // Close modal and update UI
     modal.classList.add('hidden');
-    renderHand();
-    renderMarketplace();
-
+    window.uiManager.refreshAfterActionCard();
   };
 }
 
@@ -185,7 +182,7 @@ function handleLibraryEffect(player, libraryCard) {
   confirmButton.classList.add('hidden'); // Initially hide the confirm button
 
   const currentHandSize = player.hand.length;
-  const cardsNeeded = 7 - currentHandSize;
+  const cardsNeeded = GAME_CONFIG.LIBRARY_TARGET_HAND_SIZE - currentHandSize;
 
   // Display how many cards are needed
   text.textContent = `You currently have ${currentHandSize} cards. You need to draw ${cardsNeeded} more card(s).`;
@@ -193,7 +190,7 @@ function handleLibraryEffect(player, libraryCard) {
   let drawn = [];
   for (let i = 0; i < cardsNeeded; i++) {
     if (player.deck.length === 0 && player.discard.length > 0) {
-      player.deck = shuffle(player.discard);
+      player.deck = window.gameEngine.shuffle(player.discard);
       player.discard = [];
     }
 
@@ -224,7 +221,7 @@ function handleLibraryEffect(player, libraryCard) {
 
         // If deck is empty, shuffle discard pile and continue drawing
         if (player.deck.length === 0 && player.discard.length > 0) {
-          player.deck = shuffle(player.discard);
+          player.deck = window.gameEngine.shuffle(player.discard);
           player.discard = [];
         }
         if (player.deck.length > 0) {
@@ -264,11 +261,8 @@ function handleLibraryEffect(player, libraryCard) {
     confirmButton.onclick = () => {
       // Add the drawn cards to the player's hand
       player.hand.push(...drawn);
-      renderHand(); // Re-render the player's hand
+      window.uiManager.refreshAfterActionCard(); // Use the new UI manager
       modal.classList.add('hidden');
-
-      // Re-render the market supply if there are changes to the hand
-      renderMarketplace(); // This will need to be implemented to update the available market cards
     };
   }
 }
@@ -335,9 +329,8 @@ function handleChapelEffect(player, chapelCard) {
 
       // Close the modal and update the UI
       modal.classList.add('hidden');
-      renderHand();
-      renderDeckInventory();  
-      updateVictoryPoints();
+      window.uiManager.refreshAfterActionCard();
+      window.uiManager.updateVictoryPoints();
     } else {
       alert('Please select at least one card to trash.');
     }
@@ -358,7 +351,7 @@ function handleWorkshopEffect(player, workshopCard) {
   const selectedCardIndex = { value: null };
 
   // Filter marketSupply for cards costing <= 4
-  marketSupply.forEach((slot, idx) => {
+  window.currentMarketSupply.forEach((slot, idx) => {
     if (slot.card.cost <= 4 && slot.count > 0) {
       const cardEl = document.createElement('div');
       cardEl.className = 'card';
@@ -382,7 +375,7 @@ function handleWorkshopEffect(player, workshopCard) {
   modalConfirm.textContent = 'Gain Selected';
   modalConfirm.onclick = () => {
     if (selectedCardIndex.value !== null) {
-      const chosenSlot = marketSupply[selectedCardIndex.value];
+      const chosenSlot = window.currentMarketSupply[selectedCardIndex.value];
       if (chosenSlot.count > 0) {
         player.discard.push(chosenSlot.card);
         chosenSlot.count--;
@@ -394,9 +387,7 @@ function handleWorkshopEffect(player, workshopCard) {
   
     // Close modal and update UI
     modal.classList.add('hidden');
-    renderHand();
-    renderMarketplace();
-    renderDeckInventory();
+    window.uiManager.refreshAfterActionCard();
   };
 }
 
@@ -418,7 +409,7 @@ function handleVassalEffect(player, vassalCard) {
   modalConfirm.classList.add('hidden'); // Hide confirm button for now
 
   if (player.deck.length === 0) {
-    shuffleDiscardIntoDeck(player);
+    window.gameEngine.shuffleDiscardIntoDeck();
   }
 
   if (player.deck.length === 0) {
@@ -427,9 +418,7 @@ function handleVassalEffect(player, vassalCard) {
     modalConfirm.textContent = 'Continue';
     modalConfirm.onclick = () => {
       modal.classList.add('hidden');
-      renderHand();
-      renderMarketplace();
-      renderDeckInventory();
+      window.uiManager.refreshAfterActionCard();
     };
     modal.classList.remove('hidden');
     return;
@@ -459,9 +448,7 @@ function handleVassalEffect(player, vassalCard) {
         playActionCard(player, topCard);
         player.log(`Vassal: You played ${topCard.name} for free!`);
         modal.classList.add('hidden');
-        renderHand();
-        renderMarketplace();
-        renderDeckInventory();
+        window.uiManager.refreshAfterActionCard();
       };
 
       // Add discard option
@@ -471,9 +458,7 @@ function handleVassalEffect(player, vassalCard) {
         player.discard.push(topCard);
         player.log(`Vassal: You discarded ${topCard.name}.`);
         modal.classList.add('hidden');
-        renderHand();
-        renderMarketplace();
-        renderDeckInventory();
+        window.uiManager.refreshAfterActionCard();
       };
       modalBody.appendChild(discardButton);
     } else {
@@ -483,9 +468,7 @@ function handleVassalEffect(player, vassalCard) {
       modalConfirm.textContent = 'Continue';
       modalConfirm.onclick = () => {
         modal.classList.add('hidden');
-        renderHand();
-        renderMarketplace();
-        renderDeckInventory();
+        window.uiManager.refreshAfterActionCard();
       };
     }
   });
@@ -501,7 +484,7 @@ function handleMasqueradeEffect(player, card) {
     if (player.deck.length === 0 && player.discard.length > 0) {
       player.deck = [...player.discard];
       player.discard = [];
-      shuffle(player.deck);
+      window.gameEngine.shuffle(player.deck);
     }
     if (player.deck.length > 0) {
       drawnCards.push(player.deck.shift());
@@ -567,10 +550,7 @@ function handleMasqueradeEffect(player, card) {
     modalBody.innerHTML = '';
 
     // Update the UI
-    renderHand();
-    renderDeckAndDiscardCount();
-    updateVictoryPoints();
-    renderMarketplace();
+    window.uiManager.refreshAfterActionCard();
   }
 
   // Add the listener
@@ -680,9 +660,7 @@ function handleHarbingerEffect(player, card) {
     modalBody.innerHTML = '';
 
     // Update UI
-    renderHand();
-    renderDeckAndDiscardCount();
-    updateVictoryPoints();
+    window.uiManager.refreshAfterActionCard();
   }
 
   // Set up the modal
