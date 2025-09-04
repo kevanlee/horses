@@ -73,7 +73,7 @@ body {
 
 #game-screen #game-container { width: 100%; }
 
-#game, #game #header { 
+#game, #game #header {
   display: flex; 
   flex-direction: column; 
   align-items: center; 
@@ -84,7 +84,17 @@ body {
   padding: 20px; 
 }
 
-#game #hand, #game #marketplace, #game #bottom-section, #progress-indicators, #scoreboard, #player-hand {
+#game #marketplace, #game #marketplace-content { 
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; 
+  justify-content: flex-start; 
+  width: 100%; 
+  box-sizing: border-box; 
+  padding: 20px; 
+}
+
+#game #hand, #game #bottom-section, #progress-indicators, #scoreboard, #player-hand {
   display: flex; 
   flex-direction: row; 
   align-items: center; 

@@ -118,26 +118,62 @@
         <div id="game">
           <div id="header">
             <div id="progress-indicators">
-              <div id="victory-display">VP: <span id="current-vp">0</span>/<span id="target-vp">30</span></div>
-              <div id="turn-counter">Turn: <span id="current-turn">1</span>/<span id="max-turns">100</span></div>
+              <div id="victory-display">Points: <span id="current-vp">0</span>/<span id="target-vp">30</span></div>
+              <div id="turn-counter">Turns: <span id="current-turn">1</span>/<span id="max-turns">100</span></div>
             </div>
-            <div id="scoreboard">
-              <div id="gold-display"></div>
-              <div id="actions-left">Actions: 1</div>
-              <div id="buys-left">Buys: 1</div>
-            </div>
+          </div>
+          <div id="play-area">
+              <div id="play-area-title">Play Area</div>
+              <div id="play-area-content"></div>
+          </div>
+          <div id="scoreboard">
+            <div id="gold-display">Gold: <span id="gold-amount">0</span></div>
+            <div id="actions-left">Actions: <span id="actions-amount">1</span></div>
+            <div id="buys-left">Buys: <span id="buys-amount">1</span></div>
             <div id="header-actions">
               <button id="next-turn">Next Turn</button>
             </div>
           </div>
           
           <div id="hand">
+            <div id="hand-title">Hand</div>
             <div id="deck-count"></div>
             <div id="player-hand"></div>
             <div id="discard-count"></div>
           </div>
+
+          <div id="game-phases">
+            <div id="timeline-display">
+              <div id="draw-phase">Draw</div>
+              <div id="action-phase">Action</div>
+              <div id="buy-phase">Buy</div>
+              <div id="cleanup-phase">Cleanup</div>
+            </div>
+          </div>
           
-          <div id="marketplace"></div>
+          <div id="marketplace">
+            <div id="marketplace-title">Shop</div>
+            <div id="marketplace-content">
+              <div id="marketplace-header">
+                <div id="money-display">Money: <span id="marketplace-money-amount">0</span></div>
+                <div id="buys-display">Buys: <span id="marketplace-buys-amount">1</span></div>
+                <div id="header-actions">
+                  <button id="next-turn" class="secondary-button">Done shopping</button>
+                </div>
+              </div>
+              <div id="marketplace-cards">
+                <div id="treasure-cards">
+                  <div id="treasure-cards-content"></div>
+                </div>
+                <div id="victory-cards">
+                  <div id="victory-cards-content"></div>
+                </div>
+                <div id="action-cards">
+                  <div id="action-cards-content"></div>
+                </div>
+              </div>
+            </div>
+          </div>
           
           <div id="bottom-section">
             <div id="deck-inventory">

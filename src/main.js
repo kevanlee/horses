@@ -317,17 +317,17 @@ class GameUI {
 
   // Initialize event listeners
   initializeEventListeners() {
-    // Next turn button
-    const nextTurnBtn = document.getElementById('next-turn');
-    if (nextTurnBtn) {
-      nextTurnBtn.addEventListener('click', () => {
+    // Next turn buttons (there are two - one in scoreboard, one in marketplace)
+    const nextTurnBtns = document.querySelectorAll('#next-turn');
+    nextTurnBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
         if (this.controller.game.phase === GamePhase.ACTION) {
           this.controller.startBuyPhase();
         } else if (this.controller.game.phase === GamePhase.BUY) {
           this.controller.endTurn();
         }
       });
-    }
+    });
 
     // New game button
     const newGameBtn = document.getElementById('new-game');
@@ -348,6 +348,7 @@ class GameUI {
     this.updateGameLog(gameState.gameLog);
     this.updatePhaseInfo(gameState.phase);
     this.updateTurnInfo(gameState.turn);
+    this.updateGameEndConditions(this.controller.game);
     
     if (gameState.gameOver) {
       this.showGameOver();
@@ -378,20 +379,31 @@ class GameUI {
       discardCount.textContent = `Discard: ${player.getDiscardSize()}`;
     }
 
-    // Update player stats
-    const actionsLeft = document.getElementById('actions-left');
-    if (actionsLeft) {
-      actionsLeft.textContent = `Actions: ${player.actions}`;
+    // Update all dynamic values in scoreboard
+    const goldAmount = document.getElementById('gold-amount');
+    if (goldAmount) {
+      goldAmount.textContent = player.money;
     }
 
-    const buysLeft = document.getElementById('buys-left');
-    if (buysLeft) {
-      buysLeft.textContent = `Buys: ${player.buys}`;
+    const actionsAmount = document.getElementById('actions-amount');
+    if (actionsAmount) {
+      actionsAmount.textContent = player.actions;
     }
 
-    const goldDisplay = document.getElementById('gold-display');
-    if (goldDisplay) {
-      goldDisplay.textContent = `Gold: ${player.money}`;
+    const buysAmount = document.getElementById('buys-amount');
+    if (buysAmount) {
+      buysAmount.textContent = player.buys;
+    }
+
+    // Update marketplace header displays
+    const marketplaceMoneyAmount = document.getElementById('marketplace-money-amount');
+    if (marketplaceMoneyAmount) {
+      marketplaceMoneyAmount.textContent = player.money;
+    }
+
+    const marketplaceBuysAmount = document.getElementById('marketplace-buys-amount');
+    if (marketplaceBuysAmount) {
+      marketplaceBuysAmount.textContent = player.buys;
     }
 
     // Update victory points
@@ -403,10 +415,14 @@ class GameUI {
 
   // Update supply display
   updateSupply(supply) {
-    const marketplace = document.getElementById('marketplace');
-    if (!marketplace) return;
-
-    marketplace.innerHTML = '<h3 class="marketplace-title">Supply</h3>';
+    // Clear existing card content
+    const treasureContent = document.getElementById('treasure-cards-content');
+    const victoryContent = document.getElementById('victory-cards-content');
+    const actionContent = document.getElementById('action-cards-content');
+    
+    if (treasureContent) treasureContent.innerHTML = '';
+    if (victoryContent) victoryContent.innerHTML = '';
+    if (actionContent) actionContent.innerHTML = '';
 
     // Group cards by type
     const treasureCards = [];
@@ -426,20 +442,17 @@ class GameUI {
       }
     }
 
-    // Create sections
-    if (treasureCards.length > 0) {
-      const treasureSection = this.createMarketSection('Treasure Cards', treasureCards);
-      marketplace.appendChild(treasureSection);
+    // Populate the specific containers
+    if (treasureContent && treasureCards.length > 0) {
+      treasureCards.forEach(card => treasureContent.appendChild(card));
     }
 
-    if (victoryCards.length > 0) {
-      const victorySection = this.createMarketSection('Victory Cards', victoryCards);
-      marketplace.appendChild(victorySection);
+    if (victoryContent && victoryCards.length > 0) {
+      victoryCards.forEach(card => victoryContent.appendChild(card));
     }
 
-    if (actionCards.length > 0) {
-      const actionSection = this.createMarketSection('Action Cards', actionCards);
-      marketplace.appendChild(actionSection);
+    if (actionContent && actionCards.length > 0) {
+      actionCards.forEach(card => actionContent.appendChild(card));
     }
   }
 
@@ -521,25 +534,25 @@ class GameUI {
 
   // Update phase information
   updatePhaseInfo(phase) {
-    const nextTurnBtn = document.getElementById('next-turn');
-    if (nextTurnBtn) {
+    const nextTurnBtns = document.querySelectorAll('#next-turn');
+    nextTurnBtns.forEach(btn => {
       if (phase === GamePhase.SETUP) {
-        nextTurnBtn.textContent = 'Setup Complete';
-        nextTurnBtn.disabled = true;
+        btn.textContent = 'Setup Complete';
+        btn.disabled = true;
       } else if (phase === GamePhase.DEALING) {
-        nextTurnBtn.textContent = 'Dealing...';
-        nextTurnBtn.disabled = true;
+        btn.textContent = 'Dealing...';
+        btn.disabled = true;
       } else if (phase === GamePhase.ACTION) {
-        nextTurnBtn.textContent = 'Start Buy Phase';
-        nextTurnBtn.disabled = false;
+        btn.textContent = 'Start Buy Phase';
+        btn.disabled = false;
       } else if (phase === GamePhase.BUY) {
-        nextTurnBtn.textContent = 'End Turn';
-        nextTurnBtn.disabled = false;
+        btn.textContent = 'End Turn';
+        btn.disabled = false;
       } else {
-        nextTurnBtn.textContent = 'Next Turn';
-        nextTurnBtn.disabled = false;
+        btn.textContent = 'Next Turn';
+        btn.disabled = false;
       }
-    }
+    });
   }
 
   // Update turn information
@@ -547,6 +560,20 @@ class GameUI {
     const currentTurn = document.getElementById('current-turn');
     if (currentTurn) {
       currentTurn.textContent = turn;
+    }
+  }
+
+  // Update game end conditions display
+  updateGameEndConditions(game) {
+    const targetVP = document.getElementById('target-vp');
+    const maxTurns = document.getElementById('max-turns');
+    
+    if (targetVP && game.endConditions.victoryPointsToWin) {
+      targetVP.textContent = game.endConditions.victoryPointsToWin;
+    }
+    
+    if (maxTurns && game.endConditions.maxTurns) {
+      maxTurns.textContent = game.endConditions.maxTurns;
     }
   }
 
