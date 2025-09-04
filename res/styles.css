@@ -168,16 +168,9 @@ h1.title {
   gap: 1rem;
 }
 
-#deck-inventory {
-  grid-column: span 2; /* Deck inventory takes up 2 columns */
-  background-color: white;
-  border: 1px solid #ccc;
-  padding: 1rem;
-  border-radius: 8px;
-}
 
 #marketplace {
-  grid-column: span 10; /* Marketplace takes up 10 columns */
+  grid-column: span 12; /* Marketplace takes up 10 columns */
   background-color: white;
   border: 1px solid #ccc;
   padding: 1rem;
@@ -247,8 +240,25 @@ h1.title {
 }
 
 /* === Log Section === */
+
+
+#logs {
+  grid-column: span 12;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 1rem;
+}
+
+#deck-inventory {
+  grid-column: span 6; /* Deck inventory takes up 2 columns */
+  background-color: white;
+  border: 1px solid #ccc;
+  padding: 1rem;
+  border-radius: 8px;
+}
+
 #log {
-  grid-column: span 12; /* Span the entire 12-column width */
+  grid-column: span 6; /* Span the entire 12-column width */
 }
 
 /* === Card Styles === */
@@ -331,6 +341,13 @@ h1.title {
 .card.selected {
   outline: 2px solid #0077ff;
   background-color: #eef6ff;
+}
+
+.horse-logo { 
+  position: fixed; 
+  bottom: 0; 
+  right: 0;
+  z-index: 1000;
 }
 
 /* === Mobile === */

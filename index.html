@@ -10,8 +10,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Funnel+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
 </head>
 <body>
+  <img class="horse-logo" src="res/img/horse-head.svg" alt="Horses" id="horses">
   <h1 class="title">✌️ Dominion-Inspired Deck Builder ✌️</h1>
-  <div id="game">
+  <div id="game" >
     <div id="header">
       <ul id="scoreboard">
         <li><div id="gold-display"></div></li>
@@ -45,10 +46,7 @@
       <button id="next-phase">Next Phase</button>
     </div>
     <div id="shop">
-      <div id="deck-inventory">
-        <h2>Deck Inventory</h2>
-        <ul id="deck-list"></ul>
-      </div> 
+
       <div id="marketplace">
         <h2>Marketplace</h2>
         <div id="marketplace-top">
@@ -58,8 +56,14 @@
         <div id="action-cards"></div>
       </div>
     </div>
-  </div> 
+    <div id="logs">
+      <div id="deck-inventory">
+      <h2>Deck Inventory</h2>
+      <ul id="deck-list"></ul>
+    </div> 
   <div id="log"><h2>Game Log</h2></div> 
+    </div>
+
   <div id="card-modal" class="modal hidden">
     <div class="modal-content">
       <h2 id="modal-title">Choose cards</h2>
