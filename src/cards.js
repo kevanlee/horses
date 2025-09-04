@@ -15,7 +15,7 @@ export const cardTypes = {
     village: { name: 'Village', type: 'Action', cost: 3, description: 'Draw 1 card, +2 Actions' },
     market: { name: 'Market', type: 'Action', cost: 5, description: 'Draw 1 card, +1 Action, +1 Buy, +1 Gold' },
     cellar: {
-      name: 'Cellar',
+      name: 'Cellar ✅',
       type: 'Action',
       cost: 2,
       description: '+1 Action. Discard any number of cards, then draw that many.'
@@ -38,7 +38,7 @@ export const cardTypes = {
       cost: 5,
       description: '+2 Cards, +1 Action'
     },
-    chapel: {name: "Chapel", type: "Action", cost: 2, description: "Trash up to 4 cards from your hand."},
+    chapel: {name: "Chapel ✅", type: "Action", cost: 2, description: "Trash up to 4 cards from your hand."},
     throneRoom: {name: "Throne Room ⚫️", type: "Action", cost: 4, description: "Choose an Action card in your hand. Play it twice."},
     workshop: {name: "Workshop", type: "Action", cost: 3, description: "Gain a card costing up to 4 coins."},
     woodcutter: {name: "Woodcutter", type: "Action", cost: 3, description: "+1 Buy, +2 coins."},

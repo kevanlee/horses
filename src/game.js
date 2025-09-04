@@ -27,7 +27,6 @@ export let turnNumber = 1;
 export const incrementTurn = () => {
   console.warn('incrementTurn is deprecated - use GameEngine.nextTurn() instead');
   turnNumber++;
-  console.log(`Turn ${turnNumber}`);
   const turnEl = document.getElementById('turn-counter');
   if (turnEl) {
     turnEl.textContent = `Turn ${turnNumber}`;

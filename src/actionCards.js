@@ -1,26 +1,18 @@
 import { GAME_CONFIG } from './constants.js';
 
-function playActionCard(player, card) {
-  const index = player.hand.indexOf(card);
-  if (index !== -1) {
-    player.hand.splice(index, 1);
-    player.discard.push(card);
-  }
-}
-
 
 // 👇 Central function that handles any action card
-export function playActionCardEffect(card, player) {
+export function playActionCardEffect(card, player, gameEngine) {
   switch (card.name) {
     case "Smithy":
       window.gameEngine.drawCards(player, 3);
-      player.log("Smithy: +3 Cards");
+      gameEngine.logMessage("Smithy: +3 Cards");
       break;
       
     case "Village":
       window.gameEngine.drawCards(player, 1);
       player.actions += 2;
-      player.log("Village: +1 Card, +2 Actions");
+      gameEngine.logMessage("Village: +1 Card, +2 Actions");
       break;
       
     case "Market":
@@ -28,87 +20,83 @@ export function playActionCardEffect(card, player) {
       player.actions += 1;
       player.buys += 1;
       player.bonusGold += 1; 
-      player.log("Market: +1 Card, +1 Action, +1 Buy, +1 Gold");
+      gameEngine.logMessage("Market: +1 Card, +1 Action, +1 Buy, +1 Gold");
       break;
 
     case "Festival":
       player.actions += 2;
       player.buys += 1;
       player.bonusGold += 2;
-      player.log("Festival: +2 Actions, +1 Buy, +2 Gold");
+      gameEngine.logMessage("Festival: +2 Actions, +1 Buy, +2 Gold");
       break;
 
     case "Cellar":
       player.actions += 1;
-      player.log("Cellar: +1 Action. Choose cards to discard and draw.");
-      handleCellarEffect(player, card);
+      gameEngine.logMessage("Cellar: +1 Action. Choose cards to discard and draw.");
+      handleCellarEffect(player, card, gameEngine);
       break;
 
     case "Library":
-      player.log("Library: Draw until you have 7 cards, discard Action cards.");
-      handleLibraryEffect(player, card);
+      gameEngine.logMessage("Library: Draw until you have 7 cards, discard Action cards.");
+      handleLibraryEffect(player, card, gameEngine);
       break;
 
     case "Laboratory":
       window.gameEngine.drawCards(player, 2);
       player.actions += 1;
-      player.log("Laboratory: +2 Cards, +1 Action");
+      gameEngine.logMessage("Laboratory: +2 Cards, +1 Action");
       break;
 
     case 'Chapel':
-      handleChapelEffect(player, card);  
+      handleChapelEffect(player, card, gameEngine);  
       break;
 
     case 'Workshop':
-      handleWorkshopEffect(player, card);
+      handleWorkshopEffect(player, card, gameEngine);
       break;
 
     case "Woodcutter":
       player.buys += 1;
       player.bonusGold += 2;
-      player.log("Woodcutter: +1 Buy, +2 Gold");
+      gameEngine.logMessage("Woodcutter: +1 Buy, +2 Gold");
       break;
     
     case 'Vassal':
-      handleVassalEffect(player, card);
+      handleVassalEffect(player, card, gameEngine);
       break;    
 
     case "Great Hall":
       window.gameEngine.drawCards(player, 1);
       player.actions += 1;
-      player.log("Great Hall: +1 Card, +1 Action");
+      gameEngine.logMessage("Great Hall: +1 Card, +1 Action");
       window.uiManager.updateVictoryPoints(); // 🏆 Recalculate VP immediately
       break;
 
     case 'Masquerade':
-      player.log("Masquerade: Draw 2 cards. Keep one.")
-      handleMasqueradeEffect(player, card);
+      gameEngine.logMessage("Masquerade: Draw 2 cards. Keep one.")
+      handleMasqueradeEffect(player, card, gameEngine);
       break;
     
     case 'Harbinger':
       window.gameEngine.drawCards(player, 1);
       player.actions += 1;
-      player.log("Harbinger: +1 Card, +1 Action");
-      handleHarbingerEffect(player, card); 
+      gameEngine.logMessage("Harbinger: +1 Card, +1 Action");
+      handleHarbingerEffect(player, card, gameEngine); 
       break;
     
     case "Council Room":
       window.gameEngine.drawCards(player, 4);
       player.buys += 1;
-      player.log("Council Room: +4 Cards, +1 Buy");
+      gameEngine.logMessage("Council Room: +4 Cards, +1 Buy");
       break;
 
     default:
-      player.log(`${card.name} has no effect yet.`);
+      gameEngine.logMessage(`${card.name} has no effect yet.`);
   }
 }
 
-function handleCellarEffect(player, cellarCard) {
-  // Remove the Cellar from the hand
-  const index = player.hand.indexOf(cellarCard);
-  if (index !== -1) {
-    player.hand.splice(index, 1);
-  }
+function handleCellarEffect(player, cellarCard, gameEngine) {
+  // Note: Cellar card is already in play area, no need to remove from hand
 
   const modal = document.getElementById('card-modal');
   const modalTitle = document.getElementById('modal-title');
@@ -164,12 +152,8 @@ function handleCellarEffect(player, cellarCard) {
   };
 }
 
-function handleLibraryEffect(player, libraryCard) {
-  const index = player.hand.indexOf(libraryCard);
-  if (index !== -1) {
-    player.hand.splice(index, 1);
-    player.discard.push(libraryCard);
-  }
+function handleLibraryEffect(player, libraryCard, gameEngine) {
+  // Note: Library card is already in play area, no need to remove from hand
 
   const modal = document.getElementById('library-modal');
   const text = document.getElementById('library-modal-text');
@@ -267,9 +251,8 @@ function handleLibraryEffect(player, libraryCard) {
   }
 }
 
-function handleChapelEffect(player, chapelCard) {
- // Remove Workshop from hand
-  playActionCard(player, chapelCard);
+function handleChapelEffect(player, chapelCard, gameEngine) {
+  // Note: Chapel card is already in play area, no need to remove from hand
 
   const modal = document.getElementById('card-modal');
   const modalTitle = document.getElementById('modal-title');
@@ -337,9 +320,8 @@ function handleChapelEffect(player, chapelCard) {
   };
 }
 
-function handleWorkshopEffect(player, workshopCard) {
-  // Remove Workshop from hand
-  playActionCard(player, workshopCard);
+function handleWorkshopEffect(player, workshopCard, gameEngine) {
+  // Note: Workshop card is already in play area, no need to remove from hand
 
   const modal = document.getElementById('card-modal');
   const modalTitle = document.getElementById('modal-title');
@@ -381,7 +363,7 @@ function handleWorkshopEffect(player, workshopCard) {
         chosenSlot.count--;
   
         // 🎉 Add this line:
-        player.log(`You gained a ${chosenSlot.card.name}!`);
+        gameEngine.logMessage(`You gained a ${chosenSlot.card.name}!`);
       }
     }
   
@@ -391,11 +373,10 @@ function handleWorkshopEffect(player, workshopCard) {
   };
 }
 
-function handleVassalEffect(player, vassalCard) {
-  // Play Vassal: +2 gold immediately
-  playActionCard(player, vassalCard);
+function handleVassalEffect(player, vassalCard, gameEngine) {
+  // Note: Vassal card is already in play area, no need to remove from hand
   player.bonusGold += 2;
-  player.log("Vassal: +2 Gold");
+  gameEngine.logMessage("Vassal: +2 Gold");
 
   const modal = document.getElementById('card-modal');
   const modalTitle = document.getElementById('modal-title');
@@ -444,19 +425,18 @@ function handleVassalEffect(player, vassalCard) {
       modalConfirm.textContent = 'Play This Card';
 
       // Play it if they click confirm
-      modalConfirm.onclick = () => {
-        playActionCard(player, topCard);
-        player.log(`Vassal: You played ${topCard.name} for free!`);
-        modal.classList.add('hidden');
-        window.uiManager.refreshAfterActionCard();
-      };
+              modalConfirm.onclick = () => {
+          gameEngine.logMessage(`Vassal: You played ${topCard.name} for free!`);
+          modal.classList.add('hidden');
+          window.uiManager.refreshAfterActionCard();
+        };
 
       // Add discard option
       const discardButton = document.createElement('button');
       discardButton.textContent = 'Discard Instead';
       discardButton.onclick = () => {
         player.discard.push(topCard);
-        player.log(`Vassal: You discarded ${topCard.name}.`);
+        gameEngine.logMessage(`Vassal: You discarded ${topCard.name}.`);
         modal.classList.add('hidden');
         window.uiManager.refreshAfterActionCard();
       };
@@ -477,7 +457,7 @@ function handleVassalEffect(player, vassalCard) {
   modal.classList.remove('hidden');
 }
 
-function handleMasqueradeEffect(player, card) {
+function handleMasqueradeEffect(player, card, gameEngine) {
   // 1. Draw 2 cards (reshuffle if needed)
   const drawnCards = [];
   for (let i = 0; i < 2; i++) {
@@ -557,7 +537,7 @@ function handleMasqueradeEffect(player, card) {
   confirmButton.addEventListener('click', confirmChoice);
 }
 
-function handleHarbingerEffect(player, card) {
+function handleHarbingerEffect(player, card, gameEngine) {
 
   const modal = document.getElementById('card-modal');
   const modalTitle = document.getElementById('modal-title');

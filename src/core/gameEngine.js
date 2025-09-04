@@ -64,15 +64,6 @@ export class GameEngine {
   }
 
   nextTurn() {
-    console.log('nextTurn called, current state:', {
-      hand: this.player.hand.length,
-      deck: this.player.deck.length,
-      discard: this.player.discard.length,
-      playArea: this.player.playArea.length,
-      actions: this.player.actions,
-      buys: this.player.buys
-    });
-    
     this.logMessage("=== Starting New Turn ===");
     
     // Reset everything
@@ -95,15 +86,13 @@ export class GameEngine {
     
     this.updateVictoryPoints();
     
-    console.log('nextTurn completed, new state:', {
-      hand: this.player.hand.length,
-      deck: this.player.deck.length,
-      discard: this.player.discard.length,
-      playArea: this.player.playArea.length,
-      actions: this.player.actions,
-      buys: this.player.buys,
-      currentPhase: this.currentPhase
-    });
+    // Check if we should auto-advance to Buy Phase (only once per turn, when hand is dealt)
+    if (this.shouldAutoAdvanceFromActionPhase()) {
+      setTimeout(() => {
+        this.logMessage("No actions possible. Auto-advancing to Buy Phase.");
+        this.currentPhase = GAME_PHASES.BUY_PHASE;
+      }, 500);
+    }
   }
 
   // Phase progression methods
@@ -136,9 +125,9 @@ export class GameEngine {
 
   // Check if we should auto-advance from Action Phase
   shouldAutoAdvanceFromActionPhase() {
-    // Auto-advance if no actions left OR no action cards in hand
-    const hasActionCards = this.player.hand.some(card => card.type.includes('Action'));
-    return this.player.actions <= 0 || !hasActionCards;
+    // Only auto-advance if no actions left
+    // Don't check for action cards since they might be in play area
+    return this.player.actions <= 0;
   }
 
   updateVictoryPoints() {
@@ -235,8 +224,6 @@ export class GameEngine {
     const slot = marketSupply[cardIndex];
     const cost = slot.card.cost;
 
-    console.log('Buying card:', slot.card.name, 'Cost:', cost, 'Available gold:', this.calculateAvailableGold());
-
     // Validate purchase
     const purchaseValidation = this.validatePurchase(cost);
     if (!purchaseValidation.valid) {
@@ -251,7 +238,6 @@ export class GameEngine {
 
     // Calculate payment
     const { cardsToDiscard, remainingCost } = this.calculatePayment(cost);
-    console.log('Cards to discard for payment:', cardsToDiscard.map(c => c.name), 'Remaining cost:', remainingCost);
 
     // Process payment
     this.processPayment(cardsToDiscard, remainingCost);
@@ -261,8 +247,6 @@ export class GameEngine {
 
     // Update game state
     this.updateVictoryPoints();
-    
-    console.log('Purchase completed. New hand size:', this.player.hand.length, 'New discard size:', this.player.discard.length);
     
     return { 
       success: true, 

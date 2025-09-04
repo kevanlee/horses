@@ -1,3 +1,5 @@
+import { playActionCardEffect } from '../actionCards.js';
+
 export class UIManager {
   constructor(gameEngine) {
     this.game = gameEngine;
@@ -27,26 +29,26 @@ export class UIManager {
 
   bindEvents() {
     this.elements.nextTurnBtn.addEventListener('click', () => {
-      console.log('Next Turn button clicked');
       this.game.nextTurn();
       this.updateAllDisplays();
     });
     
     this.elements.nextPhaseBtn.addEventListener('click', () => {
-      console.log('Next Phase button clicked');
       this.game.nextPhase();
       this.updateAllDisplays();
     });
+    
+
   }
 
   logMessage(msg) {
     const entry = document.createElement('div');
     entry.textContent = msg;
-    this.elements.log.appendChild(entry);
+    // Prepend new messages at the top for better UX
+    this.elements.log.insertBefore(entry, this.elements.log.firstChild);
   }
 
   renderHand() {
-    console.log('renderHand called, hand size:', this.game.player.hand.length);
     this.elements.hand.innerHTML = '<h2>Your Hand</h2>';
     
     const cardContainer = document.createElement('div');
@@ -75,19 +77,9 @@ export class UIManager {
     });
     
     this.elements.hand.appendChild(cardContainer);
-    
-    // Check if we should auto-advance to Buy Phase (no action cards or no actions)
-    if (this.game.currentPhase === 'action' && this.game.shouldAutoAdvanceFromActionPhase()) {
-      setTimeout(() => {
-        this.logMessage("No actions possible. Auto-advancing to Buy Phase.");
-        this.game.currentPhase = 'buy';
-        this.updateAllDisplays();
-      }, 500);
-    }
   }
 
   renderPlayArea() {
-    console.log('renderPlayArea called, play area size:', this.game.player.playArea.length);
     this.elements.playArea.innerHTML = '';
 
     if (this.game.player.playArea.length === 0) {
@@ -110,6 +102,19 @@ export class UIManager {
 
   renderMarketplace(marketSupply) {
     this.elements.marketplace.innerHTML = '<h2>Marketplace</h2>';
+    
+    // Add live info for buys and gold
+    const liveInfo = document.createElement('div');
+    liveInfo.className = 'marketplace-live-info';
+    liveInfo.innerHTML = `
+      <div class="live-info-item">
+        <strong>Buys Remaining:</strong> <span id="marketplace-buys">${this.game.player.buys}</span>
+      </div>
+      <div class="live-info-item">
+        <strong>Available Gold:</strong> <span id="marketplace-gold">${this.game.calculateAvailableGold()}</span>
+      </div>
+    `;
+    this.elements.marketplace.appendChild(liveInfo);
 
     const moneyCards = [];
     const victoryCards = [];
@@ -209,6 +214,12 @@ export class UIManager {
   renderActionsAndBuys() {
     this.elements.actionsLeft.textContent = `Actions: ${this.game.player.actions}`;
     this.elements.buysLeft.textContent = `Buys: ${this.game.player.buys}`;
+    
+    // Also update marketplace live info if it exists
+    const marketplaceBuys = document.getElementById('marketplace-buys');
+    if (marketplaceBuys) {
+      marketplaceBuys.textContent = this.game.player.buys;
+    }
   }
 
   renderDeckInventory() {
@@ -250,6 +261,12 @@ export class UIManager {
   updateGoldDisplay() {
     const gold = this.game.calculateAvailableGold();
     this.elements.goldDisplay.textContent = `Gold: ${gold}`;
+    
+    // Also update marketplace live info if it exists
+    const marketplaceGold = document.getElementById('marketplace-gold');
+    if (marketplaceGold) {
+      marketplaceGold.textContent = gold;
+    }
   }
 
   updateVictoryPoints() {
@@ -288,7 +305,6 @@ export class UIManager {
   }
 
   updateAllDisplays() {
-    console.log('updateAllDisplays called, player state:', this.game.player);
     this.updateGoldDisplay();
     this.updateVictoryPoints();
     this.updateTurnCounter();
@@ -299,7 +315,6 @@ export class UIManager {
     this.renderPlayArea();
     this.renderDeckInventory();
     this.renderMarketplace(window.currentMarketSupply || []);
-    console.log('updateAllDisplays completed');
   }
 
   handlePlayActionCard(card) {
@@ -307,7 +322,10 @@ export class UIManager {
     
     if (result.success) {
       this.logMessage(result.message);
-      // The action card effect will be handled separately
+      
+      // Execute the action card effect
+      playActionCardEffect(card, this.game.player, this.game);
+      
       this.updateAllDisplays();
       this.renderHand();
       
@@ -325,9 +343,8 @@ export class UIManager {
   }
 
   handleBuyCard(cardIndex, marketSupply) {
-    console.log('handleBuyCard called with index:', cardIndex, 'marketSupply length:', marketSupply.length);
     if (cardIndex >= 0 && cardIndex < marketSupply.length) {
-      console.log('Card to buy:', marketSupply[cardIndex].card.name);
+      // Card index is valid
     } else {
       console.error('Invalid card index:', cardIndex);
     }

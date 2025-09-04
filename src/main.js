@@ -21,7 +21,6 @@ uiManager.updateAllDisplays();
 
 // Override the log function to use UI manager
 gameEngine.logMessage = (msg) => {
-  console.log('Game Engine Log:', msg); // Add console logging
   uiManager.logMessage(msg);
   return msg;
 };
@@ -37,7 +36,3 @@ window.renderDeckAndDiscardCount = () => uiManager.renderDeckAndDiscardCount();
 window.renderActionsAndBuys = () => uiManager.renderActionsAndBuys();
 window.updateGoldDisplay = () => uiManager.updateGoldDisplay();
 window.shuffleDiscardIntoDeck = () => gameEngine.shuffleDiscardIntoDeck();
-
-// Debug logging
-console.log('Game initialized:', { gameEngine, uiManager });
-console.log('Player state:', gameEngine.player);

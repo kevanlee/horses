@@ -219,6 +219,33 @@ h1.title {
   justify-content: flex-start;
 }
 
+/* === Marketplace Live Info === */
+.marketplace-live-info {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: #f8f8f8;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+}
+
+.live-info-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+}
+
+.live-info-item strong {
+  color: #333;
+}
+
+.live-info-item span {
+  color: #0066cc;
+  font-weight: bold;
+}
+
 /* === Log Section === */
 #log {
   grid-column: span 12; /* Span the entire 12-column width */
