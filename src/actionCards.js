@@ -1,21 +1,22 @@
 import { GAME_CONFIG } from './constants.js';
+import { handleThroneRoomEffect } from './throneRoom.js';
 
 
 // 👇 Central function that handles any action card
 export function playActionCardEffect(card, player, gameEngine) {
   switch (card.name) {
-    case "Smithy":
+    case "Smithy ✅":
       window.gameEngine.drawCards(player, 3);
       gameEngine.logMessage("Smithy: +3 Cards");
       break;
       
-    case "Village":
+    case "Village ✅":
       window.gameEngine.drawCards(player, 1);
       player.actions += 2;
       gameEngine.logMessage("Village: +1 Card, +2 Actions");
       break;
       
-    case "Market":
+    case "Market ✅":
       window.gameEngine.drawCards(player, 1);
       player.actions += 1;
       player.buys += 1;
@@ -23,14 +24,14 @@ export function playActionCardEffect(card, player, gameEngine) {
       gameEngine.logMessage("Market: +1 Card, +1 Action, +1 Buy, +1 Gold");
       break;
 
-    case "Festival":
+    case "Festival ✅":
       player.actions += 2;
       player.buys += 1;
       player.bonusGold += 2;
       gameEngine.logMessage("Festival: +2 Actions, +1 Buy, +2 Gold");
       break;
 
-    case "Cellar":
+    case "Cellar ✅":
       player.actions += 1;
       gameEngine.logMessage("Cellar: +1 Action. Choose cards to discard and draw.");
       handleCellarEffect(player, card, gameEngine);
@@ -41,21 +42,21 @@ export function playActionCardEffect(card, player, gameEngine) {
       handleLibraryEffect(player, card, gameEngine);
       break;
 
-    case "Laboratory":
+    case "Laboratory ✅":
       window.gameEngine.drawCards(player, 2);
       player.actions += 1;
       gameEngine.logMessage("Laboratory: +2 Cards, +1 Action");
       break;
 
-    case 'Chapel':
+    case 'Chapel ✅':
       handleChapelEffect(player, card, gameEngine);  
       break;
 
-    case 'Workshop':
+    case 'Workshop ✅':
       handleWorkshopEffect(player, card, gameEngine);
       break;
 
-    case "Woodcutter":
+    case "Woodcutter ✅":
       player.buys += 1;
       player.bonusGold += 2;
       gameEngine.logMessage("Woodcutter: +1 Buy, +2 Gold");
@@ -65,29 +66,65 @@ export function playActionCardEffect(card, player, gameEngine) {
       handleVassalEffect(player, card, gameEngine);
       break;    
 
-    case "Great Hall":
+    case "Great Hall ✅":
       window.gameEngine.drawCards(player, 1);
       player.actions += 1;
       gameEngine.logMessage("Great Hall: +1 Card, +1 Action");
       window.uiManager.updateVictoryPoints(); // 🏆 Recalculate VP immediately
       break;
 
-    case 'Masquerade':
+    case 'Masquerade ✅':
       gameEngine.logMessage("Masquerade: Draw 2 cards. Keep one.")
       handleMasqueradeEffect(player, card, gameEngine);
       break;
     
-    case 'Harbinger':
+    case 'Harbinger ✅':
       window.gameEngine.drawCards(player, 1);
       player.actions += 1;
       gameEngine.logMessage("Harbinger: +1 Card, +1 Action");
       handleHarbingerEffect(player, card, gameEngine); 
       break;
     
-    case "Council Room":
+    case "Council Room ✅":
       window.gameEngine.drawCards(player, 4);
       player.buys += 1;
       gameEngine.logMessage("Council Room: +4 Cards, +1 Buy");
+      break;
+
+    case "Feast ✅":
+      handleFeastEffect(player, card, gameEngine);
+      break;
+
+    case "Moneylender ✅":
+      handleMoneylenderEffect(player, card, gameEngine);
+      break;
+
+    case "Gardens ⚫️":
+      // Gardens has no immediate effect - VP is calculated in updateVictoryPoints
+      gameEngine.logMessage("Gardens: Worth 1 VP for every 10 cards in your deck.");
+      break;
+
+    case "Treasury ⚫️":
+      window.gameEngine.drawCards(player, 1);
+      player.actions += 1;
+      player.bonusGold += 1;
+      gameEngine.logMessage("Treasury: +1 Card, +1 Action, +1 Coin");
+      break;
+
+    case "Mine ✅":
+      handleMineEffect(player, card, gameEngine);
+      break;
+
+    case "Remodel ✅":
+      handleRemodelEffect(player, card, gameEngine);
+      break;
+
+    case "Adventurer ⚫️":
+      handleAdventurerEffect(player, card, gameEngine);
+      break;
+
+    case "Throne Room ⚫️":
+      handleThroneRoomEffect(player, card, gameEngine);
       break;
 
     default:
@@ -158,7 +195,7 @@ function handleLibraryEffect(player, libraryCard, gameEngine) {
   const modal = document.getElementById('library-modal');
   const text = document.getElementById('library-modal-text');
   const libraryHand = document.getElementById('library-hand');
-  const confirmButton = document.getElementById('modal-confirm');
+  const confirmButton = document.getElementById('library-modal-confirm');
 
   // Reset modal content
   modal.classList.remove('hidden');
@@ -425,11 +462,18 @@ function handleVassalEffect(player, vassalCard, gameEngine) {
       modalConfirm.textContent = 'Play This Card';
 
       // Play it if they click confirm
-              modalConfirm.onclick = () => {
-          gameEngine.logMessage(`Vassal: You played ${topCard.name} for free!`);
-          modal.classList.add('hidden');
-          window.uiManager.refreshAfterActionCard();
-        };
+      modalConfirm.onclick = () => {
+        gameEngine.logMessage(`Vassal: You played ${topCard.name} for free!`);
+        
+        // Add the card to play area (like a normal action card play)
+        player.playArea.push(topCard);
+        
+        // Execute the action card effect
+        playActionCardEffect(topCard, player, gameEngine);
+        
+        modal.classList.add('hidden');
+        window.uiManager.refreshAfterActionCard();
+      };
 
       // Add discard option
       const discardButton = document.createElement('button');
@@ -443,7 +487,13 @@ function handleVassalEffect(player, vassalCard, gameEngine) {
       modalBody.appendChild(discardButton);
     } else {
       player.discard.push(topCard);
-      modalBody.innerHTML += `<p>It's not an Action card. It has been discarded.</p>`;
+      gameEngine.logMessage(`Vassal: You discarded ${topCard.name}.`);
+      
+      // Create a new paragraph element instead of using innerHTML +=
+      const discardMessage = document.createElement('p');
+      discardMessage.textContent = `It's not an Action card. It has been discarded.`;
+      modalBody.appendChild(discardMessage);
+      
       modalConfirm.classList.remove('hidden');
       modalConfirm.textContent = 'Continue';
       modalConfirm.onclick = () => {
@@ -648,5 +698,346 @@ function handleHarbingerEffect(player, card, gameEngine) {
   modal.classList.remove('hidden');
   renderPage();
   confirmButton.addEventListener('click', confirmChoice);
+}
+
+function handleFeastEffect(player, feastCard, gameEngine) {
+  // First, trash the Feast card (remove from play area and add to trash)
+  const feastIndex = player.playArea.indexOf(feastCard);
+  if (feastIndex !== -1) {
+    player.playArea.splice(feastIndex, 1);
+    player.trash.push(feastCard);
+  }
+  
+  gameEngine.logMessage("Feast: Trashed this card. Choose a card costing up to 5 coins.");
+
+  const modal = document.getElementById('card-modal');
+  const modalTitle = document.getElementById('modal-title');
+  const modalBody = document.getElementById('modal-body');
+  const modalConfirm = document.getElementById('modal-confirm');
+
+  modalBody.innerHTML = '';
+  modalTitle.textContent = 'Feast: Choose a card costing up to 5 coins';
+  const selectedCardIndex = { value: null };
+
+  // Filter marketSupply for cards costing <= 5
+  window.currentMarketSupply.forEach((slot, idx) => {
+    if (slot.card.cost <= 5 && slot.count > 0) {
+      const cardEl = document.createElement('div');
+      cardEl.className = 'card';
+      cardEl.innerHTML = `
+        <strong>${slot.card.name}</strong><br>
+        <em>Type:</em> ${slot.card.type}<br>
+        <em>Cost:</em> ${slot.card.cost}<br>
+        <em>${slot.card.description || ''}</em>
+      `;
+      cardEl.addEventListener('click', () => {
+        // Deselect others
+        Array.from(modalBody.children).forEach(c => c.classList.remove('selected'));
+        // Select this one
+        cardEl.classList.add('selected');
+        selectedCardIndex.value = idx;
+      });
+      modalBody.appendChild(cardEl);
+    }
+  });
+
+  modal.classList.remove('hidden');
+  modalConfirm.textContent = 'Gain Selected';
+  modalConfirm.onclick = () => {
+    if (selectedCardIndex.value !== null) {
+      const chosenSlot = window.currentMarketSupply[selectedCardIndex.value];
+      if (chosenSlot.count > 0) {
+        player.discard.push(chosenSlot.card);
+        chosenSlot.count--;
+        
+        gameEngine.logMessage(`Feast: You gained a ${chosenSlot.card.name}!`);
+      }
+    }
+
+    // Close modal and update UI
+    modal.classList.add('hidden');
+    window.uiManager.refreshAfterActionCard();
+  };
+}
+
+function handleMoneylenderEffect(player, moneylenderCard, gameEngine) {
+  // Check if player has a Copper in hand
+  const copperIndex = player.hand.findIndex(card => card.name === 'Copper');
+  
+  if (copperIndex !== -1) {
+    // Trash the Copper and gain +3 coins
+    const copper = player.hand.splice(copperIndex, 1)[0];
+    player.trash.push(copper);
+    player.bonusGold += 3;
+    
+    gameEngine.logMessage("Moneylender: Trashed a Copper for +3 coins.");
+  } else {
+    gameEngine.logMessage("Moneylender: No Copper in hand to trash.");
+  }
+}
+
+function handleMineEffect(player, mineCard, gameEngine) {
+  // Check if player has any Treasure cards in hand
+  const treasureCards = player.hand.filter(card => card.type === 'Treasure');
+  
+  if (treasureCards.length === 0) {
+    gameEngine.logMessage("Mine: No Treasure cards in hand to trash.");
+    return;
+  }
+
+  const modal = document.getElementById('card-modal');
+  const modalTitle = document.getElementById('modal-title');
+  const modalBody = document.getElementById('modal-body');
+  const modalConfirm = document.getElementById('modal-confirm');
+
+  modalBody.innerHTML = '';
+  modalTitle.textContent = 'Mine: Choose a Treasure to trash';
+  const selectedCardIndex = { value: null };
+
+  // Show only Treasure cards from hand
+  treasureCards.forEach((card, idx) => {
+    const cardEl = document.createElement('div');
+    cardEl.className = 'card';
+    cardEl.innerHTML = `
+      <strong>${card.name}</strong><br>
+      <em>Type:</em> ${card.type}<br>
+      <em>Cost:</em> ${card.cost}<br>
+      <em>Value:</em> ${card.value}<br>
+      <em>${card.description || ''}</em>
+    `;
+    cardEl.addEventListener('click', () => {
+      // Deselect others
+      Array.from(modalBody.children).forEach(c => c.classList.remove('selected'));
+      // Select this one
+      cardEl.classList.add('selected');
+      selectedCardIndex.value = idx;
+    });
+    modalBody.appendChild(cardEl);
+  });
+
+  modal.classList.remove('hidden');
+  modalConfirm.textContent = 'Trash Selected';
+  modalConfirm.onclick = () => {
+    if (selectedCardIndex.value !== null) {
+      const selectedTreasure = treasureCards[selectedCardIndex.value];
+      const maxCost = selectedTreasure.cost + 3;
+      
+      // Trash the selected treasure
+      const handIndex = player.hand.indexOf(selectedTreasure);
+      if (handIndex !== -1) {
+        player.hand.splice(handIndex, 1);
+        player.trash.push(selectedTreasure);
+      }
+      
+      // Now show cards to gain
+      modalBody.innerHTML = '';
+      modalTitle.textContent = `Mine: Choose a Treasure costing up to ${maxCost} coins`;
+      const selectedGainIndex = { value: null };
+      
+      // Filter marketSupply for Treasure cards costing <= maxCost
+      window.currentMarketSupply.forEach((slot, idx) => {
+        if (slot.card.type === 'Treasure' && slot.card.cost <= maxCost && slot.count > 0) {
+          const cardEl = document.createElement('div');
+          cardEl.className = 'card';
+          cardEl.innerHTML = `
+            <strong>${slot.card.name}</strong><br>
+            <em>Type:</em> ${slot.card.type}<br>
+            <em>Cost:</em> ${slot.card.cost}<br>
+            <em>Value:</em> ${slot.card.value}<br>
+            <em>${slot.card.description || ''}</em>
+          `;
+          cardEl.addEventListener('click', () => {
+            // Deselect others
+            Array.from(modalBody.children).forEach(c => c.classList.remove('selected'));
+            // Select this one
+            cardEl.classList.add('selected');
+            selectedGainIndex.value = idx;
+          });
+          modalBody.appendChild(cardEl);
+        }
+      });
+      
+      modalConfirm.textContent = 'Gain Selected';
+      modalConfirm.onclick = () => {
+        if (selectedGainIndex.value !== null) {
+          const chosenSlot = window.currentMarketSupply[selectedGainIndex.value];
+          if (chosenSlot.count > 0) {
+            player.hand.push(chosenSlot.card);
+            chosenSlot.count--;
+            
+            gameEngine.logMessage(`Mine: Trashed ${selectedTreasure.name} and gained ${chosenSlot.card.name} to hand!`);
+          }
+        }
+
+        // Close modal and update UI
+        modal.classList.add('hidden');
+        window.uiManager.refreshAfterActionCard();
+      };
+    } else {
+      alert('Please select a Treasure to trash.');
+    }
+  };
+}
+
+function handleRemodelEffect(player, remodelCard, gameEngine) {
+  // Check if player has any cards in hand
+  if (player.hand.length === 0) {
+    gameEngine.logMessage("Remodel: No cards in hand to trash.");
+    return;
+  }
+
+  const modal = document.getElementById('card-modal');
+  const modalTitle = document.getElementById('modal-title');
+  const modalBody = document.getElementById('modal-body');
+  const modalConfirm = document.getElementById('modal-confirm');
+
+  modalBody.innerHTML = '';
+  modalTitle.textContent = 'Remodel: Choose a card to trash';
+  const selectedCardIndex = { value: null };
+
+  // Show all cards from hand
+  player.hand.forEach((card, idx) => {
+    const cardEl = document.createElement('div');
+    cardEl.className = 'card';
+    cardEl.innerHTML = `
+      <strong>${card.name}</strong><br>
+      <em>Type:</em> ${card.type}<br>
+      <em>Cost:</em> ${card.cost}<br>
+      <em>${card.description || ''}</em>
+    `;
+    cardEl.addEventListener('click', () => {
+      // Deselect others
+      Array.from(modalBody.children).forEach(c => c.classList.remove('selected'));
+      // Select this one
+      cardEl.classList.add('selected');
+      selectedCardIndex.value = idx;
+    });
+    modalBody.appendChild(cardEl);
+  });
+
+  modal.classList.remove('hidden');
+  modalConfirm.textContent = 'Trash Selected';
+  modalConfirm.onclick = () => {
+    if (selectedCardIndex.value !== null) {
+      const selectedCard = player.hand[selectedCardIndex.value];
+      const maxCost = selectedCard.cost + 2;
+      
+      // Trash the selected card
+      const handIndex = player.hand.indexOf(selectedCard);
+      if (handIndex !== -1) {
+        player.hand.splice(handIndex, 1);
+        player.trash.push(selectedCard);
+      }
+      
+      // Now show cards to gain
+      modalBody.innerHTML = '';
+      modalTitle.textContent = `Remodel: Choose a card costing up to ${maxCost} coins`;
+      const selectedGainIndex = { value: null };
+      
+      // Filter marketSupply for cards costing <= maxCost
+      window.currentMarketSupply.forEach((slot, idx) => {
+        if (slot.card.cost <= maxCost && slot.count > 0) {
+          const cardEl = document.createElement('div');
+          cardEl.className = 'card';
+          cardEl.innerHTML = `
+            <strong>${slot.card.name}</strong><br>
+            <em>Type:</em> ${slot.card.type}<br>
+            <em>Cost:</em> ${slot.card.cost}<br>
+            <em>${slot.card.description || ''}</em>
+          `;
+          cardEl.addEventListener('click', () => {
+            // Deselect others
+            Array.from(modalBody.children).forEach(c => c.classList.remove('selected'));
+            // Select this one
+            cardEl.classList.add('selected');
+            selectedGainIndex.value = idx;
+          });
+          modalBody.appendChild(cardEl);
+        }
+      });
+      
+      modalConfirm.textContent = 'Gain Selected';
+      modalConfirm.onclick = () => {
+        if (selectedGainIndex.value !== null) {
+          const chosenSlot = window.currentMarketSupply[selectedGainIndex.value];
+          if (chosenSlot.count > 0) {
+            player.discard.push(chosenSlot.card);
+            chosenSlot.count--;
+            
+            gameEngine.logMessage(`Remodel: Trashed ${selectedCard.name} and gained ${chosenSlot.card.name}!`);
+          }
+        }
+
+        // Close modal and update UI
+        modal.classList.add('hidden');
+        window.uiManager.refreshAfterActionCard();
+      };
+    } else {
+      alert('Please select a card to trash.');
+    }
+  };
+}
+
+function handleAdventurerEffect(player, adventurerCard, gameEngine) {
+  gameEngine.logMessage("Adventurer: Revealing cards until 2 Treasures are found...");
+  
+  const revealedCards = [];
+  const treasuresFound = [];
+  let cardsRevealed = 0;
+  
+  // Keep revealing until we find 2 Treasures or run out of cards
+  while (treasuresFound.length < 2) {
+    // Check if deck is empty and shuffle if needed
+    if (player.deck.length === 0) {
+      if (player.discard.length > 0) {
+        player.deck = window.gameEngine.shuffle([...player.discard]);
+        player.discard = [];
+        gameEngine.logMessage("Shuffled discard pile into deck.");
+      } else {
+        // No more cards to reveal
+        break;
+      }
+    }
+    
+    // Reveal top card
+    if (player.deck.length > 0) {
+      const revealedCard = player.deck.pop();
+      revealedCards.push(revealedCard);
+      cardsRevealed++;
+      
+      if (revealedCard.type === 'Treasure') {
+        treasuresFound.push(revealedCard);
+        gameEngine.logMessage(`Revealed ${revealedCard.name} (Treasure #${treasuresFound.length})`);
+      } else {
+        gameEngine.logMessage(`Revealed ${revealedCard.name} (not a Treasure)`);
+      }
+    } else {
+      break;
+    }
+  }
+  
+  // Add found Treasures to hand
+  treasuresFound.forEach(treasure => {
+    player.hand.push(treasure);
+  });
+  
+  // Discard all other revealed cards
+  const nonTreasures = revealedCards.filter(card => !treasuresFound.includes(card));
+  nonTreasures.forEach(card => {
+    player.discard.push(card);
+  });
+  
+  // Log results
+  if (treasuresFound.length === 2) {
+    gameEngine.logMessage(`Adventurer: Found 2 Treasures (${treasuresFound.map(t => t.name).join(', ')}) and added them to hand.`);
+  } else if (treasuresFound.length === 1) {
+    gameEngine.logMessage(`Adventurer: Found only 1 Treasure (${treasuresFound[0].name}) and added it to hand.`);
+  } else {
+    gameEngine.logMessage("Adventurer: No Treasures found in deck.");
+  }
+  
+  if (nonTreasures.length > 0) {
+    gameEngine.logMessage(`Discarded ${nonTreasures.length} non-Treasure cards.`);
+  }
 }
 

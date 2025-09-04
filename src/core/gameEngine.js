@@ -203,8 +203,10 @@ export class GameEngine {
       this.player.bonusGold -= remainingCost;
     }
 
-    // Reset bonus gold
-    this.player.bonusGold = 0;
+    // Only reset bonus gold if it was actually used
+    if (remainingCost > 0) {
+      this.player.bonusGold = 0;
+    }
   }
 
   // Card acquisition functions
