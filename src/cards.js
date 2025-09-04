@@ -12,7 +12,7 @@ export const cardTypes = {
     duchy: { name: 'Duchy', type: 'Victory', cost: 5, points: 3 },
     province: { name: 'Province', type: 'Victory', cost: 8, points: 6 },
     smithy: { name: 'Smithy', type: 'Action', cost: 4, description: 'Draw 3 cards' },
-    village: { name: 'Village', type: 'Action', cost: 3, description: 'Draw 1 card, +2 Actions' },
+    village: { name: 'Village ✅', type: 'Action', cost: 3, description: 'Draw 1 card, +2 Actions' },
     market: { name: 'Market', type: 'Action', cost: 5, description: 'Draw 1 card, +1 Action, +1 Buy, +1 Gold' },
     cellar: {
       name: 'Cellar ✅',
@@ -40,7 +40,7 @@ export const cardTypes = {
     },
     chapel: {name: "Chapel ✅", type: "Action", cost: 2, description: "Trash up to 4 cards from your hand."},
     throneRoom: {name: "Throne Room ⚫️", type: "Action", cost: 4, description: "Choose an Action card in your hand. Play it twice."},
-    workshop: {name: "Workshop", type: "Action", cost: 3, description: "Gain a card costing up to 4 coins."},
+    workshop: {name: "Workshop ✅", type: "Action", cost: 3, description: "Gain a card costing up to 4 coins."},
     woodcutter: {name: "Woodcutter", type: "Action", cost: 3, description: "+1 Buy, +2 coins."},
     vassal: {name: "Vassal", type: "Action", cost: 3, description: "+2 coins, reveal top card. If Action, play it."},
     remodel: {name: "Remodel ⚫️", type: "Action", cost: 4, description: "Trash a card from your hand. Gain a card costing up to 2 more."},
