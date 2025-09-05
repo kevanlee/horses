@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Funnel+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
 </head>
 <body>
   <img class="horse-logo" src="res/img/horse-head.svg" alt="Horses" id="horses">
@@ -22,7 +23,10 @@
         <li><div id="turn-counter">Turn: 1</div></li>
       </ul>
       <button id="next-turn">Next Turn</button>
+      <button id="next-phase">Next Phase</button>
+
     </div>
+
 
     <div id="hand">
       <div id="deck-count"></div>
@@ -33,6 +37,7 @@
       <h2>Play Area</h2>
       <div id="played-cards" class="card-container"></div>
     </div>
+
     <div id="phase-controls">
       <div id="phase-display">
         <span class="phase-item completed">New Deal</span>
@@ -43,10 +48,9 @@
         <span class="phase-separator">|</span>
         <span class="phase-item">Clean Up</span>
       </div>
-      <button id="next-phase">Next Phase</button>
     </div>
-    <div id="shop">
 
+    <div id="shop">
       <div id="marketplace">
         <h2>Marketplace</h2>
         <div id="marketplace-top">

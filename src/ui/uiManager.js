@@ -34,8 +34,13 @@ export class UIManager {
     });
     
     this.elements.nextPhaseBtn.addEventListener('click', () => {
-      this.game.nextPhase();
-      this.updateAllDisplays();
+      // If we're in buy phase, start the enhanced cleanup sequence
+      if (this.game.currentPhase === 'buy') {
+        this.startEnhancedCleanupSequence();
+      } else {
+        this.game.nextPhase();
+        this.updateAllDisplays();
+      }
     });
     
 
@@ -294,13 +299,27 @@ export class UIManager {
       phaseItems[2].classList.add('current'); // Buy phase
       phaseItems[0].classList.add('completed'); // New Deal is always completed
       phaseItems[1].classList.add('completed'); // Action phase is completed
+    } else if (this.game.currentPhase === 'cleanup') {
+      phaseItems[3].classList.add('current'); // Clean Up phase
+      phaseItems[0].classList.add('completed'); // New Deal is always completed
+      phaseItems[1].classList.add('completed'); // Action phase is completed
+      phaseItems[2].classList.add('completed'); // Buy phase is completed
+    } else if (this.game.currentPhase === 'newdeal') {
+      phaseItems[0].classList.add('current'); // New Deal phase
     }
     
     // Update button text
     if (this.game.currentPhase === 'buy') {
       this.elements.nextPhaseBtn.textContent = 'End Turn';
+    } else if (this.game.currentPhase === 'cleanup') {
+      this.elements.nextPhaseBtn.textContent = 'Cleaning Up...';
+      this.elements.nextPhaseBtn.disabled = true;
+    } else if (this.game.currentPhase === 'newdeal') {
+      this.elements.nextPhaseBtn.textContent = 'Dealing...';
+      this.elements.nextPhaseBtn.disabled = true;
     } else {
       this.elements.nextPhaseBtn.textContent = 'Next Phase';
+      this.elements.nextPhaseBtn.disabled = false;
     }
   }
 
@@ -368,5 +387,85 @@ export class UIManager {
     this.renderHand();
     this.renderMarketplace(window.currentMarketSupply || []);
     this.renderDeckInventory();
+  }
+
+  // Enhanced cleanup sequence with New Deal phase display
+  startEnhancedCleanupSequence() {
+    // Step 1: Set phase to cleanup and update display
+    this.game.currentPhase = 'cleanup';
+    this.updatePhaseDisplay();
+    
+    // Step 2: Clear Play Area and Hand (after a brief delay to show phase change)
+    setTimeout(() => {
+      this.clearPlayAreaAndHand();
+      
+      // Step 3: Trigger discard glow
+      setTimeout(() => {
+        this.triggerCleanupGlow();
+        
+        // Step 4: After glow completes, show New Deal phase briefly
+        setTimeout(() => {
+          this.showNewDealPhase();
+        }, 1000); // Reduced from 1500ms to 1000ms
+      }, 150); // Reduced from 300ms to 150ms
+    }, 150); // Reduced from 300ms to 150ms
+  }
+
+  showNewDealPhase() {
+    // Show New Deal phase briefly
+    this.game.currentPhase = 'newdeal';
+    this.updatePhaseDisplay();
+    
+    // After a short delay, trigger deal glow and start new turn
+    setTimeout(() => {
+      this.triggerDealGlow();
+      
+      // Start the new turn after deal glow begins
+      setTimeout(() => {
+        this.game.nextTurn();
+        this.updateAllDisplays();
+      }, 200); // Back to 200ms
+    }, 600); // Increased from 300ms to 600ms to make New Deal more visible
+  }
+
+  clearPlayAreaAndHand() {
+    // First, move all cards from hand and play area to discard pile
+    this.game.player.discard.push(...this.game.player.hand);
+    this.game.player.discard.push(...this.game.player.playArea);
+    
+    // Update the discard count immediately
+    this.renderDeckAndDiscardCount();
+    
+    // Then clear the play area
+    this.elements.playArea.innerHTML = '';
+    
+    // Clear the hand but keep the header
+    const handHeader = this.elements.hand.querySelector('h2');
+    this.elements.hand.innerHTML = '';
+    if (handHeader) {
+      this.elements.hand.appendChild(handHeader);
+    }
+    
+    // Update the game state to reflect cleared areas
+    this.game.player.playArea = [];
+    this.game.player.hand = [];
+  }
+
+  triggerCleanupGlow() {
+    if (this.elements.discardIndicator) {
+      this.elements.discardIndicator.classList.add('cleaning');
+      setTimeout(() => {
+        this.elements.discardIndicator.classList.remove('cleaning');
+      }, 1500);
+    }
+  }
+
+  triggerDealGlow() {
+    if (this.elements.deckIndicator) {
+      this.elements.deckIndicator.classList.add('dealing');
+      setTimeout(() => {
+        this.elements.deckIndicator.classList.remove('dealing');
+      }, 1500);
+    }
   }
 }

@@ -3,6 +3,7 @@ body {
   font-family: "Funnel Sans", sans-serif;
   background-color: #f3f3f3;
   padding: 1rem;
+  /* background:url(../res/img/pixel-meadow.png); */
 }
 
 h1.title {
@@ -43,18 +44,19 @@ h1.title {
 }
 
 .phase-item {
-  padding: 0.25rem 0.5rem;
+  padding: 5px 75px; 
+  background-color: #d9d9d9;
   transition: all 0.2s ease;
 }
 
 .phase-item.current {
-  text-decoration: underline;
-  font-weight: bold;
-  color: #000;
+  background-color: #111;
+  color: #ffffff;
 }
 
 .phase-item.completed {
   color: #888;
+  background-color: #f9f9f9;
   font-style: italic;
 }
 
@@ -107,6 +109,7 @@ h1.title {
   padding: 1rem;
   border-radius: 8px;
   margin: 1rem 0;
+  min-height: 100px; 
 }
 
 #play-area h2 {
@@ -133,6 +136,7 @@ h1.title {
   border: 1px solid #ccc;
   padding: 1rem;
   border-radius: 8px;
+  min-height: 150px; 
 }
 
 #player-hand h2 {
