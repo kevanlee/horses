@@ -7,6 +7,43 @@ export class UIManager {
     this.bindEvents();
   }
 
+  // Helper method to animate number updates
+  animateNumber(element, animationType = 'flash') {
+    if (!element) return;
+    
+    const numberSpan = element.querySelector('.number');
+    if (!numberSpan) return;
+    
+    // Remove any existing animation classes
+    numberSpan.classList.remove('flash', 'pulse');
+    
+    // Force a reflow to ensure the class removal takes effect
+    numberSpan.offsetHeight;
+    
+    // Add the animation class
+    numberSpan.classList.add(animationType);
+    
+    // Remove the animation class after animation completes
+    setTimeout(() => {
+      numberSpan.classList.remove(animationType);
+    }, animationType === 'flash' ? 600 : 400);
+  }
+
+  // Helper method to check if a number has changed and animate if so
+  updateNumberWithAnimation(element, newValue, categoryText, animationType = 'flash') {
+    const currentNumberSpan = element.querySelector('.number');
+    const currentValue = currentNumberSpan ? currentNumberSpan.textContent : null;
+    
+    // Update the content
+    element.innerHTML = `<span class="category">${categoryText}</span> <span class="number">${newValue}</span>`;
+    
+    // Only animate if the value actually changed
+    if (currentValue !== null && currentValue !== newValue.toString()) {
+      this.animateNumber(element, animationType);
+    }
+  }
+
+
   cacheElements() {
     return {
       hand: document.getElementById('player-hand'),
@@ -28,10 +65,12 @@ export class UIManager {
   }
 
   bindEvents() {
-    this.elements.nextTurnBtn.addEventListener('click', () => {
-      this.game.nextTurn();
-      this.updateAllDisplays();
-    });
+    if (this.elements.nextTurnBtn) {
+      this.elements.nextTurnBtn.addEventListener('click', () => {
+        this.game.nextTurn();
+        this.updateAllDisplays();
+      });
+    }
     
     this.elements.nextPhaseBtn.addEventListener('click', () => {
       // If we're in buy phase, start the enhanced cleanup sequence
@@ -61,12 +100,15 @@ export class UIManager {
 
     this.game.player.hand.forEach((card, index) => {
       const cardEl = document.createElement('div');
-      cardEl.className = 'card';
+      cardEl.className = `card ${card.type.toLowerCase().replace(/\s+/g, '-')}`;
       cardEl.innerHTML = `
-        <strong>${card.name}</strong><br>
-        <em>Type:</em> ${card.type}<br>
-        <em>Cost:</em> ${card.cost}<br>
-        <em>${card.description || ''}</em>
+        <div class="card-name">${card.name}</div>
+        <div class="card-type">${card.type}</div>
+        <div class="card-description">${card.description || ''}</div>
+        <div class="card-coins">${card.value ? card.value + '*' : ''}</div>
+        <div class="card-victory">${card.points ? card.points + 'pt' : ''}</div>
+        <div class="card-cost">Cost: ${card.cost}</div>
+        <div class="card-image"></div>
       `;
 
       // Add "Play" button only if player has actions left and card is an Action type
@@ -87,26 +129,24 @@ export class UIManager {
   renderPlayArea() {
     this.elements.playArea.innerHTML = '';
 
-    if (this.game.player.playArea.length === 0) {
-      this.elements.playArea.innerHTML = '<p>No cards played this turn</p>';
-      return;
-    }
-
     this.game.player.playArea.forEach((card) => {
       const cardEl = document.createElement('div');
-      cardEl.className = 'card played-card';
+      cardEl.className = `card played-card ${card.type.toLowerCase().replace(/\s+/g, '-')}`;
       cardEl.innerHTML = `
-        <strong>${card.name}</strong><br>
-        <em>Type:</em> ${card.type}<br>
-        <em>Cost:</em> ${card.cost}<br>
-        <em>${card.description || ''}</em>
+        <div class="card-name">${card.name}</div>
+        <div class="card-type">${card.type}</div>
+        <div class="card-description">${card.description || ''}</div>
+        <div class="card-coins">${card.value ? card.value + '*' : ''}</div>
+        <div class="card-victory">${card.points ? card.points + 'pt' : ''}</div>
+        <div class="card-cost">Cost: ${card.cost}</div>
+        <div class="card-image"></div>
       `;
       this.elements.playArea.appendChild(cardEl);
     });
   }
 
   renderMarketplace(marketSupply) {
-    this.elements.marketplace.innerHTML = '<h2>Marketplace</h2>';
+    this.elements.marketplace.innerHTML = '<h2>Shop</h2>';
     
     // Add live info for buys and gold
     const liveInfo = document.createElement('div');
@@ -153,7 +193,7 @@ export class UIManager {
 
         cards.forEach((slot) => {
           const cardEl = document.createElement('div');
-          cardEl.className = 'card';
+          cardEl.className = `card ${slot.card.type.toLowerCase().replace(/\s+/g, '-')}`;
 
           const totalGold = this.game.calculateAvailableGold();
 
@@ -164,11 +204,13 @@ export class UIManager {
           }
 
           cardEl.innerHTML = `
-            <strong>${slot.card.name}</strong><br>
-            <em>Type:</em> ${slot.card.type}<br>
-            <em>Cost:</em> ${slot.card.cost}<br>
-            <em>${slot.card.description || ''}</em><br>
-            Left: ${slot.count}
+            <div class="card-name">${slot.card.name}</div>
+            <div class="card-type">${slot.card.type}</div>
+            <div class="card-description">${slot.card.description || ''}</div>
+            <div class="card-coins">${slot.card.value ? slot.card.value + '*' : ''}</div>
+            <div class="card-victory">${slot.card.points ? slot.card.points + 'pt' : ''}</div>
+            <div class="card-cost">Cost: ${slot.card.cost}</div>
+            <div class="card-image"></div>
           `;
 
           if (!cardEl.classList.contains('disabled')) {
@@ -177,7 +219,18 @@ export class UIManager {
             cardEl.addEventListener('click', () => this.handleBuyCard(actualIndex, marketSupply));
           }
 
-          cardContainer.appendChild(cardEl);
+          // Add count outside the card container
+          const countEl = document.createElement('div');
+          countEl.className = 'card-count';
+          countEl.textContent = `Left: ${slot.count}`;
+
+          // Wrap card and count in a single container
+          const cardWrapper = document.createElement('div');
+          cardWrapper.className = 'card-wrapper';
+          cardWrapper.appendChild(cardEl);
+          cardWrapper.appendChild(countEl);
+
+          cardContainer.appendChild(cardWrapper);
         });
 
         container.appendChild(cardContainer);
@@ -212,13 +265,22 @@ export class UIManager {
   }
 
   renderDeckAndDiscardCount() {
-    this.elements.deckCount.textContent = `Deck: ${this.game.player.deck.length} cards`;
-    this.elements.discardCount.textContent = `Discard Pile: ${this.game.player.discard.length} cards`;
+    // Update deck count with tiny card visual
+    this.elements.deckCount.innerHTML = `
+      <div class="tiny"></div>
+      <div>Deck: ${this.game.player.deck.length} cards</div>
+    `;
+    
+    // Update discard count with tiny card visual
+    this.elements.discardCount.innerHTML = `
+      <div class="tiny"></div>
+      <div>Discard: ${this.game.player.discard.length} cards</div>
+    `;
   }
 
   renderActionsAndBuys() {
-    this.elements.actionsLeft.textContent = `Actions: ${this.game.player.actions}`;
-    this.elements.buysLeft.textContent = `Buys: ${this.game.player.buys}`;
+    this.updateNumberWithAnimation(this.elements.actionsLeft, this.game.player.actions, 'Actions', 'pulse');
+    this.updateNumberWithAnimation(this.elements.buysLeft, this.game.player.buys, 'Buys', 'pulse');
     
     // Also update marketplace live info if it exists
     const marketplaceBuys = document.getElementById('marketplace-buys');
@@ -265,7 +327,7 @@ export class UIManager {
 
   updateGoldDisplay() {
     const gold = this.game.calculateAvailableGold();
-    this.elements.goldDisplay.textContent = `Gold: ${gold}`;
+    this.updateNumberWithAnimation(this.elements.goldDisplay, gold, 'Gold', 'flash');
     
     // Also update marketplace live info if it exists
     const marketplaceGold = document.getElementById('marketplace-gold');
@@ -275,11 +337,11 @@ export class UIManager {
   }
 
   updateVictoryPoints() {
-    this.elements.victoryDisplay.textContent = `Victory Points: ${this.game.player.victoryPoints}`;
+    this.updateNumberWithAnimation(this.elements.victoryDisplay, this.game.player.victoryPoints, 'Points', 'flash');
   }
 
   updateTurnCounter() {
-    this.elements.turnCounter.textContent = `Turn: ${this.game.turnNumber}`;
+    this.updateNumberWithAnimation(this.elements.turnCounter, this.game.turnNumber, 'Turns', 'pulse');
   }
 
   updatePhaseDisplay() {

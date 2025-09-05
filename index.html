@@ -12,31 +12,37 @@
 </head>
 <body>
   <img class="horse-logo" src="res/img/horse-head.svg" alt="Horses" id="horses">
-  <h1 class="title">✌️ Dominion-Inspired Deck Builder ✌️</h1>
+  <!-- <h1 class="title">✌️ Dominion-Inspired Deck Builder ✌️</h1> -->
+  <div id="jumbotron">
+    <ul>
+      <li><div id="victory-display">Victory Points: 0</div></li>
+      <li><div id="turn-counter">Turn: 1</div></li>
+    </ul>
+  </div>
   <div id="game" >
+  
+  <div id="top">
+    <div id="top-spacer"></div>
+    <div id="play-area">
+      <h2>Play Area</h2>
+      <div id="played-cards" class="card-container"></div>
+    </div>
     <div id="header">
       <ul id="scoreboard">
         <li><div id="gold-display"></div></li>
-        <li><div id="victory-display">Victory Points: 0</div></li>
         <li><div id="actions-left">Actions: 1</div></li>
         <li><div id="buys-left">Buys: 1</div></li>
-        <li><div id="turn-counter">Turn: 1</div></li>
       </ul>
-      <button id="next-turn">Next Turn</button>
       <button id="next-phase">Next Phase</button>
-
     </div>
-
+    </div>
 
     <div id="hand">
       <div id="deck-count"></div>
       <div id="player-hand"></div>
       <div id="discard-count"></div>
     </div>
-    <div id="play-area">
-      <h2>Play Area</h2>
-      <div id="played-cards" class="card-container"></div>
-    </div>
+
 
     <div id="phase-controls">
       <div id="phase-display">
@@ -52,7 +58,7 @@
 
     <div id="shop">
       <div id="marketplace">
-        <h2>Marketplace</h2>
+        <h2>Shop</h2>
         <div id="marketplace-top">
           <div id="money-cards"></div>
           <div id="victory-cards"></div>

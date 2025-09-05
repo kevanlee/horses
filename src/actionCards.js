@@ -5,18 +5,18 @@ import { handleThroneRoomEffect } from './throneRoom.js';
 // 👇 Central function that handles any action card
 export function playActionCardEffect(card, player, gameEngine) {
   switch (card.name) {
-    case "Smithy ✅":
+    case "Smithy":
       window.gameEngine.drawCards(player, 3);
       gameEngine.logMessage("Smithy: +3 Cards");
       break;
       
-    case "Village ✅":
+    case "Village":
       window.gameEngine.drawCards(player, 1);
       player.actions += 2;
       gameEngine.logMessage("Village: +1 Card, +2 Actions");
       break;
       
-    case "Market ✅":
+    case "Market":
       window.gameEngine.drawCards(player, 1);
       player.actions += 1;
       player.buys += 1;
@@ -24,14 +24,14 @@ export function playActionCardEffect(card, player, gameEngine) {
       gameEngine.logMessage("Market: +1 Card, +1 Action, +1 Buy, +1 Gold");
       break;
 
-    case "Festival ✅":
+    case "Festival":
       player.actions += 2;
       player.buys += 1;
       player.bonusGold += 2;
       gameEngine.logMessage("Festival: +2 Actions, +1 Buy, +2 Gold");
       break;
 
-    case "Cellar ✅":
+    case "Cellar":
       player.actions += 1;
       gameEngine.logMessage("Cellar: +1 Action. Choose cards to discard and draw.");
       handleCellarEffect(player, card, gameEngine);
@@ -42,21 +42,21 @@ export function playActionCardEffect(card, player, gameEngine) {
       handleLibraryEffect(player, card, gameEngine);
       break;
 
-    case "Laboratory ✅":
+    case "Laboratory":
       window.gameEngine.drawCards(player, 2);
       player.actions += 1;
       gameEngine.logMessage("Laboratory: +2 Cards, +1 Action");
       break;
 
-    case 'Chapel ✅':
+    case 'Chapel':
       handleChapelEffect(player, card, gameEngine);  
       break;
 
-    case 'Workshop ✅':
+    case 'Workshop':
       handleWorkshopEffect(player, card, gameEngine);
       break;
 
-    case "Woodcutter ✅":
+    case "Woodcutter":
       player.buys += 1;
       player.bonusGold += 2;
       gameEngine.logMessage("Woodcutter: +1 Buy, +2 Gold");
@@ -66,64 +66,64 @@ export function playActionCardEffect(card, player, gameEngine) {
       handleVassalEffect(player, card, gameEngine);
       break;    
 
-    case "Great Hall ✅":
+    case "Great Hall":
       window.gameEngine.drawCards(player, 1);
       player.actions += 1;
       gameEngine.logMessage("Great Hall: +1 Card, +1 Action");
       window.uiManager.updateVictoryPoints(); // 🏆 Recalculate VP immediately
       break;
 
-    case 'Masquerade ✅':
+    case 'Masquerade':
       gameEngine.logMessage("Masquerade: Draw 2 cards. Keep one.")
       handleMasqueradeEffect(player, card, gameEngine);
       break;
     
-    case 'Harbinger ✅':
+    case 'Harbinger':
       window.gameEngine.drawCards(player, 1);
       player.actions += 1;
       gameEngine.logMessage("Harbinger: +1 Card, +1 Action");
       handleHarbingerEffect(player, card, gameEngine); 
       break;
     
-    case "Council Room ✅":
+    case "Council Room":
       window.gameEngine.drawCards(player, 4);
       player.buys += 1;
       gameEngine.logMessage("Council Room: +4 Cards, +1 Buy");
       break;
 
-    case "Feast ✅":
+    case "Feast":
       handleFeastEffect(player, card, gameEngine);
       break;
 
-    case "Moneylender ✅":
+    case "Moneylender":
       handleMoneylenderEffect(player, card, gameEngine);
       break;
 
-    case "Gardens ⚫️":
+    case "Gardens":
       // Gardens has no immediate effect - VP is calculated in updateVictoryPoints
       gameEngine.logMessage("Gardens: Worth 1 VP for every 10 cards in your deck.");
       break;
 
-    case "Treasury ⚫️":
+    case "Treasury":
       window.gameEngine.drawCards(player, 1);
       player.actions += 1;
       player.bonusGold += 1;
       gameEngine.logMessage("Treasury: +1 Card, +1 Action, +1 Coin");
       break;
 
-    case "Mine ✅":
+    case "Mine":
       handleMineEffect(player, card, gameEngine);
       break;
 
-    case "Remodel ✅":
+    case "Remodel":
       handleRemodelEffect(player, card, gameEngine);
       break;
 
-    case "Adventurer ⚫️":
+    case "Adventurer":
       handleAdventurerEffect(player, card, gameEngine);
       break;
 
-    case "Throne Room ⚫️":
+    case "Throne Room":
       handleThroneRoomEffect(player, card, gameEngine);
       break;
 
@@ -148,9 +148,13 @@ function handleCellarEffect(player, cellarCard, gameEngine) {
     const cardEl = document.createElement('div');
     cardEl.className = 'card';
     cardEl.innerHTML = `
-      <strong>${c.name}</strong><br>
-      <em>Type:</em> ${c.type}<br>
-      <em>Cost:</em> ${c.cost}<br>
+      <div class="card-name">${c.name}</div>
+      <div class="card-type">${c.type}</div>
+      <div class="card-description">${c.description || ''}</div>
+      <div class="card-coins">${c.value ? c.value + '*' : ''}</div>
+      <div class="card-victory">${c.points ? c.points + 'pt' : ''}</div>
+      <div class="card-cost">Cost: ${c.cost}</div>
+      <div class="card-image"></div>
     `;
     cardEl.addEventListener('click', () => {
       if (selectedCards.has(idx)) {
@@ -228,7 +232,7 @@ function handleLibraryEffect(player, libraryCard, gameEngine) {
   drawn.forEach(card => {
     const cardDiv = document.createElement('div');
     cardDiv.className = 'card';
-    cardDiv.innerHTML = `<strong>${card.name}</strong><br><em>${card.type}</em>`;
+    cardDiv.innerHTML = `<div class="card-name">${card.name}</div><div class="card-type">${card.type}</div><div class="card-description">${card.description || ''}</div><div class="card-coins">${card.value ? card.value + '*' : ''}</div><div class="card-victory">${card.points ? card.points + 'pt' : ''}</div><div class="card-cost">Cost: ${card.cost}</div><div class="card-image"></div>`;
 
     // Add a discard button for Action cards
     if (card.type === "Action") {
@@ -306,9 +310,9 @@ function handleChapelEffect(player, chapelCard, gameEngine) {
       const cardEl = document.createElement('div');
       cardEl.className = 'card';
       cardEl.innerHTML = `
-        <strong>${c.name}</strong><br>
-        <em>Type:</em> ${c.type}<br>
-        <em>Cost:</em> ${c.cost}<br>
+        <div class="card-name">${c.name}</div>
+        <div class="card-type">${c.type}</div>
+        <div class="card-cost">Cost: ${c.cost}</div>
       `;
       cardEl.addEventListener('click', () => {
         if (selectedCards.has(idx)) {
@@ -375,9 +379,13 @@ function handleWorkshopEffect(player, workshopCard, gameEngine) {
       const cardEl = document.createElement('div');
       cardEl.className = 'card';
       cardEl.innerHTML = `
-        <strong>${slot.card.name}</strong><br>
-        <em>Type:</em> ${slot.card.type}<br>
-        <em>Cost:</em> ${slot.card.cost}<br>
+        <div class="card-name">${slot.card.name}</div>
+        <div class="card-type">${slot.card.type}</div>
+        <div class="card-description">${slot.card.description || ''}</div>
+        <div class="card-coins">${slot.card.value ? slot.card.value + '*' : ''}</div>
+        <div class="card-victory">${slot.card.points ? slot.card.points + 'pt' : ''}</div>
+        <div class="card-cost">Cost: ${slot.card.cost}</div>
+        <div class="card-image"></div>
       `;
       cardEl.addEventListener('click', () => {
         // Deselect others
@@ -451,9 +459,13 @@ function handleVassalEffect(player, vassalCard, gameEngine) {
   cardEl.addEventListener('click', () => {
     cardEl.classList.remove('card-back');
     cardEl.innerHTML = `
-      <strong>${topCard.name}</strong><br>
-      <em>Type:</em> ${topCard.type}<br>
-      <em>${topCard.description || ''}</em>
+      <div class="card-name">${topCard.name}</div>
+      <div class="card-type">${topCard.type}</div>
+      <div class="card-description">${topCard.description || ''}</div>
+      <div class="card-coins">${topCard.value ? topCard.value + '*' : ''}</div>
+      <div class="card-victory">${topCard.points ? topCard.points + 'pt' : ''}</div>
+      <div class="card-cost">Cost: ${topCard.cost}</div>
+      <div class="card-image"></div>
     `;
 
     if (topCard.type === 'Action') {
@@ -538,10 +550,13 @@ function handleMasqueradeEffect(player, card, gameEngine) {
     const cardDiv = document.createElement('div');
     cardDiv.className = 'card'; // same styling
     cardDiv.innerHTML = `
-      <strong>${drawnCard.name}</strong><br>
-      <em>Type:</em> ${drawnCard.type}</em><br>
-      <em>Cost:</em> ${drawnCard.cost}</em><br>
-      <em>${drawnCard.description || ''}</em>
+      <div class="card-name">${drawnCard.name}</div>
+      <div class="card-type">${drawnCard.type}</div>
+      <div class="card-description">${drawnCard.description || ''}</div>
+      <div class="card-coins">${drawnCard.value ? drawnCard.value + '*' : ''}</div>
+      <div class="card-victory">${drawnCard.points ? drawnCard.points + 'pt' : ''}</div>
+      <div class="card-cost">Cost: ${drawnCard.cost}</div>
+      <div class="card-image"></div>
     `;
 
     cardDiv.addEventListener('click', () => {
@@ -617,10 +632,13 @@ function handleHarbingerEffect(player, card, gameEngine) {
       const cardDiv = document.createElement('div');
       cardDiv.className = 'card';
       cardDiv.innerHTML = `
-        <strong>${cardObj.name}</strong><br>
-        <em>Type:</em> ${cardObj.type}<br>
-        <em>Cost:</em> ${cardObj.cost}<br>
-        <em>${cardObj.description || ''}</em>
+        <div class="card-name">${cardObj.name}</div>
+        <div class="card-type">${cardObj.type}</div>
+        <div class="card-description">${cardObj.description || ''}</div>
+        <div class="card-coins">${cardObj.value ? cardObj.value + '*' : ''}</div>
+        <div class="card-victory">${cardObj.points ? cardObj.points + 'pt' : ''}</div>
+        <div class="card-cost">Cost: ${cardObj.cost}</div>
+        <div class="card-image"></div>
       `;
 
       cardDiv.addEventListener('click', () => {
@@ -725,10 +743,12 @@ function handleFeastEffect(player, feastCard, gameEngine) {
       const cardEl = document.createElement('div');
       cardEl.className = 'card';
       cardEl.innerHTML = `
-        <strong>${slot.card.name}</strong><br>
-        <em>Type:</em> ${slot.card.type}<br>
-        <em>Cost:</em> ${slot.card.cost}<br>
-        <em>${slot.card.description || ''}</em>
+        <div class="card-name">${slot.card.name}</div>
+        <div class="card-type">${slot.card.type}</div>
+        <div class="card-cost">Cost: ${slot.card.cost}</div>
+        <div class="card-coins">${slot.card.coins || ''}</div>
+        <div class="card-victory">${slot.card.victory || ''}</div>
+        <div class="card-description">${slot.card.description || ''}</div>
       `;
       cardEl.addEventListener('click', () => {
         // Deselect others
@@ -799,11 +819,14 @@ function handleMineEffect(player, mineCard, gameEngine) {
     const cardEl = document.createElement('div');
     cardEl.className = 'card';
     cardEl.innerHTML = `
-      <strong>${card.name}</strong><br>
-      <em>Type:</em> ${card.type}<br>
-      <em>Cost:</em> ${card.cost}<br>
-      <em>Value:</em> ${card.value}<br>
-      <em>${card.description || ''}</em>
+      <div class="card-name">${card.name}</div>
+      <div class="card-type">${card.type}</div>
+      <div class="card-description">${card.description || ''}</div>
+      <div class="card-coins">${card.value ? card.value + '*' : ''}</div>
+      <div class="card-victory">${card.points ? card.points + 'pt' : ''}</div>
+      <div class="card-cost">Cost: ${card.cost}</div>
+      <div class="card-value">${card.value}</div>
+      <div class="card-image"></div>
     `;
     cardEl.addEventListener('click', () => {
       // Deselect others
@@ -840,11 +863,14 @@ function handleMineEffect(player, mineCard, gameEngine) {
           const cardEl = document.createElement('div');
           cardEl.className = 'card';
           cardEl.innerHTML = `
-            <strong>${slot.card.name}</strong><br>
-            <em>Type:</em> ${slot.card.type}<br>
-            <em>Cost:</em> ${slot.card.cost}<br>
-            <em>Value:</em> ${slot.card.value}<br>
-            <em>${slot.card.description || ''}</em>
+            <div class="card-name">${slot.card.name}</div>
+            <div class="card-type">${slot.card.type}</div>
+            <div class="card-description">${slot.card.description || ''}</div>
+            <div class="card-coins">${slot.card.value ? slot.card.value + '*' : ''}</div>
+            <div class="card-victory">${slot.card.points ? slot.card.points + 'pt' : ''}</div>
+            <div class="card-cost">Cost: ${slot.card.cost}</div>
+            <div class="card-value">${slot.card.value}</div>
+            <div class="card-image"></div>
           `;
           cardEl.addEventListener('click', () => {
             // Deselect others
@@ -900,10 +926,13 @@ function handleRemodelEffect(player, remodelCard, gameEngine) {
     const cardEl = document.createElement('div');
     cardEl.className = 'card';
     cardEl.innerHTML = `
-      <strong>${card.name}</strong><br>
-      <em>Type:</em> ${card.type}<br>
-      <em>Cost:</em> ${card.cost}<br>
-      <em>${card.description || ''}</em>
+      <div class="card-name">${card.name}</div>
+      <div class="card-type">${card.type}</div>
+      <div class="card-description">${card.description || ''}</div>
+      <div class="card-coins">${card.value ? card.value + '*' : ''}</div>
+      <div class="card-victory">${card.points ? card.points + 'pt' : ''}</div>
+      <div class="card-cost">Cost: ${card.cost}</div>
+      <div class="card-image"></div>
     `;
     cardEl.addEventListener('click', () => {
       // Deselect others
@@ -940,10 +969,10 @@ function handleRemodelEffect(player, remodelCard, gameEngine) {
           const cardEl = document.createElement('div');
           cardEl.className = 'card';
           cardEl.innerHTML = `
-            <strong>${slot.card.name}</strong><br>
-            <em>Type:</em> ${slot.card.type}<br>
-            <em>Cost:</em> ${slot.card.cost}<br>
-            <em>${slot.card.description || ''}</em>
+            <div class="card-name">${slot.card.name}</div>
+            <div class="card-type">${slot.card.type}</div>
+            <div class="card-cost">Cost: ${slot.card.cost}</div>
+            <div class="card-description">${slot.card.description || ''}</div>
           `;
           cardEl.addEventListener('click', () => {
             // Deselect others

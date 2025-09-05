@@ -4,13 +4,13 @@
 // Hard-coded effects for each action card when played via Throne Room
 const THRONE_ROOM_EFFECTS = {
   // Simple cards (no modals) - just double the effects
-  "Smithy ✅": (player, gameEngine) => {
+  "Smithy": (player, gameEngine) => {
     window.gameEngine.drawCards(player, 3);
     window.gameEngine.drawCards(player, 3);
     gameEngine.logMessage("Throne Room + Smithy: +6 Cards total");
   },
 
-  "Village ✅": (player, gameEngine) => {
+  "Village": (player, gameEngine) => {
     window.gameEngine.drawCards(player, 1);
     player.actions += 2;
     window.gameEngine.drawCards(player, 1);
@@ -18,7 +18,7 @@ const THRONE_ROOM_EFFECTS = {
     gameEngine.logMessage("Throne Room + Village: +2 Cards, +4 Actions total");
   },
 
-  "Market ✅": (player, gameEngine) => {
+  "Market": (player, gameEngine) => {
     window.gameEngine.drawCards(player, 1);
     player.actions += 1;
     player.buys += 1;
@@ -30,7 +30,7 @@ const THRONE_ROOM_EFFECTS = {
     gameEngine.logMessage("Throne Room + Market: +2 Cards, +2 Actions, +2 Buys, +2 Gold total");
   },
 
-  "Festival ✅": (player, gameEngine) => {
+  "Festival": (player, gameEngine) => {
     player.actions += 2;
     player.buys += 1;
     player.bonusGold += 2;
@@ -40,7 +40,7 @@ const THRONE_ROOM_EFFECTS = {
     gameEngine.logMessage("Throne Room + Festival: +4 Actions, +2 Buys, +4 Gold total");
   },
 
-  "Laboratory ✅": (player, gameEngine) => {
+  "Laboratory": (player, gameEngine) => {
     window.gameEngine.drawCards(player, 2);
     player.actions += 1;
     window.gameEngine.drawCards(player, 2);
@@ -48,7 +48,7 @@ const THRONE_ROOM_EFFECTS = {
     gameEngine.logMessage("Throne Room + Laboratory: +4 Cards, +2 Actions total");
   },
 
-  "Woodcutter ✅": (player, gameEngine) => {
+  "Woodcutter": (player, gameEngine) => {
     player.buys += 1;
     player.bonusGold += 2;
     player.buys += 1;
@@ -56,7 +56,7 @@ const THRONE_ROOM_EFFECTS = {
     gameEngine.logMessage("Throne Room + Woodcutter: +2 Buys, +4 Gold total");
   },
 
-  "Great Hall ✅": (player, gameEngine) => {
+  "Great Hall": (player, gameEngine) => {
     window.gameEngine.drawCards(player, 1);
     player.actions += 1;
     window.gameEngine.drawCards(player, 1);
@@ -65,7 +65,7 @@ const THRONE_ROOM_EFFECTS = {
     window.uiManager.updateVictoryPoints();
   },
 
-  "Council Room ✅": (player, gameEngine) => {
+  "Council Room": (player, gameEngine) => {
     window.gameEngine.drawCards(player, 4);
     player.buys += 1;
     window.gameEngine.drawCards(player, 4);
@@ -73,7 +73,7 @@ const THRONE_ROOM_EFFECTS = {
     gameEngine.logMessage("Throne Room + Council Room: +8 Cards, +2 Buys total");
   },
 
-  "Treasury ✅": (player, gameEngine) => {
+  "Treasury": (player, gameEngine) => {
     window.gameEngine.drawCards(player, 1);
     player.actions += 1;
     player.bonusGold += 1;
@@ -83,7 +83,7 @@ const THRONE_ROOM_EFFECTS = {
     gameEngine.logMessage("Throne Room + Treasury: +2 Cards, +2 Actions, +2 Gold total");
   },
 
-  "Moneylender ✅": (player, gameEngine) => {
+  "Moneylender": (player, gameEngine) => {
     // Check if player has a Copper in hand
     const copperIndex = player.hand.findIndex(card => card.name === 'Copper');
     
@@ -99,54 +99,54 @@ const THRONE_ROOM_EFFECTS = {
   },
 
   // Modal cards - these need special handling
-  "Cellar ✅": (player, gameEngine) => {
+  "Cellar": (player, gameEngine) => {
     player.actions += 1;
     gameEngine.logMessage("Throne Room + Cellar: +1 Action. Choose cards to discard and draw (twice).");
-    handleThroneRoomModalCard(player, "Cellar ✅", gameEngine);
+    handleThroneRoomModalCard(player, "Cellar", gameEngine);
   },
 
-  "Chapel ✅": (player, gameEngine) => {
+  "Chapel": (player, gameEngine) => {
     gameEngine.logMessage("Throne Room + Chapel: Choose cards to trash (twice).");
-    handleThroneRoomModalCard(player, "Chapel ✅", gameEngine);
+    handleThroneRoomModalCard(player, "Chapel", gameEngine);
   },
 
-  "Workshop ✅": (player, gameEngine) => {
+  "Workshop": (player, gameEngine) => {
     gameEngine.logMessage("Throne Room + Workshop: Choose a card costing up to 4 coins to gain (twice).");
-    handleThroneRoomModalCard(player, "Workshop ✅", gameEngine);
+    handleThroneRoomModalCard(player, "Workshop", gameEngine);
   },
 
-  "Feast ✅": (player, gameEngine) => {
+  "Feast": (player, gameEngine) => {
     gameEngine.logMessage("Throne Room + Feast: Choose a card costing up to 5 coins to gain (twice).");
-    handleThroneRoomModalCard(player, "Feast ✅", gameEngine);
+    handleThroneRoomModalCard(player, "Feast", gameEngine);
   },
 
-  "Mine ✅": (player, gameEngine) => {
+  "Mine": (player, gameEngine) => {
     gameEngine.logMessage("Throne Room + Mine: Choose a Treasure to trash and gain a better one (twice).");
-    handleThroneRoomModalCard(player, "Mine ✅", gameEngine);
+    handleThroneRoomModalCard(player, "Mine", gameEngine);
   },
 
-  "Remodel ✅": (player, gameEngine) => {
+  "Remodel": (player, gameEngine) => {
     gameEngine.logMessage("Throne Room + Remodel: Choose a card to trash and gain a better one (twice).");
-    handleThroneRoomModalCard(player, "Remodel ✅", gameEngine);
+    handleThroneRoomModalCard(player, "Remodel", gameEngine);
   },
 
-  "Masquerade ✅": (player, gameEngine) => {
+  "Masquerade": (player, gameEngine) => {
     gameEngine.logMessage("Throne Room + Masquerade: Draw 2 cards, keep one (twice).");
-    handleThroneRoomModalCard(player, "Masquerade ✅", gameEngine);
+    handleThroneRoomModalCard(player, "Masquerade", gameEngine);
   },
 
-  "Harbinger ✅": (player, gameEngine) => {
+  "Harbinger": (player, gameEngine) => {
     window.gameEngine.drawCards(player, 1);
     player.actions += 1;
     window.gameEngine.drawCards(player, 1);
     player.actions += 1;
     gameEngine.logMessage("Throne Room + Harbinger: +2 Cards, +2 Actions. Choose cards to put on deck (twice).");
-    handleThroneRoomModalCard(player, "Harbinger ✅", gameEngine);
+    handleThroneRoomModalCard(player, "Harbinger", gameEngine);
   },
 
-  "Library ✅": (player, gameEngine) => {
+  "Library": (player, gameEngine) => {
     gameEngine.logMessage("Throne Room + Library: Draw until you have 7 cards, discard Action cards (twice).");
-    handleThroneRoomModalCard(player, "Library ✅", gameEngine);
+    handleThroneRoomModalCard(player, "Library", gameEngine);
   },
 
   "Vassal": (player, gameEngine) => {
@@ -154,9 +154,9 @@ const THRONE_ROOM_EFFECTS = {
     handleThroneRoomModalCard(player, "Vassal", gameEngine);
   },
 
-  "Adventurer ✅": (player, gameEngine) => {
+  "Adventurer": (player, gameEngine) => {
     gameEngine.logMessage("Throne Room + Adventurer: Reveal cards until 2 Treasures found (twice).");
-    handleThroneRoomModalCard(player, "Adventurer ✅", gameEngine);
+    handleThroneRoomModalCard(player, "Adventurer", gameEngine);
   }
 };
 
@@ -215,10 +215,13 @@ export function handleThroneRoomEffect(player, throneRoomCard, gameEngine) {
     const cardEl = document.createElement('div');
     cardEl.className = 'card';
     cardEl.innerHTML = `
-      <strong>${card.name}</strong><br>
-      <em>Type:</em> ${card.type}<br>
-      <em>Cost:</em> ${card.cost}<br>
-      <em>${card.description || ''}</em>
+      <div class="card-name">${card.name}</div>
+      <div class="card-type">${card.type}</div>
+      <div class="card-description">${card.description || ''}</div>
+      <div class="card-coins">${card.value ? card.value + '*' : ''}</div>
+      <div class="card-victory">${card.points ? card.points + 'pt' : ''}</div>
+      <div class="card-cost">Cost: ${card.cost}</div>
+      <div class="card-image"></div>
     `;
     cardEl.addEventListener('click', () => {
       // Deselect others
