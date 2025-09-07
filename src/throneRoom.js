@@ -216,11 +216,9 @@ export function handleThroneRoomEffect(player, throneRoomCard, gameEngine) {
     cardEl.className = 'card';
     cardEl.innerHTML = `
       <div class="card-name">${card.name}</div>
-      <div class="card-type">${card.type}</div>
       <div class="card-description">${card.description || ''}</div>
       <div class="card-coins">${card.value ? card.value + '*' : ''}</div>
       <div class="card-victory">${card.points ? card.points + 'pt' : ''}</div>
-      <div class="card-cost">Cost: ${card.cost}</div>
       <div class="card-image"></div>
     `;
     cardEl.addEventListener('click', () => {

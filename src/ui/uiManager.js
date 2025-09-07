@@ -82,6 +82,8 @@ export class UIManager {
       }
     });
     
+    // Add sticky button behavior - show floating button when original scrolls out of view
+    this.setupStickyButton();
 
   }
 
@@ -529,5 +531,44 @@ export class UIManager {
         this.elements.deckIndicator.classList.remove('dealing');
       }, 1500);
     }
+  }
+
+  setupStickyButton() {
+    const button = this.elements.nextPhaseBtn;
+    const header = document.getElementById('header');
+    
+    if (!button || !header) return;
+    
+    // Function to check if button is in viewport
+    const isButtonInView = () => {
+      const rect = header.getBoundingClientRect();
+      return rect.bottom > 0; // Button is in view if header bottom is above viewport top
+    };
+    
+    // Function to toggle sticky state
+    const toggleSticky = () => {
+      if (isButtonInView()) {
+        button.classList.remove('sticky');
+      } else {
+        button.classList.add('sticky');
+      }
+    };
+    
+    // Initial check
+    toggleSticky();
+    
+    // Add scroll listener with throttling for performance
+    let ticking = false;
+    const handleScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          toggleSticky();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+    
+    window.addEventListener('scroll', handleScroll);
   }
 }

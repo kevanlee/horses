@@ -149,11 +149,9 @@ function handleCellarEffect(player, cellarCard, gameEngine) {
     cardEl.className = 'card';
     cardEl.innerHTML = `
       <div class="card-name">${c.name}</div>
-      <div class="card-type">${c.type}</div>
       <div class="card-description">${c.description || ''}</div>
       <div class="card-coins">${c.value ? c.value + '*' : ''}</div>
       <div class="card-victory">${c.points ? c.points + 'pt' : ''}</div>
-      <div class="card-cost">Cost: ${c.cost}</div>
       <div class="card-image"></div>
     `;
     cardEl.addEventListener('click', () => {
@@ -232,7 +230,7 @@ function handleLibraryEffect(player, libraryCard, gameEngine) {
   drawn.forEach(card => {
     const cardDiv = document.createElement('div');
     cardDiv.className = 'card';
-    cardDiv.innerHTML = `<div class="card-name">${card.name}</div><div class="card-type">${card.type}</div><div class="card-description">${card.description || ''}</div><div class="card-coins">${card.value ? card.value + '*' : ''}</div><div class="card-victory">${card.points ? card.points + 'pt' : ''}</div><div class="card-cost">Cost: ${card.cost}</div><div class="card-image"></div>`;
+    cardDiv.innerHTML = `<div class="card-name">${card.name}</div><div class="card-description">${card.description || ''}</div><div class="card-coins">${card.value ? card.value + '*' : ''}</div><div class="card-victory">${card.points ? card.points + 'pt' : ''}</div><div class="card-image"></div>`;
 
     // Add a discard button for Action cards
     if (card.type === "Action") {
@@ -311,8 +309,10 @@ function handleChapelEffect(player, chapelCard, gameEngine) {
       cardEl.className = 'card';
       cardEl.innerHTML = `
         <div class="card-name">${c.name}</div>
-        <div class="card-type">${c.type}</div>
-        <div class="card-cost">Cost: ${c.cost}</div>
+        <div class="card-description">${c.description || ''}</div>
+        <div class="card-coins">${c.value ? c.value + '*' : ''}</div>
+        <div class="card-victory">${c.points ? c.points + 'pt' : ''}</div>
+        <div class="card-image"></div>
       `;
       cardEl.addEventListener('click', () => {
         if (selectedCards.has(idx)) {
@@ -380,11 +380,9 @@ function handleWorkshopEffect(player, workshopCard, gameEngine) {
       cardEl.className = 'card';
       cardEl.innerHTML = `
         <div class="card-name">${slot.card.name}</div>
-        <div class="card-type">${slot.card.type}</div>
         <div class="card-description">${slot.card.description || ''}</div>
         <div class="card-coins">${slot.card.value ? slot.card.value + '*' : ''}</div>
         <div class="card-victory">${slot.card.points ? slot.card.points + 'pt' : ''}</div>
-        <div class="card-cost">Cost: ${slot.card.cost}</div>
         <div class="card-image"></div>
       `;
       cardEl.addEventListener('click', () => {
@@ -460,11 +458,9 @@ function handleVassalEffect(player, vassalCard, gameEngine) {
     cardEl.classList.remove('card-back');
     cardEl.innerHTML = `
       <div class="card-name">${topCard.name}</div>
-      <div class="card-type">${topCard.type}</div>
       <div class="card-description">${topCard.description || ''}</div>
       <div class="card-coins">${topCard.value ? topCard.value + '*' : ''}</div>
       <div class="card-victory">${topCard.points ? topCard.points + 'pt' : ''}</div>
-      <div class="card-cost">Cost: ${topCard.cost}</div>
       <div class="card-image"></div>
     `;
 
@@ -551,11 +547,9 @@ function handleMasqueradeEffect(player, card, gameEngine) {
     cardDiv.className = 'card'; // same styling
     cardDiv.innerHTML = `
       <div class="card-name">${drawnCard.name}</div>
-      <div class="card-type">${drawnCard.type}</div>
       <div class="card-description">${drawnCard.description || ''}</div>
       <div class="card-coins">${drawnCard.value ? drawnCard.value + '*' : ''}</div>
       <div class="card-victory">${drawnCard.points ? drawnCard.points + 'pt' : ''}</div>
-      <div class="card-cost">Cost: ${drawnCard.cost}</div>
       <div class="card-image"></div>
     `;
 
@@ -633,11 +627,9 @@ function handleHarbingerEffect(player, card, gameEngine) {
       cardDiv.className = 'card';
       cardDiv.innerHTML = `
         <div class="card-name">${cardObj.name}</div>
-        <div class="card-type">${cardObj.type}</div>
         <div class="card-description">${cardObj.description || ''}</div>
         <div class="card-coins">${cardObj.value ? cardObj.value + '*' : ''}</div>
         <div class="card-victory">${cardObj.points ? cardObj.points + 'pt' : ''}</div>
-        <div class="card-cost">Cost: ${cardObj.cost}</div>
         <div class="card-image"></div>
       `;
 
@@ -744,11 +736,10 @@ function handleFeastEffect(player, feastCard, gameEngine) {
       cardEl.className = 'card';
       cardEl.innerHTML = `
         <div class="card-name">${slot.card.name}</div>
-        <div class="card-type">${slot.card.type}</div>
-        <div class="card-cost">Cost: ${slot.card.cost}</div>
-        <div class="card-coins">${slot.card.coins || ''}</div>
-        <div class="card-victory">${slot.card.victory || ''}</div>
         <div class="card-description">${slot.card.description || ''}</div>
+        <div class="card-coins">${slot.card.value ? slot.card.value + '*' : ''}</div>
+        <div class="card-victory">${slot.card.points ? slot.card.points + 'pt' : ''}</div>
+        <div class="card-image"></div>
       `;
       cardEl.addEventListener('click', () => {
         // Deselect others
@@ -820,12 +811,9 @@ function handleMineEffect(player, mineCard, gameEngine) {
     cardEl.className = 'card';
     cardEl.innerHTML = `
       <div class="card-name">${card.name}</div>
-      <div class="card-type">${card.type}</div>
       <div class="card-description">${card.description || ''}</div>
       <div class="card-coins">${card.value ? card.value + '*' : ''}</div>
       <div class="card-victory">${card.points ? card.points + 'pt' : ''}</div>
-      <div class="card-cost">Cost: ${card.cost}</div>
-      <div class="card-value">${card.value}</div>
       <div class="card-image"></div>
     `;
     cardEl.addEventListener('click', () => {
@@ -864,12 +852,9 @@ function handleMineEffect(player, mineCard, gameEngine) {
           cardEl.className = 'card';
           cardEl.innerHTML = `
             <div class="card-name">${slot.card.name}</div>
-            <div class="card-type">${slot.card.type}</div>
             <div class="card-description">${slot.card.description || ''}</div>
             <div class="card-coins">${slot.card.value ? slot.card.value + '*' : ''}</div>
             <div class="card-victory">${slot.card.points ? slot.card.points + 'pt' : ''}</div>
-            <div class="card-cost">Cost: ${slot.card.cost}</div>
-            <div class="card-value">${slot.card.value}</div>
             <div class="card-image"></div>
           `;
           cardEl.addEventListener('click', () => {
@@ -927,11 +912,9 @@ function handleRemodelEffect(player, remodelCard, gameEngine) {
     cardEl.className = 'card';
     cardEl.innerHTML = `
       <div class="card-name">${card.name}</div>
-      <div class="card-type">${card.type}</div>
       <div class="card-description">${card.description || ''}</div>
       <div class="card-coins">${card.value ? card.value + '*' : ''}</div>
       <div class="card-victory">${card.points ? card.points + 'pt' : ''}</div>
-      <div class="card-cost">Cost: ${card.cost}</div>
       <div class="card-image"></div>
     `;
     cardEl.addEventListener('click', () => {
@@ -970,9 +953,10 @@ function handleRemodelEffect(player, remodelCard, gameEngine) {
           cardEl.className = 'card';
           cardEl.innerHTML = `
             <div class="card-name">${slot.card.name}</div>
-            <div class="card-type">${slot.card.type}</div>
-            <div class="card-cost">Cost: ${slot.card.cost}</div>
             <div class="card-description">${slot.card.description || ''}</div>
+            <div class="card-coins">${slot.card.value ? slot.card.value + '*' : ''}</div>
+            <div class="card-victory">${slot.card.points ? slot.card.points + 'pt' : ''}</div>
+            <div class="card-image"></div>
           `;
           cardEl.addEventListener('click', () => {
             // Deselect others

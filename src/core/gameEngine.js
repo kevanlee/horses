@@ -101,6 +101,13 @@ export class GameEngine {
       case GAME_PHASES.ACTION_PHASE:
         this.currentPhase = GAME_PHASES.BUY_PHASE;
         this.logMessage("Moving to Buy Phase.");
+        // Scroll to buy phase anchor with a small delay to ensure UI updates
+        setTimeout(() => {
+          const anchor = document.getElementById('buy-phase-anchor');
+          if (anchor) {
+            anchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 100);
         break;
       case GAME_PHASES.BUY_PHASE:
         // Auto-advance to cleanup and then new turn
