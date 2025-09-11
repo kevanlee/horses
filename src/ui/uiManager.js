@@ -110,7 +110,7 @@ export class UIManager {
         <div class="card-coins">${card.value ? card.value + '*' : ''}</div>
         <div class="card-victory">${card.points ? card.points + 'pt' : ''}</div>
         <div class="card-cost">Cost: ${card.cost}</div>
-        <div class="card-image"></div>
+        <div class="card-image">${card.image ? `<img src="../res/img/cards/${card.image}" alt="${card.name}">` : ''}</div>
       `;
 
       // Add "Play" button only if player has actions left and card is an Action type
@@ -141,7 +141,7 @@ export class UIManager {
         <div class="card-coins">${card.value ? card.value + '*' : ''}</div>
         <div class="card-victory">${card.points ? card.points + 'pt' : ''}</div>
         <div class="card-cost">Cost: ${card.cost}</div>
-        <div class="card-image"></div>
+        <div class="card-image">${card.image ? `<img src="../res/img/cards/${card.image}" alt="${card.name}">` : ''}</div>
       `;
       this.elements.playArea.appendChild(cardEl);
     });
@@ -212,7 +212,7 @@ export class UIManager {
             <div class="card-coins">${slot.card.value ? slot.card.value + '*' : ''}</div>
             <div class="card-victory">${slot.card.points ? slot.card.points + 'pt' : ''}</div>
             <div class="card-cost">Cost: ${slot.card.cost}</div>
-            <div class="card-image"></div>
+            <div class="card-image">${slot.card.image ? `<img src="../res/img/cards/${slot.card.image}" alt="${slot.card.name}">` : ''}</div>
           `;
 
           if (!cardEl.classList.contains('disabled')) {

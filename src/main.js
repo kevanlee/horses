@@ -36,3 +36,55 @@ window.renderDeckAndDiscardCount = () => uiManager.renderDeckAndDiscardCount();
 window.renderActionsAndBuys = () => uiManager.renderActionsAndBuys();
 window.updateGoldDisplay = () => uiManager.updateGoldDisplay();
 window.shuffleDiscardIntoDeck = () => gameEngine.shuffleDiscardIntoDeck();
+
+// Menu Modal functionality
+function initializeMenuModal() {
+  const menuButton = document.getElementById('menu-button');
+  const menuModal = document.getElementById('menu-modal');
+  const closeButton = document.getElementById('close-menu');
+
+  if (!menuButton || !menuModal || !closeButton) {
+    console.log('Menu modal elements not found, retrying...');
+    setTimeout(initializeMenuModal, 100);
+    return;
+  }
+
+  console.log('Initializing menu modal...');
+
+  // Open modal when menu button is clicked
+  menuButton.addEventListener('click', () => {
+    console.log('Menu button clicked');
+    menuModal.classList.add('active');
+  });
+
+  // Close modal when close button is clicked
+  closeButton.addEventListener('click', () => {
+    console.log('Close button clicked');
+    menuModal.classList.remove('active');
+  });
+
+  // Close modal when clicking outside the modal content
+  menuModal.addEventListener('click', (e) => {
+    if (e.target === menuModal) {
+      console.log('Clicked outside modal');
+      menuModal.classList.remove('active');
+    }
+  });
+
+  // Close modal with Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && menuModal.classList.contains('active')) {
+      console.log('Escape key pressed');
+      menuModal.classList.remove('active');
+    }
+  });
+}
+
+// Initialize menu modal - try multiple approaches
+initializeMenuModal();
+
+// Also try after DOM is ready
+document.addEventListener('DOMContentLoaded', initializeMenuModal);
+
+// And after window loads
+window.addEventListener('load', initializeMenuModal);

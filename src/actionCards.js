@@ -146,13 +146,13 @@ function handleCellarEffect(player, cellarCard, gameEngine) {
 
   player.hand.forEach((c, idx) => {
     const cardEl = document.createElement('div');
-    cardEl.className = 'card';
+    cardEl.className = `card ${c.type.toLowerCase().replace(/\s+/g, '-')}`;
     cardEl.innerHTML = `
       <div class="card-name">${c.name}</div>
       <div class="card-description">${c.description || ''}</div>
       <div class="card-coins">${c.value ? c.value + '*' : ''}</div>
       <div class="card-victory">${c.points ? c.points + 'pt' : ''}</div>
-      <div class="card-image"></div>
+      <div class="card-image">${c.image ? `<img src="../res/img/cards/${c.image}" alt="${c.name}">` : ''}</div>
     `;
     cardEl.addEventListener('click', () => {
       if (selectedCards.has(idx)) {
@@ -229,7 +229,7 @@ function handleLibraryEffect(player, libraryCard, gameEngine) {
 
   drawn.forEach(card => {
     const cardDiv = document.createElement('div');
-    cardDiv.className = 'card';
+    cardDiv.className = `card ${card.type.toLowerCase().replace(/\s+/g, '-')}`;
     cardDiv.innerHTML = `<div class="card-name">${card.name}</div><div class="card-description">${card.description || ''}</div><div class="card-coins">${card.value ? card.value + '*' : ''}</div><div class="card-victory">${card.points ? card.points + 'pt' : ''}</div><div class="card-image"></div>`;
 
     // Add a discard button for Action cards
@@ -306,13 +306,13 @@ function handleChapelEffect(player, chapelCard, gameEngine) {
     // Don't allow the Chapel card itself to be selected
     if (c.name !== 'Chapel') {
       const cardEl = document.createElement('div');
-      cardEl.className = 'card';
+      cardEl.className = `card ${card.type.toLowerCase().replace(/\s+/g, '-')}`;
       cardEl.innerHTML = `
         <div class="card-name">${c.name}</div>
         <div class="card-description">${c.description || ''}</div>
         <div class="card-coins">${c.value ? c.value + '*' : ''}</div>
         <div class="card-victory">${c.points ? c.points + 'pt' : ''}</div>
-        <div class="card-image"></div>
+        <div class="card-image">${card.image ? `<img src="../res/img/cards/${card.image}" alt="${card.name}">` : ''}</div>
       `;
       cardEl.addEventListener('click', () => {
         if (selectedCards.has(idx)) {
@@ -377,13 +377,13 @@ function handleWorkshopEffect(player, workshopCard, gameEngine) {
   window.currentMarketSupply.forEach((slot, idx) => {
     if (slot.card.cost <= 4 && slot.count > 0) {
       const cardEl = document.createElement('div');
-      cardEl.className = 'card';
+      cardEl.className = `card ${card.type.toLowerCase().replace(/\s+/g, '-')}`;
       cardEl.innerHTML = `
         <div class="card-name">${slot.card.name}</div>
         <div class="card-description">${slot.card.description || ''}</div>
         <div class="card-coins">${slot.card.value ? slot.card.value + '*' : ''}</div>
         <div class="card-victory">${slot.card.points ? slot.card.points + 'pt' : ''}</div>
-        <div class="card-image"></div>
+        <div class="card-image">${card.image ? `<img src="../res/img/cards/${card.image}" alt="${card.name}">` : ''}</div>
       `;
       cardEl.addEventListener('click', () => {
         // Deselect others
@@ -451,7 +451,7 @@ function handleVassalEffect(player, vassalCard, gameEngine) {
   const topCard = player.deck.shift();
 
   const cardEl = document.createElement('div');
-  cardEl.className = 'card card-back'; // Initially styled as face-down
+  cardEl.className = `card card-back ${card.type.toLowerCase().replace(/\s+/g, '-')}`; // Initially styled as face-down
   cardEl.innerHTML = `<em>Click to reveal</em>`;
 
   cardEl.addEventListener('click', () => {
@@ -461,7 +461,7 @@ function handleVassalEffect(player, vassalCard, gameEngine) {
       <div class="card-description">${topCard.description || ''}</div>
       <div class="card-coins">${topCard.value ? topCard.value + '*' : ''}</div>
       <div class="card-victory">${topCard.points ? topCard.points + 'pt' : ''}</div>
-      <div class="card-image"></div>
+      <div class="card-image">${card.image ? `<img src="../res/img/cards/${card.image}" alt="${card.name}">` : ''}</div>
     `;
 
     if (topCard.type === 'Action') {
@@ -544,13 +544,13 @@ function handleMasqueradeEffect(player, card, gameEngine) {
   // 3. Display the two drawn cards
   drawnCards.forEach((drawnCard) => {
     const cardDiv = document.createElement('div');
-    cardDiv.className = 'card'; // same styling
+    cardDiv.className = `card ${card.type.toLowerCase().replace(/\s+/g, '-')}`; // same styling
     cardDiv.innerHTML = `
       <div class="card-name">${drawnCard.name}</div>
       <div class="card-description">${drawnCard.description || ''}</div>
       <div class="card-coins">${drawnCard.value ? drawnCard.value + '*' : ''}</div>
       <div class="card-victory">${drawnCard.points ? drawnCard.points + 'pt' : ''}</div>
-      <div class="card-image"></div>
+      <div class="card-image">${card.image ? `<img src="../res/img/cards/${card.image}" alt="${card.name}">` : ''}</div>
     `;
 
     cardDiv.addEventListener('click', () => {
@@ -624,13 +624,13 @@ function handleHarbingerEffect(player, card, gameEngine) {
 
     pageCards.forEach((cardObj) => {
       const cardDiv = document.createElement('div');
-      cardDiv.className = 'card';
+      cardDiv.className = `card ${card.type.toLowerCase().replace(/\s+/g, '-')}`;
       cardDiv.innerHTML = `
         <div class="card-name">${cardObj.name}</div>
         <div class="card-description">${cardObj.description || ''}</div>
         <div class="card-coins">${cardObj.value ? cardObj.value + '*' : ''}</div>
         <div class="card-victory">${cardObj.points ? cardObj.points + 'pt' : ''}</div>
-        <div class="card-image"></div>
+        <div class="card-image">${card.image ? `<img src="../res/img/cards/${card.image}" alt="${card.name}">` : ''}</div>
       `;
 
       cardDiv.addEventListener('click', () => {
@@ -733,13 +733,13 @@ function handleFeastEffect(player, feastCard, gameEngine) {
   window.currentMarketSupply.forEach((slot, idx) => {
     if (slot.card.cost <= 5 && slot.count > 0) {
       const cardEl = document.createElement('div');
-      cardEl.className = 'card';
+      cardEl.className = `card ${card.type.toLowerCase().replace(/\s+/g, '-')}`;
       cardEl.innerHTML = `
         <div class="card-name">${slot.card.name}</div>
         <div class="card-description">${slot.card.description || ''}</div>
         <div class="card-coins">${slot.card.value ? slot.card.value + '*' : ''}</div>
         <div class="card-victory">${slot.card.points ? slot.card.points + 'pt' : ''}</div>
-        <div class="card-image"></div>
+        <div class="card-image">${card.image ? `<img src="../res/img/cards/${card.image}" alt="${card.name}">` : ''}</div>
       `;
       cardEl.addEventListener('click', () => {
         // Deselect others
@@ -808,13 +808,13 @@ function handleMineEffect(player, mineCard, gameEngine) {
   // Show only Treasure cards from hand
   treasureCards.forEach((card, idx) => {
     const cardEl = document.createElement('div');
-    cardEl.className = 'card';
+    cardEl.className = `card ${card.type.toLowerCase().replace(/\s+/g, '-')}`;
     cardEl.innerHTML = `
       <div class="card-name">${card.name}</div>
       <div class="card-description">${card.description || ''}</div>
       <div class="card-coins">${card.value ? card.value + '*' : ''}</div>
       <div class="card-victory">${card.points ? card.points + 'pt' : ''}</div>
-      <div class="card-image"></div>
+      <div class="card-image">${card.image ? `<img src="../res/img/cards/${card.image}" alt="${card.name}">` : ''}</div>
     `;
     cardEl.addEventListener('click', () => {
       // Deselect others
@@ -849,13 +849,13 @@ function handleMineEffect(player, mineCard, gameEngine) {
       window.currentMarketSupply.forEach((slot, idx) => {
         if (slot.card.type === 'Treasure' && slot.card.cost <= maxCost && slot.count > 0) {
           const cardEl = document.createElement('div');
-          cardEl.className = 'card';
+          cardEl.className = `card ${card.type.toLowerCase().replace(/\s+/g, '-')}`;
           cardEl.innerHTML = `
             <div class="card-name">${slot.card.name}</div>
             <div class="card-description">${slot.card.description || ''}</div>
             <div class="card-coins">${slot.card.value ? slot.card.value + '*' : ''}</div>
             <div class="card-victory">${slot.card.points ? slot.card.points + 'pt' : ''}</div>
-            <div class="card-image"></div>
+            <div class="card-image">${card.image ? `<img src="../res/img/cards/${card.image}" alt="${card.name}">` : ''}</div>
           `;
           cardEl.addEventListener('click', () => {
             // Deselect others
@@ -909,13 +909,13 @@ function handleRemodelEffect(player, remodelCard, gameEngine) {
   // Show all cards from hand
   player.hand.forEach((card, idx) => {
     const cardEl = document.createElement('div');
-    cardEl.className = 'card';
+    cardEl.className = `card ${card.type.toLowerCase().replace(/\s+/g, '-')}`;
     cardEl.innerHTML = `
       <div class="card-name">${card.name}</div>
       <div class="card-description">${card.description || ''}</div>
       <div class="card-coins">${card.value ? card.value + '*' : ''}</div>
       <div class="card-victory">${card.points ? card.points + 'pt' : ''}</div>
-      <div class="card-image"></div>
+      <div class="card-image">${card.image ? `<img src="../res/img/cards/${card.image}" alt="${card.name}">` : ''}</div>
     `;
     cardEl.addEventListener('click', () => {
       // Deselect others
@@ -950,13 +950,13 @@ function handleRemodelEffect(player, remodelCard, gameEngine) {
       window.currentMarketSupply.forEach((slot, idx) => {
         if (slot.card.cost <= maxCost && slot.count > 0) {
           const cardEl = document.createElement('div');
-          cardEl.className = 'card';
+          cardEl.className = `card ${card.type.toLowerCase().replace(/\s+/g, '-')}`;
           cardEl.innerHTML = `
             <div class="card-name">${slot.card.name}</div>
             <div class="card-description">${slot.card.description || ''}</div>
             <div class="card-coins">${slot.card.value ? slot.card.value + '*' : ''}</div>
             <div class="card-victory">${slot.card.points ? slot.card.points + 'pt' : ''}</div>
-            <div class="card-image"></div>
+            <div class="card-image">${card.image ? `<img src="../res/img/cards/${card.image}" alt="${card.name}">` : ''}</div>
           `;
           cardEl.addEventListener('click', () => {
             // Deselect others

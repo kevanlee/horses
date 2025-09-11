@@ -14,11 +14,26 @@
   <img class="horse-logo" src="res/img/horse-head.svg" alt="Horses" id="horses">
   <!-- <h1 class="title">✌️ Dominion-Inspired Deck Builder ✌️</h1> -->
   <div id="jumbotron">
+    <div id="game-logo"><img src="res/img/horses-logo.png" alt="Game Logo"></div>
     <ul>
       <li><div id="victory-display">Victory Points: 0</div></li>
       <li><div id="turn-counter">Turn: 1</div></li>
     </ul>
+    <div id="menu"><button id="menu-button"><img src="res/img/hamburger.png" alt="Menu"></button></div>
   </div>
+  
+  <!-- Menu Modal -->
+  <div id="menu-modal" class="modal-overlay">
+    <div class="modal-content">
+      <button id="close-menu" class="close-button">&times;</button>
+      <div class="modal-text">
+        <h2>Main Menu</h2>
+        <h2>Rules</h2>
+        <h2>Settings</h2>
+      </div>
+    </div>
+  </div>
+  
   <div id="game" >
   
   <div id="top">
@@ -93,6 +108,10 @@
     </div>
   </div>  
   
+  <div id="footer">
+    <div id="footer-content">
+    </div>
+  </div>
   <script type="module" src="src/main.js"></script>
 </body>
 </html>

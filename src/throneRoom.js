@@ -213,13 +213,13 @@ export function handleThroneRoomEffect(player, throneRoomCard, gameEngine) {
   // Show only Action cards from hand
   actionCards.forEach((card, idx) => {
     const cardEl = document.createElement('div');
-    cardEl.className = 'card';
+    cardEl.className = `card ${card.type.toLowerCase().replace(/\s+/g, '-')}`;
     cardEl.innerHTML = `
       <div class="card-name">${card.name}</div>
       <div class="card-description">${card.description || ''}</div>
       <div class="card-coins">${card.value ? card.value + '*' : ''}</div>
       <div class="card-victory">${card.points ? card.points + 'pt' : ''}</div>
-      <div class="card-image"></div>
+      <div class="card-image">${card.image ? `<img src="../res/img/cards/${card.image}" alt="${card.name}">` : ''}</div>
     `;
     cardEl.addEventListener('click', () => {
       // Deselect others
