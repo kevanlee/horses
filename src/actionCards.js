@@ -950,13 +950,15 @@ function handleRemodelEffect(player, remodelCard, gameEngine) {
       window.currentMarketSupply.forEach((slot, idx) => {
         if (slot.card.cost <= maxCost && slot.count > 0) {
           const cardEl = document.createElement('div');
-          cardEl.className = `card ${card.type.toLowerCase().replace(/\s+/g, '-')}`;
+          cardEl.className = `card ${slot.card.type.toLowerCase().replace(/\s+/g, '-')}`;
           cardEl.innerHTML = `
             <div class="card-name">${slot.card.name}</div>
+            <div class="card-type">${slot.card.type}</div>
             <div class="card-description">${slot.card.description || ''}</div>
             <div class="card-coins">${slot.card.value ? slot.card.value + '*' : ''}</div>
             <div class="card-victory">${slot.card.points ? slot.card.points + 'pt' : ''}</div>
-            <div class="card-image">${card.image ? `<img src="../res/img/cards/${card.image}" alt="${card.name}">` : ''}</div>
+            <div class="card-cost">Cost: ${slot.card.cost}</div>
+            <div class="card-image">${slot.card.image ? `<img src="../res/img/cards/${slot.card.image}" alt="${slot.card.name}">` : ''}</div>
           `;
           cardEl.addEventListener('click', () => {
             // Deselect others
@@ -969,6 +971,7 @@ function handleRemodelEffect(player, remodelCard, gameEngine) {
         }
       });
       
+      // Update the confirm button for the second step
       modalConfirm.textContent = 'Gain Selected';
       modalConfirm.onclick = () => {
         if (selectedGainIndex.value !== null) {

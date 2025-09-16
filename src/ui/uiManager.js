@@ -35,7 +35,7 @@ export class UIManager {
     const currentValue = currentNumberSpan ? currentNumberSpan.textContent : null;
     
     // Update the content
-    element.innerHTML = `<span class="category">${categoryText}</span> <span class="number">${newValue}</span>`;
+    element.innerHTML = `<span class="number">${newValue}</span> <span class="category">${categoryText}</span>`;
     
     // Only animate if the value actually changed
     if (currentValue !== null && currentValue !== newValue.toString()) {
@@ -57,21 +57,19 @@ export class UIManager {
       deckCount: document.getElementById('deck-count'),
       discardCount: document.getElementById('discard-count'),
       deckList: document.getElementById('deck-list'),
-      nextTurnBtn: document.getElementById('next-turn'),
       playArea: document.getElementById('played-cards'),
       phaseDisplay: document.getElementById('phase-display'),
-      nextPhaseBtn: document.getElementById('next-phase')
+      nextPhaseBtn: document.getElementById('next-phase'),
+      winConditionDisplay: document.getElementById('win-condition-display'),
+      livesDisplay: document.getElementById('lives-display'),
+      currentLevel: document.getElementById('current-level'),
+      maxLevel: document.getElementById('max-level'),
+      levelBoxes: document.getElementById('level-boxes')
     };
   }
 
   bindEvents() {
-    if (this.elements.nextTurnBtn) {
-      this.elements.nextTurnBtn.addEventListener('click', () => {
-        this.game.nextTurn();
-        this.updateAllDisplays();
-      });
-    }
-    
+    // Note: nextTurnBtn doesn't exist in HTML, so we only have nextPhaseBtn
     this.elements.nextPhaseBtn.addEventListener('click', () => {
       // If we're in buy phase, start the enhanced cleanup sequence
       if (this.game.currentPhase === 'buy') {
@@ -79,6 +77,7 @@ export class UIManager {
       } else {
         this.game.nextPhase();
         this.updateAllDisplays();
+        this.checkWinConditions();
       }
     });
     
@@ -95,7 +94,7 @@ export class UIManager {
   }
 
   renderHand() {
-    this.elements.hand.innerHTML = '<h2>Your Hand</h2>';
+    this.elements.hand.innerHTML = '';
     
     const cardContainer = document.createElement('div');
     cardContainer.className = 'card-container';
@@ -148,7 +147,7 @@ export class UIManager {
   }
 
   renderMarketplace(marketSupply) {
-    this.elements.marketplace.innerHTML = '<h2>Shop</h2>';
+    this.elements.marketplace.innerHTML = '';
     
     // Add live info for buys and gold
     const liveInfo = document.createElement('div');
@@ -398,6 +397,93 @@ export class UIManager {
     this.renderPlayArea();
     this.renderDeckInventory();
     this.renderMarketplace(window.currentMarketSupply || []);
+    this.updateWinConditionDisplay();
+    this.updateLivesDisplay();
+    this.updateLevelProgression();
+  }
+
+  updateWinConditionDisplay() {
+    if (!this.elements.winConditionDisplay) {
+      console.log('Win condition display element not found');
+      return;
+    }
+    
+    const dungeonMaster = window.dungeonMaster;
+    console.log('DungeonMaster:', dungeonMaster);
+    console.log('Current dungeon level:', dungeonMaster?.currentDungeonLevel);
+    
+    if (dungeonMaster && dungeonMaster.currentDungeonLevel) {
+      const level = dungeonMaster.currentDungeonLevel;
+      const description = level.getWinConditionDescription();
+      console.log('Setting win condition:', description);
+      
+      this.elements.winConditionDisplay.innerHTML = `
+        <div class="win-condition">
+          <h3>Level ${level.levelNumber} Goal</h3>
+          <p>${description}</p>
+        </div>
+      `;
+    } else {
+      console.log('No dungeon master or current level found');
+      this.elements.winConditionDisplay.innerHTML = `
+        <div class="win-condition">
+          <h3>Loading...</h3>
+          <p>Preparing your challenge...</p>
+        </div>
+      `;
+    }
+  }
+
+  updateLivesDisplay() {
+    if (!this.elements.livesDisplay) return;
+    
+    const dungeonMaster = window.dungeonMaster;
+    if (dungeonMaster) {
+      const hearts = '❤️'.repeat(dungeonMaster.playerLives);
+      const emptyHearts = '🤍'.repeat(3 - dungeonMaster.playerLives);
+      this.elements.livesDisplay.innerHTML = `
+        <div class="lives-display">
+          <span class="lives-label">Lives:</span>
+          <span class="hearts">${hearts}${emptyHearts}</span>
+        </div>
+      `;
+    }
+  }
+
+  updateLevelProgression() {
+    if (!window.dungeonMaster) return;
+    
+    const dungeonMaster = window.dungeonMaster;
+    const currentLevel = dungeonMaster.currentLevel;
+    const maxLevel = 10; // You can make this configurable later
+    
+    // Update level text
+    if (this.elements.currentLevel) {
+      this.elements.currentLevel.textContent = currentLevel;
+    }
+    if (this.elements.maxLevel) {
+      this.elements.maxLevel.textContent = maxLevel;
+    }
+    
+    // Render level boxes
+    if (this.elements.levelBoxes) {
+      this.elements.levelBoxes.innerHTML = '';
+      
+      for (let i = 1; i <= maxLevel; i++) {
+        const box = document.createElement('div');
+        box.className = 'level-box';
+        
+        if (i < currentLevel) {
+          box.classList.add('completed');
+        } else if (i === currentLevel) {
+          box.classList.add('current');
+        } else {
+          box.classList.add('locked');
+        }
+        
+        this.elements.levelBoxes.appendChild(box);
+      }
+    }
   }
 
   handlePlayActionCard(card) {
@@ -411,6 +497,14 @@ export class UIManager {
       
       this.updateAllDisplays();
       this.renderHand();
+      
+      // Check win conditions after playing action card
+      this.checkWinConditions();
+      
+      // Save progress after playing action card
+      if (window.dungeonMaster) {
+        window.dungeonMaster.saveProgress();
+      }
       
       // Check if we should auto-advance to Buy Phase
       if (this.game.shouldAutoAdvanceFromActionPhase()) {
@@ -440,6 +534,14 @@ export class UIManager {
       this.renderHand();
       this.renderMarketplace(marketSupply);
       this.renderDeckInventory();
+      
+      // Check win conditions after buying a card
+      this.checkWinConditions();
+      
+      // Save progress after buying a card
+      if (window.dungeonMaster) {
+        window.dungeonMaster.saveProgress();
+      }
     } else {
       this.logMessage(result.message);
     }
@@ -480,6 +582,9 @@ export class UIManager {
     this.game.currentPhase = 'newdeal';
     this.updatePhaseDisplay();
     
+    // Scroll to top of page for new deal phase
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
     // After a short delay, trigger deal glow and start new turn
     setTimeout(() => {
       this.triggerDealGlow();
@@ -488,6 +593,7 @@ export class UIManager {
       setTimeout(() => {
         this.game.nextTurn();
         this.updateAllDisplays();
+        this.checkWinConditions();
       }, 200); // Back to 200ms
     }, 600); // Increased from 300ms to 600ms to make New Deal more visible
   }
@@ -531,6 +637,82 @@ export class UIManager {
         this.elements.deckIndicator.classList.remove('dealing');
       }, 1500);
     }
+  }
+
+  checkWinConditions() {
+    const dungeonMaster = window.dungeonMaster;
+    if (!dungeonMaster || !dungeonMaster.currentDungeonLevel) {
+      console.log('No dungeon master or current level found for win condition check');
+      return;
+    }
+
+    console.log('Checking win conditions...');
+    console.log('Current victory points:', this.game.player.victoryPoints);
+    console.log('Current gold:', this.game.calculateAvailableGold());
+    console.log('Win condition:', dungeonMaster.currentDungeonLevel.winCondition);
+    
+    const completed = dungeonMaster.checkLevelCompletion(this.game);
+    console.log('Level completed?', completed);
+    
+    if (completed) {
+      this.handleLevelComplete();
+    }
+  }
+
+  handleLevelComplete() {
+    const dungeonMaster = window.dungeonMaster;
+    this.logMessage("🎉 LEVEL COMPLETE! 🎉");
+    this.logMessage(`You completed Level ${dungeonMaster.currentLevel}!`);
+    
+    // Save progress
+    dungeonMaster.saveProgress();
+    
+    // Advance to next level after a delay
+    setTimeout(() => {
+      const nextLevel = dungeonMaster.advanceToNextLevel();
+      if (nextLevel) {
+        this.logMessage(`=== Level ${nextLevel.levelNumber} ===`);
+        this.logMessage(`Goal: ${nextLevel.getWinConditionDescription()}`);
+        this.logMessage(`Lives: ${dungeonMaster.playerLives}`);
+        
+        // Update market supply and re-render
+        window.currentMarketSupply = nextLevel.marketSupply;
+        this.updateAllDisplays();
+      }
+    }, 2000);
+  }
+
+  handleLevelFailure() {
+    const dungeonMaster = window.dungeonMaster;
+    const hasLivesLeft = dungeonMaster.failLevel();
+    
+    if (hasLivesLeft) {
+      this.logMessage(`💔 You failed! Lives remaining: ${dungeonMaster.playerLives}`);
+      this.logMessage("Try again with the same level...");
+      
+      // Restart the current level
+      setTimeout(() => {
+        dungeonMaster.generateLevel(dungeonMaster.currentLevel);
+        window.currentMarketSupply = dungeonMaster.currentDungeonLevel.marketSupply;
+        this.game.startNewGame();
+        this.updateAllDisplays();
+        this.logMessage(`=== Retry Level ${dungeonMaster.currentLevel} ===`);
+        this.logMessage(`Goal: ${dungeonMaster.currentDungeonLevel.getWinConditionDescription()}`);
+      }, 2000);
+    } else {
+      this.handleGameOver();
+    }
+  }
+
+  handleGameOver() {
+    this.logMessage("💀 GAME OVER 💀");
+    this.logMessage(`You reached Level ${dungeonMaster.maxLevelReached}`);
+    this.logMessage("Better luck next time!");
+    
+    // Show game over screen after delay
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('gameOver'));
+    }, 3000);
   }
 
   setupStickyButton() {

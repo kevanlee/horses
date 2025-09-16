@@ -11,16 +11,18 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
 </head>
 <body>
-  <img class="horse-logo" src="res/img/horse-head.svg" alt="Horses" id="horses">
-  <!-- <h1 class="title">✌️ Dominion-Inspired Deck Builder ✌️</h1> -->
-  <div id="jumbotron">
-    <div id="game-logo"><img src="res/img/horses-logo.png" alt="Game Logo"></div>
-    <ul>
-      <li><div id="victory-display">Victory Points: 0</div></li>
-      <li><div id="turn-counter">Turn: 1</div></li>
-    </ul>
-    <div id="menu"><button id="menu-button"><img src="res/img/hamburger.png" alt="Menu"></button></div>
+    
+  <!-- Win Condition Display -->
+  <div class="sticky-footer">
+    <div id="spacer"></div>
+    <img class="horse-logo" src="res/img/horse-head.svg" alt="Horses" id="horses">
   </div>
+
+  <div id="jumbotron">
+    <div id="game-title"><h1 class="title">HORSES</h1></div>
+  </div>
+  <div id="menu"><button id="menu-button"><img src="res/img/hamburger.png" alt="Menu"></button></div>
+
   
   <!-- Menu Modal -->
   <div id="menu-modal" class="modal-overlay">
@@ -30,6 +32,12 @@
         <h2>Main Menu</h2>
         <h2>Rules</h2>
         <h2>Settings</h2>
+        <div id="level-progression">
+          <div id="level-info">Level <span id="current-level">1</span>/<span id="max-level">10</span></div>
+          <div id="level-boxes"></div>
+        </div>
+        <div id="win-condition-display"></div>
+        <button id="give-up-btn" class="menu-button">Give Up Level</button>
       </div>
     </div>
   </div>
@@ -37,9 +45,14 @@
   <div id="game" >
   
   <div id="top">
-    <div id="top-spacer"></div>
+    <div id="top-spacer">
+      <ul id="points-display">
+        <li><div id="victory-display">Victory Points: 0</div></li>
+        <li><div id="turn-counter">Turn: 1</div></li>
+      </ul>
+    </div>
+
     <div id="play-area">
-      <h2>Play Area</h2>
       <div id="played-cards" class="card-container"></div>
     </div>
     <div id="header">
@@ -75,7 +88,6 @@
 
     <div id="shop">
       <div id="marketplace">
-        <h2>Shop</h2>
         <div id="marketplace-top">
           <div id="money-cards"></div>
           <div id="victory-cards"></div>
