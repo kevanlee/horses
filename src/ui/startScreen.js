@@ -20,10 +20,14 @@ export class StartScreen {
         <p>HORSES: Like Dominion but with horses.</p>
         
         <div class="start-options">
-          <button id="new-game-btn" class="start-button">Enter Dungeon</button>
+          <button id="new-game-btn" class="start-button">Start New Game</button>
           <a href="#" id="resume-game-btn" class="start-link">Resume Adventure</a>
           <a href="#" id="level-select-btn" class="start-link">Level Selection</a>
         </div>
+          <div class="sticky-footer">
+                <div id="spacer"></div>
+                    <img class="horse-logo" src="res/img/horse-head.svg" alt="Horses" id="horses">
+  </div>
         
 
       </div>

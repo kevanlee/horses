@@ -306,13 +306,13 @@ function handleChapelEffect(player, chapelCard, gameEngine) {
     // Don't allow the Chapel card itself to be selected
     if (c.name !== 'Chapel') {
       const cardEl = document.createElement('div');
-      cardEl.className = `card ${card.type.toLowerCase().replace(/\s+/g, '-')}`;
+      cardEl.className = `card ${c.type.toLowerCase().replace(/\s+/g, '-')}`;
       cardEl.innerHTML = `
         <div class="card-name">${c.name}</div>
         <div class="card-description">${c.description || ''}</div>
         <div class="card-coins">${c.value ? c.value + '*' : ''}</div>
         <div class="card-victory">${c.points ? c.points + 'pt' : ''}</div>
-        <div class="card-image">${card.image ? `<img src="../res/img/cards/${card.image}" alt="${card.name}">` : ''}</div>
+        <div class="card-image">${c.image ? `<img src="../res/img/cards/${c.image}" alt="${c.name}">` : ''}</div>
       `;
       cardEl.addEventListener('click', () => {
         if (selectedCards.has(idx)) {

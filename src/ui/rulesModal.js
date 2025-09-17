@@ -18,15 +18,15 @@ export class RulesModal {
     
     this.element.innerHTML = `
       <div class="modal-content">
-        <h2>Level ${levelInfo.levelNumber}</h2>
-        
+        <h2 class="level-number">Level ${levelInfo.levelNumber}</h2>
+        <div class="level-info-box">
         <div class="rules-section">
           <h3>Goal</h3>
           <p>${levelInfo.winConditionDescription || 'Complete the level objective'}</p>
         </div>
         
         <div class="rules-section">
-          <h3>Available Action Cards</h3>
+          <h3>Action Cards</h3>
           <div class="available-cards">
             ${availableCards.map(card => `
               <div class="card-item">
@@ -36,8 +36,9 @@ export class RulesModal {
             `).join('')}
           </div>
         </div>
+        </div>
         
-        <button id="lets-go-btn" class="lets-go-button">Let's Go!</button>
+        <button id="lets-go-btn" class="start-button">Let's Go!</button>
       </div>
     `;
 
