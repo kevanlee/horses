@@ -11,9 +11,9 @@ export const cardTypes = {
     estate: { name: 'Estate', type: 'Victory', cost: 2, points: 1, description: "Each Estate is worth 1 point." },
     duchy: { name: 'Duchy', type: 'Victory', cost: 5, points: 3, description: "Each Duchy is worth 3 points." },
     province: { name: 'Province', type: 'Victory', cost: 8, points: 6, description: "Each Province is worth 6 points." },
-    smithy: { name: 'Smithy', type: 'Action', cost: 4, description: 'Draw 3 cards', image: 'smithy.png' },
-    village: { name: 'Village', type: 'Action', cost: 3, description: 'Draw 1 card, +2 Actions', image: 'village.png' },
-    market: { name: 'Market', type: 'Action', cost: 5, description: 'Draw 1 card, +1 Action, +1 Buy, +1 Gold', image: 'market.png' },
+    smithy: { name: 'Smithy', type: 'Action', cost: 4, description: 'Draw 3 cards', image: 'sunset.png' },
+    village: { name: 'Village', type: 'Action', cost: 3, description: 'Draw 1 card, +2 Actions', image: 'pound.png' },
+    market: { name: 'Market', type: 'Action', cost: 5, description: 'Draw 1 card, +1 Action, +1 Buy, +1 Gold', image: 'fossil.png' },
     cellar: {
       name: 'Cellar',
       type: 'Action',
@@ -26,38 +26,38 @@ export const cardTypes = {
       type: 'Action',
       cost: 5,
       description: '+2 Actions, +1 Buy, +2 Gold',
-      image: 'festival.png'
+      image: 'horsefly.png'
     },
     library: {
       name: 'Library',
       type: 'Action',
       cost: 5,
       description: 'Draw until you have 7 cards in hand. You may set aside Action cards.',
-      image: 'library.png'
+      image: 'bucket.png'
     },
     laboratory: {
       name: 'Laboratory',
       type: 'Action',
       cost: 5,
       description: '+2 Cards, +1 Action',
-      image: 'laboratory.png'
+      image: 'horseshoes.png'
     },
-    chapel: {name: "Chapel", type: "Action", cost: 2, description: "Trash up to 4 cards from your hand.", image: "chapel.png"},
-    throneRoom: {name: "Throne Room", type: "Action", cost: 4, description: "Choose an Action card in your hand. Play it twice.", image: "throne-room.png"},
-    workshop: {name: "Workshop", type: "Action", cost: 3, description: "Gain a card costing up to 4 coins.", image: "workshop.png"},
-    woodcutter: {name: "Woodcutter", type: "Action", cost: 3, description: "+1 Buy, +2 coins."},
-    vassal: {name: "Vassal", type: "Action", cost: 3, description: "+2 coins, reveal top card. If Action, play it."},
-    remodel: {name: "Remodel", type: "Action", cost: 4, description: "Trash a card from your hand. Gain a card costing up to 2 more."},
-    mine: {name: "Mine", type: "Action", cost: 5, description: "Trash a Treasure from your hand. Gain a Treasure costing up to 3 more."},
-    moneylender: {name: "Moneylender", type: "Action", cost: 4, description: "Trash a Copper from your hand for +3 coins."},
-    feast: {name: "Feast", type: "Action", cost: 4, description: "Trash this card. Gain a card costing up to 5 coins."},
-    councilRoom: {name: "Council Room", type: "Action", cost: 5, description: "+4 Cards, +1 Buy."},
-    adventurer: {name: "Adventurer", type: "Action", cost: 6, description: "Reveal cards until you reveal 2 Treasures. Add them to hand."},
-    gardens: {name: "Gardens", type: "Action-Victory", cost: 4, points: 0, description: "Worth 1 VP for every 10 cards in your deck (rounded down)."},
-    treasury: {name: "Treasury", type: "Action", cost: 5, description: "+1 Card, +1 Action, +1 Coin"},
-    greatHall: {name: "Great Hall", type: "Action-Victory", cost: 3, points: 1, description: "+1 Card, +1 Action, worth 1 VP."},
-    masquerade: {name: "Masquerade", type: "Action", cost: 3, description: "Draw 2 cards. Keep one, discard the other."},
-    harbinger: {name: "Harbinger", type: "Action", cost: 3, description: "+1 Card, +1 Action, look through your discard pile and put a card on top of your deck."},
+    chapel: {name: "Chapel", type: "Action", cost: 2, description: "Trash up to 4 cards from your hand.", image: "star.png"},
+    throneRoom: {name: "Throne Room", type: "Action", cost: 4, description: "Choose an Action card in your hand. Play it twice.", image: "wagon.png"},
+    workshop: {name: "Workshop", type: "Action", cost: 3, description: "Gain a card costing up to 4 coins.", image: "cactus.png"},
+    woodcutter: {name: "Woodcutter", type: "Action", cost: 3, description: "+1 Buy, +2 coins.", image: "whinny.png"},
+    vassal: {name: "Vassal", type: "Action", cost: 3, description: "+2 coins, reveal top card. If Action, play it.", image: "hat.png"},
+    remodel: {name: "Remodel", type: "Action", cost: 4, description: "Trash a card from your hand. Gain a card costing up to 2 more.", image: "jockey.png"},
+    mine: {name: "Mine", type: "Action", cost: 5, description: "Trash a Treasure from your hand. Gain a Treasure costing up to 3 more.", image: "snort.png"},
+    moneylender: {name: "Moneylender", type: "Action", cost: 4, description: "Trash a Copper from your hand for +3 coins.", image: "unicorn.png"},
+    feast: {name: "Feast", type: "Action", cost: 4, description: "Trash this card. Gain a card costing up to 5 coins.", image: "branding.png"},
+    councilRoom: {name: "Council Room", type: "Action", cost: 5, description: "+4 Cards, +1 Buy.", image: "chaps.png"},
+    adventurer: {name: "Adventurer", type: "Action", cost: 6, description: "Reveal cards until you reveal 2 Treasures. Add them to hand.", image: "hair.png"},
+    gardens: {name: "Gardens", type: "Action-Victory", cost: 4, points: 0, description: "Worth 1 VP for every 10 cards in your deck (rounded down).", image: "haybale.png"},
+    treasury: {name: "Treasury", type: "Action", cost: 5, description: "+1 Card, +1 Action, +1 Coin", image: "lasso.png"},
+    greatHall: {name: "Great Hall", type: "Action-Victory", cost: 3, points: 1, description: "+1 Card, +1 Action, worth 1 VP.", image: "pitchfork.png"},
+    masquerade: {name: "Masquerade", type: "Action", cost: 3, description: "Draw 2 cards. Keep one, discard the other.", image: "racetrack.png"},
+    harbinger: {name: "Harbinger", type: "Action", cost: 3, description: "+1 Card, +1 Action, look through your discard pile and put a card on top of your deck.", image: "wanted.png"},
 
   }    
   

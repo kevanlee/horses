@@ -54,6 +54,7 @@ export class UIManager {
       actionsLeft: document.getElementById('actions-left'),
       buysLeft: document.getElementById('buys-left'),
       turnCounter: document.getElementById('turn-counter'),
+      cardCounter: document.getElementById('card-counter'),
       deckCount: document.getElementById('deck-count'),
       discardCount: document.getElementById('discard-count'),
       deckList: document.getElementById('deck-list'),
@@ -81,8 +82,6 @@ export class UIManager {
       }
     });
     
-    // Add sticky button behavior - show floating button when original scrolls out of view
-    this.setupStickyButton();
 
   }
 
@@ -345,6 +344,11 @@ export class UIManager {
     this.updateNumberWithAnimation(this.elements.turnCounter, this.game.turnNumber, 'Turns', 'pulse');
   }
 
+  updateCardCounter() {
+    const totalCards = this.game.getTotalCardCount();
+    this.updateNumberWithAnimation(this.elements.cardCounter, totalCards, 'Cards', 'pulse');
+  }
+
   updatePhaseDisplay() {
     // Get all phase items
     const phaseItems = this.elements.phaseDisplay.querySelectorAll('.phase-item');
@@ -390,6 +394,7 @@ export class UIManager {
     this.updateGoldDisplay();
     this.updateVictoryPoints();
     this.updateTurnCounter();
+    this.updateCardCounter();
     this.updatePhaseDisplay();
     this.renderActionsAndBuys();
     this.renderDeckAndDiscardCount();
@@ -506,14 +511,6 @@ export class UIManager {
         window.dungeonMaster.saveProgress();
       }
       
-      // Check if we should auto-advance to Buy Phase
-      if (this.game.shouldAutoAdvanceFromActionPhase()) {
-        setTimeout(() => {
-          this.logMessage("No more actions possible. Auto-advancing to Buy Phase.");
-          this.game.currentPhase = 'buy';
-          this.updateAllDisplays();
-        }, 1000); // Small delay so player can see what happened
-      }
     } else {
       this.logMessage(result.message);
     }
@@ -671,6 +668,9 @@ export class UIManager {
     setTimeout(() => {
       const nextLevel = dungeonMaster.advanceToNextLevel();
       if (nextLevel) {
+        // Reset game state for new level
+        this.game.startNewGame();
+        
         this.logMessage(`=== Level ${nextLevel.levelNumber} ===`);
         this.logMessage(`Goal: ${nextLevel.getWinConditionDescription()}`);
         this.logMessage(`Lives: ${dungeonMaster.playerLives}`);
@@ -715,42 +715,4 @@ export class UIManager {
     }, 3000);
   }
 
-  setupStickyButton() {
-    const button = this.elements.nextPhaseBtn;
-    const header = document.getElementById('header');
-    
-    if (!button || !header) return;
-    
-    // Function to check if button is in viewport
-    const isButtonInView = () => {
-      const rect = header.getBoundingClientRect();
-      return rect.bottom > 0; // Button is in view if header bottom is above viewport top
-    };
-    
-    // Function to toggle sticky state
-    const toggleSticky = () => {
-      if (isButtonInView()) {
-        button.classList.remove('sticky');
-      } else {
-        button.classList.add('sticky');
-      }
-    };
-    
-    // Initial check
-    toggleSticky();
-    
-    // Add scroll listener with throttling for performance
-    let ticking = false;
-    const handleScroll = () => {
-      if (!ticking) {
-        requestAnimationFrame(() => {
-          toggleSticky();
-          ticking = false;
-        });
-        ticking = true;
-      }
-    };
-    
-    window.addEventListener('scroll', handleScroll);
-  }
 }

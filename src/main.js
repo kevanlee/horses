@@ -33,6 +33,7 @@ window.renderHand = () => uiManager.renderHand();
 window.renderMarketplace = () => uiManager.renderMarketplace(window.currentMarketSupply || []);
 window.renderDeckInventory = () => uiManager.renderDeckInventory();
 window.updateVictoryPoints = () => uiManager.updateVictoryPoints();
+window.updateCardCounter = () => uiManager.updateCardCounter();
 window.renderDeckAndDiscardCount = () => uiManager.renderDeckAndDiscardCount();
 window.renderActionsAndBuys = () => uiManager.renderActionsAndBuys();
 window.updateGoldDisplay = () => uiManager.updateGoldDisplay();

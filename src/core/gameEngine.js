@@ -55,6 +55,8 @@ export class GameEngine {
 
   startNewGame() {
     this.player = this.createPlayer();
+    // Shuffle the initial deck for randomized starting hands
+    this.player.deck = this.shuffle(this.player.deck);
     this.turnNumber = 1;
     this.gameLog = [];
     this.currentPhase = GAME_PHASES.ACTION_PHASE;
@@ -86,13 +88,6 @@ export class GameEngine {
     
     this.updateVictoryPoints();
     
-    // Check if we should auto-advance to Buy Phase (only once per turn, when hand is dealt)
-    if (this.shouldAutoAdvanceFromActionPhase()) {
-      setTimeout(() => {
-        this.logMessage("No actions possible. Auto-advancing to Buy Phase.");
-        this.currentPhase = GAME_PHASES.BUY_PHASE;
-      }, 500);
-    }
   }
 
   // Phase progression methods
@@ -130,20 +125,33 @@ export class GameEngine {
     this.nextTurn();
   }
 
-  // Check if we should auto-advance from Action Phase
-  shouldAutoAdvanceFromActionPhase() {
-    // Only auto-advance if no actions left
-    // Don't check for action cards since they might be in play area
-    return this.player.actions <= 0;
-  }
 
   updateVictoryPoints() {
-    const victoryPoints = [...this.player.hand, ...this.player.deck, ...this.player.discard, ...this.player.playArea]
-      .filter(card => card.type.includes('Victory'))
-      .reduce((sum, card) => sum + (card.points || 0), 0);
+    const allCards = [...this.player.hand, ...this.player.deck, ...this.player.discard, ...this.player.playArea];
+    const victoryCards = allCards.filter(card => card.type.includes('Victory'));
+    
+    let victoryPoints = 0;
+    
+    victoryCards.forEach(card => {
+      if (card.name === 'Gardens') {
+        // Gardens: 1 VP per 10 cards (rounded down)
+        const totalCards = allCards.length;
+        victoryPoints += Math.floor(totalCards / 10);
+      } else {
+        // Regular victory cards
+        victoryPoints += card.points || 0;
+      }
+    });
 
     this.player.victoryPoints = victoryPoints;
     return victoryPoints;
+  }
+
+  getTotalCardCount() {
+    return this.player.hand.length + 
+           this.player.deck.length + 
+           this.player.discard.length + 
+           this.player.playArea.length;
   }
 
   calculateAvailableGold() {

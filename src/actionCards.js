@@ -377,13 +377,13 @@ function handleWorkshopEffect(player, workshopCard, gameEngine) {
   window.currentMarketSupply.forEach((slot, idx) => {
     if (slot.card.cost <= 4 && slot.count > 0) {
       const cardEl = document.createElement('div');
-      cardEl.className = `card ${card.type.toLowerCase().replace(/\s+/g, '-')}`;
+      cardEl.className = `card ${slot.card.type.toLowerCase().replace(/\s+/g, '-')}`;
       cardEl.innerHTML = `
         <div class="card-name">${slot.card.name}</div>
         <div class="card-description">${slot.card.description || ''}</div>
         <div class="card-coins">${slot.card.value ? slot.card.value + '*' : ''}</div>
         <div class="card-victory">${slot.card.points ? slot.card.points + 'pt' : ''}</div>
-        <div class="card-image">${card.image ? `<img src="../res/img/cards/${card.image}" alt="${card.name}">` : ''}</div>
+        <div class="card-image">${slot.card.image ? `<img src="../res/img/cards/${slot.card.image}" alt="${slot.card.name}">` : ''}</div>
       `;
       cardEl.addEventListener('click', () => {
         // Deselect others
@@ -650,7 +650,8 @@ function handleHarbingerEffect(player, card, gameEngine) {
     const totalPages = Math.ceil(discardCopy.length / cardsPerPage);
     if (totalPages > 1) {
       const navDiv = document.createElement('div');
-      navDiv.style.marginTop = '10px';
+      navDiv.style.margin = '25px';
+      navDiv.style.width = '100%';
       navDiv.innerHTML = `
         <button id="prev-page" ${currentPage === 0 ? 'disabled' : ''}>Prev</button>
         Page ${currentPage + 1} / ${totalPages}
@@ -733,13 +734,13 @@ function handleFeastEffect(player, feastCard, gameEngine) {
   window.currentMarketSupply.forEach((slot, idx) => {
     if (slot.card.cost <= 5 && slot.count > 0) {
       const cardEl = document.createElement('div');
-      cardEl.className = `card ${card.type.toLowerCase().replace(/\s+/g, '-')}`;
+      cardEl.className = `card ${slot.card.type.toLowerCase().replace(/\s+/g, '-')}`;
       cardEl.innerHTML = `
         <div class="card-name">${slot.card.name}</div>
         <div class="card-description">${slot.card.description || ''}</div>
         <div class="card-coins">${slot.card.value ? slot.card.value + '*' : ''}</div>
         <div class="card-victory">${slot.card.points ? slot.card.points + 'pt' : ''}</div>
-        <div class="card-image">${card.image ? `<img src="../res/img/cards/${card.image}" alt="${card.name}">` : ''}</div>
+        <div class="card-image">${slot.card.image ? `<img src="../res/img/cards/${slot.card.image}" alt="${slot.card.name}">` : ''}</div>
       `;
       cardEl.addEventListener('click', () => {
         // Deselect others
