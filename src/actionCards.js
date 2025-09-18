@@ -451,7 +451,7 @@ function handleVassalEffect(player, vassalCard, gameEngine) {
   const topCard = player.deck.shift();
 
   const cardEl = document.createElement('div');
-  cardEl.className = `card card-back ${card.type.toLowerCase().replace(/\s+/g, '-')}`; // Initially styled as face-down
+  cardEl.className = `card card-back ${topCard.type.toLowerCase().replace(/\s+/g, '-')}`; // Initially styled as face-down
   cardEl.innerHTML = `<em>Click to reveal</em>`;
 
   cardEl.addEventListener('click', () => {
@@ -461,7 +461,7 @@ function handleVassalEffect(player, vassalCard, gameEngine) {
       <div class="card-description">${topCard.description || ''}</div>
       <div class="card-coins">${topCard.value ? topCard.value + '*' : ''}</div>
       <div class="card-victory">${topCard.points ? topCard.points + 'pt' : ''}</div>
-      <div class="card-image">${card.image ? `<img src="../res/img/cards/${card.image}" alt="${card.name}">` : ''}</div>
+      <div class="card-image">${topCard.image ? `<img src="../res/img/cards/${topCard.image}" alt="${topCard.name}">` : ''}</div>
     `;
 
     if (topCard.type === 'Action') {
@@ -850,13 +850,13 @@ function handleMineEffect(player, mineCard, gameEngine) {
       window.currentMarketSupply.forEach((slot, idx) => {
         if (slot.card.type === 'Treasure' && slot.card.cost <= maxCost && slot.count > 0) {
           const cardEl = document.createElement('div');
-          cardEl.className = `card ${card.type.toLowerCase().replace(/\s+/g, '-')}`;
+          cardEl.className = `card ${slot.card.type.toLowerCase().replace(/\s+/g, '-')}`;
           cardEl.innerHTML = `
             <div class="card-name">${slot.card.name}</div>
             <div class="card-description">${slot.card.description || ''}</div>
             <div class="card-coins">${slot.card.value ? slot.card.value + '*' : ''}</div>
             <div class="card-victory">${slot.card.points ? slot.card.points + 'pt' : ''}</div>
-            <div class="card-image">${card.image ? `<img src="../res/img/cards/${card.image}" alt="${card.name}">` : ''}</div>
+            <div class="card-image">${slot.card.image ? `<img src="../res/img/cards/${slot.card.image}" alt="${slot.card.name}">` : ''}</div>
           `;
           cardEl.addEventListener('click', () => {
             // Deselect others
@@ -1000,7 +1000,6 @@ function handleAdventurerEffect(player, adventurerCard, gameEngine) {
   
   const revealedCards = [];
   const treasuresFound = [];
-  let cardsRevealed = 0;
   
   // Keep revealing until we find 2 Treasures or run out of cards
   while (treasuresFound.length < 2) {
@@ -1020,41 +1019,96 @@ function handleAdventurerEffect(player, adventurerCard, gameEngine) {
     if (player.deck.length > 0) {
       const revealedCard = player.deck.pop();
       revealedCards.push(revealedCard);
-      cardsRevealed++;
       
       if (revealedCard.type === 'Treasure') {
         treasuresFound.push(revealedCard);
-        gameEngine.logMessage(`Revealed ${revealedCard.name} (Treasure #${treasuresFound.length})`);
-      } else {
-        gameEngine.logMessage(`Revealed ${revealedCard.name} (not a Treasure)`);
       }
     } else {
       break;
     }
   }
   
-  // Add found Treasures to hand
+  // Show modal with revealed cards
+  const modal = document.getElementById('card-modal');
+  const modalTitle = document.getElementById('modal-title');
+  const modalBody = document.getElementById('modal-body');
+  const modalConfirm = document.getElementById('modal-confirm');
+
+  modalBody.innerHTML = '';
+  modalTitle.textContent = `Adventurer: Revealed ${revealedCards.length} cards`;
+  
+  // Create sections for treasures and non-treasures
+  const treasureSection = document.createElement('div');
+  treasureSection.innerHTML = `<h4>Treasures Found (${treasuresFound.length}/2) - Added to Hand:</h4>`;
+  modalBody.appendChild(treasureSection);
+  
+  // Show found treasures
   treasuresFound.forEach(treasure => {
-    player.hand.push(treasure);
+    const cardEl = document.createElement('div');
+    cardEl.className = `card ${treasure.type.toLowerCase().replace(/\s+/g, '-')} treasure-found`;
+    cardEl.innerHTML = `
+      <div class="card-name">${treasure.name}</div>
+      <div class="card-description">${treasure.description || ''}</div>
+      <div class="card-coins">${treasure.value ? treasure.value + '*' : ''}</div>
+      <div class="card-image">${treasure.image ? `<img src="../res/img/cards/${treasure.image}" alt="${treasure.name}">` : ''}</div>
+    `;
+    treasureSection.appendChild(cardEl);
   });
   
-  // Discard all other revealed cards
+  // Show discarded cards
   const nonTreasures = revealedCards.filter(card => !treasuresFound.includes(card));
-  nonTreasures.forEach(card => {
-    player.discard.push(card);
-  });
-  
-  // Log results
-  if (treasuresFound.length === 2) {
-    gameEngine.logMessage(`Adventurer: Found 2 Treasures (${treasuresFound.map(t => t.name).join(', ')}) and added them to hand.`);
-  } else if (treasuresFound.length === 1) {
-    gameEngine.logMessage(`Adventurer: Found only 1 Treasure (${treasuresFound[0].name}) and added it to hand.`);
-  } else {
-    gameEngine.logMessage("Adventurer: No Treasures found in deck.");
-  }
-  
   if (nonTreasures.length > 0) {
-    gameEngine.logMessage(`Discarded ${nonTreasures.length} non-Treasure cards.`);
+    const discardSection = document.createElement('div');
+    discardSection.innerHTML = `<h4>Other Cards Revealed - Discarded (${nonTreasures.length}):</h4>`;
+    modalBody.appendChild(discardSection);
+    
+    nonTreasures.forEach(card => {
+      const cardEl = document.createElement('div');
+      cardEl.className = `card ${card.type.toLowerCase().replace(/\s+/g, '-')} card-discarded`;
+      cardEl.innerHTML = `
+        <div class="card-name">${card.name}</div>
+        <div class="card-description">${card.description || ''}</div>
+        <div class="card-coins">${card.value ? card.value + '*' : ''}</div>
+        <div class="card-victory">${card.points ? card.points + 'pt' : ''}</div>
+        <div class="card-image">${card.image ? `<img src="../res/img/cards/${card.image}" alt="${card.name}">` : ''}</div>
+      `;
+      discardSection.appendChild(cardEl);
+    });
   }
+  
+  // Set up confirm button
+  modalConfirm.classList.remove('hidden');
+  modalConfirm.textContent = 'Continue';
+  modalConfirm.onclick = () => {
+    // Add found Treasures to hand
+    treasuresFound.forEach(treasure => {
+      player.hand.push(treasure);
+    });
+    
+    // Discard all other revealed cards
+    nonTreasures.forEach(card => {
+      player.discard.push(card);
+    });
+    
+    // Log results
+    if (treasuresFound.length === 2) {
+      gameEngine.logMessage(`Adventurer: Found 2 Treasures (${treasuresFound.map(t => t.name).join(', ')}) and added them to hand.`);
+    } else if (treasuresFound.length === 1) {
+      gameEngine.logMessage(`Adventurer: Found only 1 Treasure (${treasuresFound[0].name}) and added it to hand.`);
+    } else {
+      gameEngine.logMessage("Adventurer: No Treasures found in deck.");
+    }
+    
+    if (nonTreasures.length > 0) {
+      gameEngine.logMessage(`Discarded ${nonTreasures.length} non-Treasure cards.`);
+    }
+    
+    // Close modal and update UI
+    modal.classList.add('hidden');
+    window.uiManager.refreshAfterActionCard();
+  };
+  
+  // Show the modal
+  modal.classList.remove('hidden');
 }
 

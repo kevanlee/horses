@@ -34,25 +34,27 @@ Cards are working? A checklist
 
 ## Action Cards
 * Cellar ✅👍
-* Chapel ❌ - does not let you trash other chapel cards in your hand
+* Council Room ✅👍
+* Workshop ✅👍
 * Village ✅👍
 * Woodcutter ✅👍
-* Masquerade ❌ - text of the button is wrong (Put in hand, not Discard)
-* Harbinger ❌ - text of the button is wrong (Discard, should be "Add to top of deck"). Update button text if discard is empty. When does it put it on top of my deck? because I played masquerade right after, and my card wasn't in there. What is the # of cards that show up on a page? b/c I have two pages but it looks like they all could fit on page 1. 
 * Smithy ✅👍
-* Throne Room ⚫️
-* Feast ❌ - modal does not open
-* Library ❌ - fix the UI. Also, when drawing new cards after discarding action cards, the new cards need the proper/same info including CSS class, and it needs to reshuffle the discard when it runs out
+* Treasury ✅👍
+* Great Hall ✅👍
 * Laboratory ✅👍
-* Mine ✅
-* Council Room ✅
-* Treasury ✅
-* Adventurer ✅
-* Workshop ✅
-* Vassal ✅
-* Great Hall ✅
-* Remodel ✅
-* Moneylender ✅ - need to confirm it actually adds money
-* Gardens ❌
 * Market ✅👍
 * Festival ✅👍
+* Remodel ✅👍
+* Throne Room ⚫️
+* Chapel ❌ - does not let you trash other chapel cards in your hand
+* Masquerade ❌ - text of the button is wrong (Put in hand, not Discard). Also, it adds a card-image to money cards for some reason (the masquerade image btw)
+* Harbinger ❌ - text of the button is wrong (Discard, should be "Add to top of deck"). Update button text if discard is empty. When does it put it on top of my deck? because I played masquerade right after, and my card wasn't in there. What is the # of cards that show up on a page? b/c I have two pages but it looks like they all could fit on page 1. 
+* Feast ❌ - modal does not open
+* Library ❌ - fix the UI. Also, when drawing new cards after discarding action cards, the new cards need the proper/same info including CSS class, and it needs to reshuffle the discard when it runs out
+* Mine ❌
+* Moneylender - need to confirm it actually adds money
+* Gardens ❌
+* Adventurer ❌ - needs rechecked
+* Vassal ❌ - modal does not work
+
+

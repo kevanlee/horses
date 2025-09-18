@@ -646,6 +646,8 @@ export class UIManager {
     console.log('Checking win conditions...');
     console.log('Current victory points:', this.game.player.victoryPoints);
     console.log('Current gold:', this.game.calculateAvailableGold());
+    console.log('Current turn:', this.game.turnNumber);
+    console.log('Max turns:', dungeonMaster.currentDungeonLevel.maxTurns);
     console.log('Win condition:', dungeonMaster.currentDungeonLevel.winCondition);
     
     const completed = dungeonMaster.checkLevelCompletion(this.game);
@@ -653,6 +655,12 @@ export class UIManager {
     
     if (completed) {
       this.handleLevelComplete();
+    } else {
+      // Check if turn limit exceeded (level failure)
+      if (this.game.turnNumber > dungeonMaster.currentDungeonLevel.maxTurns) {
+        console.log('Turn limit exceeded - level failed');
+        this.handleLevelFailure();
+      }
     }
   }
 
@@ -664,14 +672,70 @@ export class UIManager {
     // Save progress
     dungeonMaster.saveProgress();
     
-    // Advance to next level after a delay
-    setTimeout(() => {
+    // Show victory modal
+    this.showVictoryModal(dungeonMaster);
+  }
+
+  showVictoryModal(dungeonMaster) {
+    const modal = document.getElementById('card-modal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalBody = document.getElementById('modal-body');
+    const modalConfirm = document.getElementById('modal-confirm');
+
+    const currentLevel = dungeonMaster.currentDungeonLevel;
+    const levelStats = {
+      levelNumber: dungeonMaster.currentLevel,
+      challengeName: currentLevel.challengeName,
+      turnsUsed: this.game.turnNumber,
+      victoryPoints: this.game.player.victoryPoints,
+      finalGold: this.game.calculateAvailableGold(),
+      totalCards: this.getTotalCardCount(),
+      winCondition: currentLevel.winCondition
+    };
+
+    modalTitle.textContent = '🎉 Level Complete! 🎉';
+    modalBody.innerHTML = `
+      <div class="victory-stats">
+        <h3>${levelStats.challengeName || `Level ${levelStats.levelNumber}`}</h3>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <strong>Turns Used:</strong> ${levelStats.turnsUsed} / ${currentLevel.maxTurns}
+          </div>
+          <div class="stat-item">
+            <strong>Victory Points:</strong> ${levelStats.victoryPoints}
+          </div>
+          <div class="stat-item">
+            <strong>Final Gold:</strong> ${levelStats.finalGold}
+          </div>
+          <div class="stat-item">
+            <strong>Total Cards:</strong> ${levelStats.totalCards}
+          </div>
+          <div class="stat-item">
+            <strong>Goal:</strong> ${currentLevel.getWinConditionDescription()}
+          </div>
+        </div>
+        <div class="victory-message">
+          <p>🏆 Congratulations! You've completed this challenge!</p>
+          <p>Lives remaining: ${dungeonMaster.playerLives}</p>
+        </div>
+      </div>
+    `;
+
+    modalConfirm.classList.remove('hidden');
+    modalConfirm.textContent = 'Continue to Next Level';
+    modalConfirm.onclick = () => {
+      modal.classList.add('hidden');
+      
+      // Advance to next level
       const nextLevel = dungeonMaster.advanceToNextLevel();
       if (nextLevel) {
         // Reset game state for new level
         this.game.startNewGame();
         
-        this.logMessage(`=== Level ${nextLevel.levelNumber} ===`);
+        const levelTitle = nextLevel.challengeName ? 
+          `=== Level ${nextLevel.levelNumber}: ${nextLevel.challengeName} ===` :
+          `=== Level ${nextLevel.levelNumber} ===`;
+        this.logMessage(levelTitle);
         this.logMessage(`Goal: ${nextLevel.getWinConditionDescription()}`);
         this.logMessage(`Lives: ${dungeonMaster.playerLives}`);
         
@@ -679,7 +743,16 @@ export class UIManager {
         window.currentMarketSupply = nextLevel.marketSupply;
         this.updateAllDisplays();
       }
-    }, 2000);
+    };
+
+    modal.classList.remove('hidden');
+  }
+
+  getTotalCardCount() {
+    return this.game.player.hand.length + 
+           this.game.player.deck.length + 
+           this.game.player.discard.length + 
+           this.game.player.playArea.length;
   }
 
   handleLevelFailure() {
@@ -696,7 +769,10 @@ export class UIManager {
         window.currentMarketSupply = dungeonMaster.currentDungeonLevel.marketSupply;
         this.game.startNewGame();
         this.updateAllDisplays();
-        this.logMessage(`=== Retry Level ${dungeonMaster.currentLevel} ===`);
+        const levelTitle = dungeonMaster.currentDungeonLevel.challengeName ? 
+          `=== Retry Level ${dungeonMaster.currentLevel}: ${dungeonMaster.currentDungeonLevel.challengeName} ===` :
+          `=== Retry Level ${dungeonMaster.currentLevel} ===`;
+        this.logMessage(levelTitle);
         this.logMessage(`Goal: ${dungeonMaster.currentDungeonLevel.getWinConditionDescription()}`);
       }, 2000);
     } else {

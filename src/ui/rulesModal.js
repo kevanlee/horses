@@ -18,7 +18,10 @@ export class RulesModal {
     
     this.element.innerHTML = `
       <div class="modal-content">
-        <h2 class="level-number">Level ${levelInfo.levelNumber}</h2>
+        <div class="level-info">
+        <h2 class="level-number">${levelInfo.challengeName ? `${levelInfo.challengeName}` : `Level ${levelInfo.levelNumber}`}</h2>
+        ${levelInfo.challengeName ? `<h3 class="level-subtitle">Level ${levelInfo.levelNumber}</h3>` : ''}
+        </div>
         <div class="level-info-box">
         <div class="rules-section">
           <h3>Goal</h3>

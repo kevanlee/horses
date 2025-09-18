@@ -1,14 +1,20 @@
 export class DungeonLevel {
-  constructor(levelNumber, winCondition, marketSupply) {
+  constructor(levelNumber, winCondition, marketSupply, challengeName = null, challengeId = null, maxTurns = null) {
     this.levelNumber = levelNumber;
     this.winCondition = winCondition;
     this.marketSupply = marketSupply;
-    this.maxTurns = this.calculateMaxTurns();
+    this.challengeName = challengeName;     // NEW: Challenge name
+    this.challengeId = challengeId;         // NEW: Challenge ID
+    this.maxTurns = maxTurns || this.calculateMaxTurns(); // NEW: Use provided maxTurns or calculate
   }
 
-  // Calculate max turns based on level difficulty
+  // Calculate max turns - fallback for when no maxTurns provided
   calculateMaxTurns() {
-    // Simple scaling: higher levels get more turns
+    // If win condition has maxTurns defined (for turn_limit challenges), use that
+    if (this.winCondition.maxTurns) {
+      return this.winCondition.maxTurns;
+    }
+    // Otherwise use the old formula as fallback
     return Math.min(15, 8 + Math.floor(this.levelNumber / 2));
   }
 
@@ -46,34 +52,43 @@ export class DungeonLevel {
 
   // Check card collection win condition
   checkCardCollection(gameEngine) {
-    const allCards = [
-      ...gameEngine.player.hand,
-      ...gameEngine.player.deck,
-      ...gameEngine.player.discard,
-      ...gameEngine.player.playArea
-    ];
+    const totalCards = gameEngine.player.hand.length + 
+                      gameEngine.player.deck.length + 
+                      gameEngine.player.discard.length + 
+                      gameEngine.player.playArea.length;
     
-    const uniqueCards = new Set(allCards.map(card => card.name));
-    return uniqueCards.size >= this.winCondition.target;
+    return totalCards >= this.winCondition.target;
   }
 
   // Get win condition description for UI
   getWinConditionDescription() {
+    let primaryGoal;
     switch (this.winCondition.type) {
       case 'victory_points':
-        return `Reach ${this.winCondition.target} Victory Points`;
+        primaryGoal = `Reach ${this.winCondition.target} Victory Points`;
+        break;
       
       case 'gold_accumulation':
-        return `Accumulate ${this.winCondition.target} Gold`;
+        primaryGoal = `Accumulate ${this.winCondition.target} Gold`;
+        break;
       
       case 'turn_limit':
-        return `Survive ${this.winCondition.maxTurns} turns`;
+        primaryGoal = `Survive ${this.winCondition.maxTurns} turns`;
+        break;
       
       case 'card_collection':
-        return `Collect ${this.winCondition.target} different card types`;
+        primaryGoal = `Accumulate ${this.winCondition.target} total cards`;
+        break;
       
       default:
-        return 'Complete the level';
+        primaryGoal = 'Complete the level';
+    }
+    
+    // Always show both the primary goal and turn limit (unless the primary goal IS the turn limit)
+    if (this.winCondition.type === 'turn_limit') {
+      return primaryGoal;
+    } else {
+      return `${primaryGoal} within ${this.maxTurns} turns`;
     }
   }
 }

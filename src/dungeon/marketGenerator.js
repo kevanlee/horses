@@ -12,13 +12,13 @@ export class MarketGenerator {
       { card: cards.province, count: 8 }
     ];
 
-    // Get random action cards based on level
-    const actionCards = this.getRandomActionCards(levelNumber);
+    // Get random action cards (level number no longer affects difficulty, just for randomness seed)
+    const actionCards = this.getRandomActionCards();
     
     return [...baseCards, ...actionCards];
   }
 
-  static getRandomActionCards(levelNumber) {
+  static getRandomActionCards() {
     const allActionCards = [
       cards.smithy, cards.village, cards.market, cards.cellar,
       cards.festival, cards.library, cards.laboratory, cards.chapel,
@@ -38,7 +38,7 @@ export class MarketGenerator {
     // Create market supply entries
     return selectedCards.map(card => ({
       card: card,
-      count: Math.max(4, 10 - Math.floor(levelNumber / 3)) // Fewer cards available at higher levels
+      count: 10 // Consistent 10 cards available at all levels
     }));
   }
 }

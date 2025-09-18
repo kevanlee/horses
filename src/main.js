@@ -7,6 +7,19 @@ import { LevelSelectScreen } from './ui/levelSelectScreen.js';
 import { RulesModal } from './ui/rulesModal.js';
 import { playActionCardEffect } from './actionCards.js';
 
+// Register service worker for PWA functionality
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then((registration) => {
+        console.log('SW registered: ', registration);
+      })
+      .catch((registrationError) => {
+        console.log('SW registration failed: ', registrationError);
+      });
+  });
+}
+
 // Initialize dungeon system
 const dungeonMaster = new DungeonMaster();
 const gameEngine = new GameEngine();
@@ -117,7 +130,10 @@ window.addEventListener('startNewGame', () => {
     uiManager.updateAllDisplays();
     
     // Show level info
-    uiManager.logMessage(`=== Level ${levelInfo.levelNumber} ===`);
+    const levelTitle = levelInfo.challengeName ? 
+      `=== Level ${levelInfo.levelNumber}: ${levelInfo.challengeName} ===` :
+      `=== Level ${levelInfo.levelNumber} ===`;
+    uiManager.logMessage(levelTitle);
     uiManager.logMessage(`Goal: ${dungeonMaster.currentDungeonLevel.getWinConditionDescription()}`);
     uiManager.logMessage(`Lives: ${levelInfo.lives}`);
     
@@ -148,7 +164,10 @@ window.addEventListener('resumeGame', () => {
     uiManager.updateAllDisplays();
     
     // Show level info
-    uiManager.logMessage(`=== Resumed Level ${levelInfo.levelNumber} ===`);
+    const levelTitle = levelInfo.challengeName ? 
+      `=== Resumed Level ${levelInfo.levelNumber}: ${levelInfo.challengeName} ===` :
+      `=== Resumed Level ${levelInfo.levelNumber} ===`;
+    uiManager.logMessage(levelTitle);
     uiManager.logMessage(`Goal: ${dungeonMaster.currentDungeonLevel.getWinConditionDescription()}`);
     uiManager.logMessage(`Lives: ${levelInfo.lives}`);
     

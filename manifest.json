@@ -1,0 +1,68 @@
+{
+  "name": "HORSES - Dungeon Card Game",
+  "short_name": "HORSES",
+  "description": "A strategic deck-building dungeon crawler with 50 unique challenges",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#2c1810",
+  "theme_color": "#8b4513",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en-US",
+  "categories": ["games", "entertainment"],
+  "icons": [
+    {
+      "src": "res/img/horse-head.svg",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "res/img/horse-head.svg", 
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "res/img/horse-head.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "New Game",
+      "short_name": "New Game",
+      "description": "Start a new dungeon run",
+      "url": "/?action=new",
+      "icons": [
+        {
+          "src": "res/img/horses-logo.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Level Select",
+      "short_name": "Levels",
+      "description": "Choose a specific challenge",
+      "url": "/?action=levels",
+      "icons": [
+        {
+          "src": "res/img/horses-logo.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "res/img/play-area-bg.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "platform": "wide",
+      "label": "Game play area with cards and marketplace"
+    }
+  ]
+}
