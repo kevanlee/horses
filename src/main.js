@@ -123,6 +123,9 @@ window.addEventListener('startNewGame', () => {
     // Start the game
     gameEngine.startNewGame();
     
+    // Update ponies for current level
+    uiManager.updatePoniesForLevel(dungeonMaster.currentLevel);
+    
     // Initial render
     uiManager.renderHand();
     uiManager.renderMarketplace(levelInfo.marketSupply);

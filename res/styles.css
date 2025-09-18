@@ -173,7 +173,12 @@ h1.title {
   background: url(../res/img/meadow.png) no-repeat center center;
   background-size: cover;
   height: 350px;
+}
 
+#footer-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
 }
 
 /* ========================================
@@ -282,6 +287,8 @@ h1.title {
   border-color: #95a5a6;
 }
 
+.vassal { width: 100%; }
+
 /* Win Condition Display */
 #win-condition-display {
   color: var(--text-dark);
@@ -290,15 +297,26 @@ h1.title {
   text-align: center; 
 }
 
+#level-progression, #max-level {
+  display: none; 
+}
+
 .win-condition h3 {
   margin: 0 0 var(--spacing-sm) 0;
   font-size: 1.2rem;
-  font-weight: bold; 
-  display: none; 
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--text-dark);
+  width: 150px;
 }
 
 .win-condition p {
   margin: 0;
+  font-size: 2rem;
+  line-height: 1.25;
+  font-weight: bolder;
+  margin-top: var(--spacing-xl);
+
 }
 
 #level-progression #win-condition-display {
@@ -419,7 +437,7 @@ h1.title {
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   padding: var(--spacing-md);
-  min-height: 210px; 
+  min-height: 220px; 
   background-image: url(../res/img/your-hand-bg.png);
   background-size: contain;
   background-position: center;
@@ -488,7 +506,7 @@ h1.title {
   border: 1px solid var(--border-color);
   padding: var(--spacing-md);
   border-radius: var(--radius-md);
-  min-height: 210px; 
+  min-height: 220px; 
   background-image: url(../res/img/play-area-bg.png);
   background-size: contain;
   background-position: center;
@@ -659,6 +677,8 @@ h1.title {
   padding: 10px;
   margin: 5px;
   width: 125px;
+  min-width: 125px; /* Prevent cards from shrinking */
+  flex-shrink: 0; /* Prevent cards from shrinking in flex containers */
   text-align: left;
   cursor: pointer;
   transition: opacity var(--transition-normal), transform var(--transition-normal);
@@ -792,6 +812,14 @@ h1.title {
   align-items: center;
 }
 
+.adventurer .card-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  justify-content: center;
+  align-items: center;
+}
+
 /* Horizontal Scrolling for Hand and Play Area */
 #player-hand .card-container,
 #play-area .card-container {
@@ -827,13 +855,18 @@ h1.title {
 }
 
 /* Victory Modal Styling */
+.victory .modal-content {
+  background: var(--primary-bg);
+  border: 2px solid var(--text-dark);
+}
+
 .victory-stats {
   text-align: center;
   padding: var(--spacing-md);
 }
 
 .victory-stats h3 {
-  color: var(--accent-color);
+  color: var(--text-dark);
   margin-bottom: var(--spacing-md);
   font-size: 1.5rem;
 }
@@ -847,10 +880,10 @@ h1.title {
 }
 
 .stat-item {
-  background: rgba(139, 69, 19, 0.1);
-  padding: var(--spacing-sm);
+  background: var(--accent-color);
+  padding: var(--spacing-sm) var(--spacing-md);
   border-radius: var(--radius-sm);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--text-dark);
 }
 
 .victory-message {
@@ -864,6 +897,7 @@ h1.title {
 .victory-message p {
   margin: var(--spacing-sm) 0;
   font-weight: bold;
+  font-size: 1.5rem; 
 }
 
 /* ========================================
@@ -889,7 +923,7 @@ h1.title {
 }
 
 /* Menu Button */
-.menu-button {
+.menu-button, .discard-instead {
   background: var(--error-color);
   color: white;
   border: none;
@@ -899,7 +933,11 @@ h1.title {
   border-radius: var(--radius-sm);
   cursor: pointer;
   margin: var(--spacing-sm) 0;
-  font-size: 0.9rem;
+}
+
+.discard-instead {
+  padding: var(--spacing-sm) var(--spacing-md);
+  margin-top: var(--spacing-md);
 }
 
 .menu-button:hover {
@@ -961,6 +999,7 @@ h1.title {
 #card-modal .modal-content {
   overflow-y: auto;
   background: var(--secondary-bg);
+  backdrop-filter: blur(5px);
   border: 2px solid var(--text-dark);
   width: auto;
   max-width: 90%;
@@ -1009,6 +1048,12 @@ h2.level-number {
   border-bottom: 2px solid var(--border-color);
   margin-bottom: var(--spacing-md);
   align-items: center;
+  padding-bottom: var(--spacing-md);
+  justify-content: center;
+}
+
+.level-info-box {
+  padding-top: var(--spacing-md);
 }
 
 .level-info-box > :first-child {
@@ -1044,6 +1089,7 @@ h2.level-number {
 .rules-section p {
   margin-top: 0;
   line-height: 1.25;
+  font-size: 1.5rem;
 }
 
 .available-cards {
@@ -1133,7 +1179,7 @@ h2.level-number {
 
 .modal-text p {
   margin-bottom: 15px;
-  line-height: 1.6;
+  line-height: 1.25;
 }
 
 .modal-text ul {
@@ -1236,6 +1282,8 @@ h2.level-number {
   color: var(--text-dark);
   border-color: var(--text-dark);
 }
+
+#library-hand p { width: 100%; }
 
 .start-button:active {
   transform: translateY(0);
@@ -1568,6 +1616,19 @@ h2.level-number {
 /* ========================================
    17. UTILITIES & HELPERS
    ======================================== */
+
+/* Pony Level Markers */
+.level-pony {
+  position: absolute;
+  width: 50%;
+  height: auto;
+  pointer-events: none;
+  z-index: 1;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
 
 /* Debugging Styles (commented out) */
 /*

@@ -136,12 +136,14 @@ const THRONE_ROOM_EFFECTS = {
   },
 
   "Harbinger": (player, gameEngine) => {
+    // Create discard copy BEFORE drawing cards (which might shuffle discard into deck)
+    const discardCopy = [...player.discard];
     window.gameEngine.drawCards(player, 1);
     player.actions += 1;
     window.gameEngine.drawCards(player, 1);
     player.actions += 1;
     gameEngine.logMessage("Throne Room + Harbinger: +2 Cards, +2 Actions. Choose cards to put on deck (twice).");
-    handleThroneRoomModalCard(player, "Harbinger", gameEngine);
+    handleThroneRoomModalCard(player, "Harbinger", gameEngine, discardCopy);
   },
 
   "Library": (player, gameEngine) => {
@@ -161,7 +163,7 @@ const THRONE_ROOM_EFFECTS = {
 };
 
 // Handle modal cards that need to be executed twice
-function handleThroneRoomModalCard(player, cardName, gameEngine) {
+function handleThroneRoomModalCard(player, cardName, gameEngine, discardCopy = null) {
   // For now, we'll execute the modal card effect twice sequentially
   // This is a simplified approach - in a full implementation, we'd need to
   // track the Throne Room state and ensure the modal appears twice
@@ -219,7 +221,7 @@ export function handleThroneRoomEffect(player, throneRoomCard, gameEngine) {
       <div class="card-description">${card.description || ''}</div>
       <div class="card-coins">${card.value ? card.value + '*' : ''}</div>
       <div class="card-victory">${card.points ? card.points + 'pt' : ''}</div>
-      <div class="card-image">${card.image ? `<img src="../res/img/cards/${card.image}" alt="${card.name}">` : ''}</div>
+      <div class="card-image">${card.image ? `<img src="res/img/cards/${card.image}" alt="${card.name}">` : ''}</div>
     `;
     cardEl.addEventListener('click', () => {
       // Deselect others

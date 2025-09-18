@@ -28,7 +28,7 @@ export const CHALLENGE_DEFINITIONS = [
     id: 4,
     name: "Quick Victory",
     winCondition: { type: 'victory_points', target: 10 },
-    maxTurns: 8,
+    maxTurns: 6,
     difficulty: 1
   },
   {

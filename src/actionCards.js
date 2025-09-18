@@ -79,10 +79,12 @@ export function playActionCardEffect(card, player, gameEngine) {
       break;
     
     case 'Harbinger':
+      // Create discard copy BEFORE drawing cards (which might shuffle discard into deck)
+      const discardCopy = [...player.discard];
       window.gameEngine.drawCards(player, 1);
       player.actions += 1;
       gameEngine.logMessage("Harbinger: +1 Card, +1 Action");
-      handleHarbingerEffect(player, card, gameEngine); 
+      handleHarbingerEffect(player, card, gameEngine, discardCopy); 
       break;
     
     case "Council Room":
@@ -152,7 +154,7 @@ function handleCellarEffect(player, cellarCard, gameEngine) {
       <div class="card-description">${c.description || ''}</div>
       <div class="card-coins">${c.value ? c.value + '*' : ''}</div>
       <div class="card-victory">${c.points ? c.points + 'pt' : ''}</div>
-      <div class="card-image">${c.image ? `<img src="../res/img/cards/${c.image}" alt="${c.name}">` : ''}</div>
+      <div class="card-image">${c.image ? `<img src="res/img/cards/${c.image}" alt="${c.name}">` : ''}</div>
     `;
     cardEl.addEventListener('click', () => {
       if (selectedCards.has(idx)) {
@@ -253,8 +255,8 @@ function handleLibraryEffect(player, libraryCard, gameEngine) {
 
           // Update modal with new card
           const newCardDiv = document.createElement('div');
-          newCardDiv.className = 'card';
-          newCardDiv.innerHTML = `<strong>${newCard.name}</strong><br><em>${newCard.type}</em>`;
+          newCardDiv.className = `card ${card.type.toLowerCase().replace(/\s+/g, '-')}`;
+          newCardDiv.innerHTML = `<div class="card-name">${newCard.name}</div><div class="card-description">${newCard.description || ''}</div><div class="card-coins">${newCard.value ? newCard.value + '*' : ''}</div><div class="card-victory">${newCard.points ? newCard.points + 'pt' : ''}</div><div class="card-image"></div>`;
           
           // If the new card is an action card, add a Discard button again
           if (newCard.type === "Action") {
@@ -303,28 +305,26 @@ function handleChapelEffect(player, chapelCard, gameEngine) {
   const selectedCards = new Set();
 
   player.hand.forEach((c, idx) => {
-    // Don't allow the Chapel card itself to be selected
-    if (c.name !== 'Chapel') {
-      const cardEl = document.createElement('div');
-      cardEl.className = `card ${c.type.toLowerCase().replace(/\s+/g, '-')}`;
-      cardEl.innerHTML = `
-        <div class="card-name">${c.name}</div>
-        <div class="card-description">${c.description || ''}</div>
-        <div class="card-coins">${c.value ? c.value + '*' : ''}</div>
-        <div class="card-victory">${c.points ? c.points + 'pt' : ''}</div>
-        <div class="card-image">${c.image ? `<img src="../res/img/cards/${c.image}" alt="${c.name}">` : ''}</div>
-      `;
-      cardEl.addEventListener('click', () => {
-        if (selectedCards.has(idx)) {
-          selectedCards.delete(idx);
-          cardEl.classList.remove('selected');
-        } else if (selectedCards.size < 4) { // Only allow up to 4 cards to be selected
-          selectedCards.add(idx);
-          cardEl.classList.add('selected');
-        }
-      });
-      modalBody.appendChild(cardEl);
-    }
+    // Only exclude the specific played Chapel card (it should already be in play area)
+    const cardEl = document.createElement('div');
+    cardEl.className = `card ${c.type.toLowerCase().replace(/\s+/g, '-')}`;
+    cardEl.innerHTML = `
+      <div class="card-name">${c.name}</div>
+      <div class="card-description">${c.description || ''}</div>
+      <div class="card-coins">${c.value ? c.value + '*' : ''}</div>
+      <div class="card-victory">${c.points ? c.points + 'pt' : ''}</div>
+      <div class="card-image">${c.image ? `<img src="res/img/cards/${c.image}" alt="${c.name}">` : ''}</div>
+    `;
+    cardEl.addEventListener('click', () => {
+      if (selectedCards.has(idx)) {
+        selectedCards.delete(idx);
+        cardEl.classList.remove('selected');
+      } else if (selectedCards.size < 4) { // Only allow up to 4 cards to be selected
+        selectedCards.add(idx);
+        cardEl.classList.add('selected');
+      }
+    });
+    modalBody.appendChild(cardEl);
   });
 
   // Show modal
@@ -383,7 +383,7 @@ function handleWorkshopEffect(player, workshopCard, gameEngine) {
         <div class="card-description">${slot.card.description || ''}</div>
         <div class="card-coins">${slot.card.value ? slot.card.value + '*' : ''}</div>
         <div class="card-victory">${slot.card.points ? slot.card.points + 'pt' : ''}</div>
-        <div class="card-image">${slot.card.image ? `<img src="../res/img/cards/${slot.card.image}" alt="${slot.card.name}">` : ''}</div>
+        <div class="card-image">${slot.card.image ? `<img src="res/img/cards/${slot.card.image}" alt="${slot.card.name}">` : ''}</div>
       `;
       cardEl.addEventListener('click', () => {
         // Deselect others
@@ -428,7 +428,9 @@ function handleVassalEffect(player, vassalCard, gameEngine) {
 
   modalTitle.textContent = 'Vassal Effect';
   modalBody.innerHTML = `
-    <p>You've gained +2 gold! Click the card below to reveal the top card of your deck.</p>
+    <div class="vassal">
+      <p>You've gained +2 gold! Click the card below to reveal the top card of your deck.</p>
+    </div>
   `;
   modalConfirm.classList.add('hidden'); // Hide confirm button for now
 
@@ -448,7 +450,7 @@ function handleVassalEffect(player, vassalCard, gameEngine) {
     return;
   }
 
-  const topCard = player.deck.shift();
+  const topCard = player.deck.pop();
 
   const cardEl = document.createElement('div');
   cardEl.className = `card card-back ${topCard.type.toLowerCase().replace(/\s+/g, '-')}`; // Initially styled as face-down
@@ -461,11 +463,11 @@ function handleVassalEffect(player, vassalCard, gameEngine) {
       <div class="card-description">${topCard.description || ''}</div>
       <div class="card-coins">${topCard.value ? topCard.value + '*' : ''}</div>
       <div class="card-victory">${topCard.points ? topCard.points + 'pt' : ''}</div>
-      <div class="card-image">${topCard.image ? `<img src="../res/img/cards/${topCard.image}" alt="${topCard.name}">` : ''}</div>
+      <div class="card-image">${topCard.image ? `<img src="res/img/cards/${topCard.image}" alt="${topCard.name}">` : ''}</div>
     `;
 
     if (topCard.type === 'Action') {
-      modalBody.innerHTML += `<p>It's an Action card! Play it or discard it?</p>`;
+      modalBody.innerHTML += `<br /><p>It's an Action card! Play it or discard it?</p>`;
       modalConfirm.classList.remove('hidden');
       modalConfirm.textContent = 'Play This Card';
 
@@ -476,15 +478,19 @@ function handleVassalEffect(player, vassalCard, gameEngine) {
         // Add the card to play area (like a normal action card play)
         player.playArea.push(topCard);
         
-        // Execute the action card effect
+        // Close the Vassal modal first
+        modal.classList.add('hidden');
+        
+        // Execute the action card effect (this may open its own modal)
         playActionCardEffect(topCard, player, gameEngine);
         
-        modal.classList.add('hidden');
+        // Update UI
         window.uiManager.refreshAfterActionCard();
       };
 
       // Add discard option
       const discardButton = document.createElement('button');
+      discardButton.className = 'discard-instead';
       discardButton.textContent = 'Discard Instead';
       discardButton.onclick = () => {
         player.discard.push(topCard);
@@ -525,7 +531,7 @@ function handleMasqueradeEffect(player, card, gameEngine) {
       window.gameEngine.shuffle(player.deck);
     }
     if (player.deck.length > 0) {
-      drawnCards.push(player.deck.shift());
+      drawnCards.push(player.deck.pop());
     }
   }
 
@@ -538,19 +544,23 @@ function handleMasqueradeEffect(player, card, gameEngine) {
   modalTitle.textContent = "Masquerade: Choose a card to keep";
   modalBody.innerHTML = '';
   modal.classList.remove('hidden');
+  
+  // Ensure confirm button is visible and labeled correctly for this flow
+  confirmButton.classList.remove('hidden');
+  confirmButton.textContent = 'Put in Hand';
 
   let selectedCard = null;
 
   // 3. Display the two drawn cards
   drawnCards.forEach((drawnCard) => {
     const cardDiv = document.createElement('div');
-    cardDiv.className = `card ${card.type.toLowerCase().replace(/\s+/g, '-')}`; // same styling
+    cardDiv.className = `card ${drawnCard.type.toLowerCase().replace(/\s+/g, '-')}`; // use the drawn card's type
     cardDiv.innerHTML = `
       <div class="card-name">${drawnCard.name}</div>
       <div class="card-description">${drawnCard.description || ''}</div>
       <div class="card-coins">${drawnCard.value ? drawnCard.value + '*' : ''}</div>
       <div class="card-victory">${drawnCard.points ? drawnCard.points + 'pt' : ''}</div>
-      <div class="card-image">${card.image ? `<img src="../res/img/cards/${card.image}" alt="${card.name}">` : ''}</div>
+      <div class="card-image">${drawnCard.image ? `<img src="res/img/cards/${drawnCard.image}" alt="${drawnCard.name}">` : ''}</div>
     `;
 
     cardDiv.addEventListener('click', () => {
@@ -596,7 +606,7 @@ function handleMasqueradeEffect(player, card, gameEngine) {
   confirmButton.addEventListener('click', confirmChoice);
 }
 
-function handleHarbingerEffect(player, card, gameEngine) {
+function handleHarbingerEffect(player, card, gameEngine, discardCopy) {
 
   const modal = document.getElementById('card-modal');
   const modalTitle = document.getElementById('modal-title');
@@ -607,7 +617,7 @@ function handleHarbingerEffect(player, card, gameEngine) {
   let currentPage = 0;
   const cardsPerPage = 10;
 
-  const discardCopy = [...player.discard]; // Important: copy so we don't mutate during selection
+  // discardCopy is now passed as a parameter (created before drawing cards)
 
   // Helper: Render a page of discard cards
   function renderPage() {
@@ -630,7 +640,7 @@ function handleHarbingerEffect(player, card, gameEngine) {
         <div class="card-description">${cardObj.description || ''}</div>
         <div class="card-coins">${cardObj.value ? cardObj.value + '*' : ''}</div>
         <div class="card-victory">${cardObj.points ? cardObj.points + 'pt' : ''}</div>
-        <div class="card-image">${card.image ? `<img src="../res/img/cards/${card.image}" alt="${card.name}">` : ''}</div>
+        <div class="card-image">${card.image ? `<img src="res/img/cards/${card.image}" alt="${card.name}">` : ''}</div>
       `;
 
       cardDiv.addEventListener('click', () => {
@@ -708,6 +718,7 @@ function handleHarbingerEffect(player, card, gameEngine) {
   modalTitle.textContent = "Harbinger: Choose a card to put on top of your deck";
   modal.classList.remove('hidden');
   renderPage();
+  confirmButton.textContent = discardCopy.length === 0 ? 'Continue' : 'Put on Top';
   confirmButton.addEventListener('click', confirmChoice);
 }
 
@@ -740,7 +751,7 @@ function handleFeastEffect(player, feastCard, gameEngine) {
         <div class="card-description">${slot.card.description || ''}</div>
         <div class="card-coins">${slot.card.value ? slot.card.value + '*' : ''}</div>
         <div class="card-victory">${slot.card.points ? slot.card.points + 'pt' : ''}</div>
-        <div class="card-image">${slot.card.image ? `<img src="../res/img/cards/${slot.card.image}" alt="${slot.card.name}">` : ''}</div>
+        <div class="card-image">${slot.card.image ? `<img src="res/img/cards/${slot.card.image}" alt="${slot.card.name}">` : ''}</div>
       `;
       cardEl.addEventListener('click', () => {
         // Deselect others
@@ -815,7 +826,7 @@ function handleMineEffect(player, mineCard, gameEngine) {
       <div class="card-description">${card.description || ''}</div>
       <div class="card-coins">${card.value ? card.value + '*' : ''}</div>
       <div class="card-victory">${card.points ? card.points + 'pt' : ''}</div>
-      <div class="card-image">${card.image ? `<img src="../res/img/cards/${card.image}" alt="${card.name}">` : ''}</div>
+      <div class="card-image">${card.image ? `<img src="res/img/cards/${card.image}" alt="${card.name}">` : ''}</div>
     `;
     cardEl.addEventListener('click', () => {
       // Deselect others
@@ -856,7 +867,7 @@ function handleMineEffect(player, mineCard, gameEngine) {
             <div class="card-description">${slot.card.description || ''}</div>
             <div class="card-coins">${slot.card.value ? slot.card.value + '*' : ''}</div>
             <div class="card-victory">${slot.card.points ? slot.card.points + 'pt' : ''}</div>
-            <div class="card-image">${slot.card.image ? `<img src="../res/img/cards/${slot.card.image}" alt="${slot.card.name}">` : ''}</div>
+            <div class="card-image">${slot.card.image ? `<img src="res/img/cards/${slot.card.image}" alt="${slot.card.name}">` : ''}</div>
           `;
           cardEl.addEventListener('click', () => {
             // Deselect others
@@ -916,7 +927,7 @@ function handleRemodelEffect(player, remodelCard, gameEngine) {
       <div class="card-description">${card.description || ''}</div>
       <div class="card-coins">${card.value ? card.value + '*' : ''}</div>
       <div class="card-victory">${card.points ? card.points + 'pt' : ''}</div>
-      <div class="card-image">${card.image ? `<img src="../res/img/cards/${card.image}" alt="${card.name}">` : ''}</div>
+      <div class="card-image">${card.image ? `<img src="res/img/cards/${card.image}" alt="${card.name}">` : ''}</div>
     `;
     cardEl.addEventListener('click', () => {
       // Deselect others
@@ -959,7 +970,7 @@ function handleRemodelEffect(player, remodelCard, gameEngine) {
             <div class="card-coins">${slot.card.value ? slot.card.value + '*' : ''}</div>
             <div class="card-victory">${slot.card.points ? slot.card.points + 'pt' : ''}</div>
             <div class="card-cost">Cost: ${slot.card.cost}</div>
-            <div class="card-image">${slot.card.image ? `<img src="../res/img/cards/${slot.card.image}" alt="${slot.card.name}">` : ''}</div>
+            <div class="card-image">${slot.card.image ? `<img src="res/img/cards/${slot.card.image}" alt="${slot.card.name}">` : ''}</div>
           `;
           cardEl.addEventListener('click', () => {
             // Deselect others
@@ -1034,11 +1045,13 @@ function handleAdventurerEffect(player, adventurerCard, gameEngine) {
   const modalBody = document.getElementById('modal-body');
   const modalConfirm = document.getElementById('modal-confirm');
 
+  modal.classList.add('adventurer');
   modalBody.innerHTML = '';
   modalTitle.textContent = `Adventurer: Revealed ${revealedCards.length} cards`;
   
   // Create sections for treasures and non-treasures
   const treasureSection = document.createElement('div');
+  treasureSection.className = 'adventurer-flex';
   treasureSection.innerHTML = `<h4>Treasures Found (${treasuresFound.length}/2) - Added to Hand:</h4>`;
   modalBody.appendChild(treasureSection);
   
@@ -1050,7 +1063,7 @@ function handleAdventurerEffect(player, adventurerCard, gameEngine) {
       <div class="card-name">${treasure.name}</div>
       <div class="card-description">${treasure.description || ''}</div>
       <div class="card-coins">${treasure.value ? treasure.value + '*' : ''}</div>
-      <div class="card-image">${treasure.image ? `<img src="../res/img/cards/${treasure.image}" alt="${treasure.name}">` : ''}</div>
+      <div class="card-image">${treasure.image ? `<img src="res/img/cards/${treasure.image}" alt="${treasure.name}">` : ''}</div>
     `;
     treasureSection.appendChild(cardEl);
   });
@@ -1070,7 +1083,7 @@ function handleAdventurerEffect(player, adventurerCard, gameEngine) {
         <div class="card-description">${card.description || ''}</div>
         <div class="card-coins">${card.value ? card.value + '*' : ''}</div>
         <div class="card-victory">${card.points ? card.points + 'pt' : ''}</div>
-        <div class="card-image">${card.image ? `<img src="../res/img/cards/${card.image}" alt="${card.name}">` : ''}</div>
+        <div class="card-image">${card.image ? `<img src="res/img/cards/${card.image}" alt="${card.name}">` : ''}</div>
       `;
       discardSection.appendChild(cardEl);
     });

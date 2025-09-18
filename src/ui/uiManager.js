@@ -108,7 +108,7 @@ export class UIManager {
         <div class="card-coins">${card.value ? card.value + '*' : ''}</div>
         <div class="card-victory">${card.points ? card.points + 'pt' : ''}</div>
         <div class="card-cost">Cost: ${card.cost}</div>
-        <div class="card-image">${card.image ? `<img src="../res/img/cards/${card.image}" alt="${card.name}">` : ''}</div>
+        <div class="card-image">${card.image ? `<img src="res/img/cards/${card.image}" alt="${card.name}">` : ''}</div>
       `;
 
       // Add "Play" button only if player has actions left and card is an Action type
@@ -139,7 +139,7 @@ export class UIManager {
         <div class="card-coins">${card.value ? card.value + '*' : ''}</div>
         <div class="card-victory">${card.points ? card.points + 'pt' : ''}</div>
         <div class="card-cost">Cost: ${card.cost}</div>
-        <div class="card-image">${card.image ? `<img src="../res/img/cards/${card.image}" alt="${card.name}">` : ''}</div>
+        <div class="card-image">${card.image ? `<img src="res/img/cards/${card.image}" alt="${card.name}">` : ''}</div>
       `;
       this.elements.playArea.appendChild(cardEl);
     });
@@ -210,7 +210,7 @@ export class UIManager {
             <div class="card-coins">${slot.card.value ? slot.card.value + '*' : ''}</div>
             <div class="card-victory">${slot.card.points ? slot.card.points + 'pt' : ''}</div>
             <div class="card-cost">Cost: ${slot.card.cost}</div>
-            <div class="card-image">${slot.card.image ? `<img src="../res/img/cards/${slot.card.image}" alt="${slot.card.name}">` : ''}</div>
+            <div class="card-image">${slot.card.image ? `<img src="res/img/cards/${slot.card.image}" alt="${slot.card.name}">` : ''}</div>
           `;
 
           if (!cardEl.classList.contains('disabled')) {
@@ -682,6 +682,9 @@ export class UIManager {
     const modalBody = document.getElementById('modal-body');
     const modalConfirm = document.getElementById('modal-confirm');
 
+    // Add victory class to the modal
+    modal.classList.add('victory');
+
     const currentLevel = dungeonMaster.currentDungeonLevel;
     const levelStats = {
       levelNumber: dungeonMaster.currentLevel,
@@ -726,22 +729,16 @@ export class UIManager {
     modalConfirm.onclick = () => {
       modal.classList.add('hidden');
       
+      // Add a pony for the completed level (if level 2 or higher)
+      if (dungeonMaster.currentLevel >= 2) {
+        this.addPonyToFooter();
+      }
+      
       // Advance to next level
       const nextLevel = dungeonMaster.advanceToNextLevel();
       if (nextLevel) {
-        // Reset game state for new level
-        this.game.startNewGame();
-        
-        const levelTitle = nextLevel.challengeName ? 
-          `=== Level ${nextLevel.levelNumber}: ${nextLevel.challengeName} ===` :
-          `=== Level ${nextLevel.levelNumber} ===`;
-        this.logMessage(levelTitle);
-        this.logMessage(`Goal: ${nextLevel.getWinConditionDescription()}`);
-        this.logMessage(`Lives: ${dungeonMaster.playerLives}`);
-        
-        // Update market supply and re-render
-        window.currentMarketSupply = nextLevel.marketSupply;
-        this.updateAllDisplays();
+        // Dispatch startNewGame event to trigger the full initialization flow
+        window.dispatchEvent(new CustomEvent('startNewGame'));
       }
     };
 
@@ -789,6 +786,61 @@ export class UIManager {
     setTimeout(() => {
       window.dispatchEvent(new CustomEvent('gameOver'));
     }, 3000);
+  }
+
+  // Pony level marker system
+  addPonyToFooter() {
+    const footerContent = document.getElementById('footer-content');
+    if (!footerContent) return;
+
+    const pony = document.createElement('img');
+    pony.src = 'res/img/pony.png';
+    pony.className = 'level-pony';
+    pony.alt = 'Level completion pony';
+    
+    // Set size to 50% of natural size
+    pony.style.width = '50px';
+    pony.style.height = 'auto';
+    
+    // Random positioning within footer bounds
+    const footerRect = footerContent.getBoundingClientRect();
+    const ponyWidth = 50; // Approximate pony width at 50% size
+    const ponyHeight = 50; // Approximate pony height at 50% size
+    
+    const maxX = Math.max(0, footerRect.width - ponyWidth);
+    const maxY = Math.max(0, footerRect.height - ponyHeight);
+    
+    const randomX = Math.random() * maxX;
+    const randomY = Math.random() * maxY;
+    
+    pony.style.position = 'absolute';
+    pony.style.left = `${randomX}px`;
+    pony.style.top = `${randomY}px`;
+    pony.style.pointerEvents = 'none'; // Don't interfere with clicks
+    pony.style.zIndex = '1'; // Above background, below content
+    
+    footerContent.appendChild(pony);
+  }
+
+  removeAllPonies() {
+    const footerContent = document.getElementById('footer-content');
+    if (!footerContent) return;
+    
+    const ponies = footerContent.querySelectorAll('.level-pony');
+    ponies.forEach(pony => pony.remove());
+  }
+
+  updatePoniesForLevel(currentLevel) {
+    // Remove all existing ponies
+    this.removeAllPonies();
+    
+    // Add ponies for levels 2 and above
+    // Level 2 = 1 pony, Level 3 = 2 ponies, etc.
+    const poniesToAdd = Math.max(0, currentLevel - 1);
+    
+    for (let i = 0; i < poniesToAdd; i++) {
+      this.addPonyToFooter();
+    }
   }
 
 }
