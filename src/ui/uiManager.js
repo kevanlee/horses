@@ -793,27 +793,17 @@ export class UIManager {
 
     const dungeonMaster = window.dungeonMaster;
     if (!dungeonMaster || !dungeonMaster.currentDungeonLevel) {
-      console.log('No dungeon master or current level found for win condition check');
       return;
     }
 
-    console.log('Checking win conditions...');
-    console.log('Current victory points:', this.game.player.victoryPoints);
-    console.log('Current gold:', this.game.calculateAvailableGold());
-    console.log('Current turn:', this.game.turnNumber);
-    console.log('Max turns:', dungeonMaster.currentDungeonLevel.maxTurns);
-    console.log('Win condition:', dungeonMaster.currentDungeonLevel.winCondition);
-    
     const completed = dungeonMaster.checkLevelCompletion(this.game);
-    console.log('Level completed?', completed);
-    
+
     if (completed) {
       this.levelResolutionInProgress = true;
       this.handleLevelComplete();
     } else {
       // Check if turn limit exceeded (level failure)
       if (this.game.turnNumber > dungeonMaster.currentDungeonLevel.maxTurns) {
-        console.log('Turn limit exceeded - level failed');
         this.levelResolutionInProgress = true;
         this.handleLevelFailure();
       }

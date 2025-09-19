@@ -5,10 +5,6 @@ export class RulesModal {
   }
 
   show(levelInfo) {
-    console.log('RulesModal.show() called with levelInfo:', levelInfo);
-    console.log('Win condition object:', levelInfo.winCondition);
-    console.log('Win condition description:', levelInfo.winConditionDescription);
-    
     // Create rules modal
     this.element = document.createElement('div');
     this.element.id = 'rules-modal';
@@ -16,7 +12,7 @@ export class RulesModal {
     
     // Get available cards for this level
     const availableCards = this.getAvailableCards(levelInfo.marketSupply);
-    
+
     this.element.innerHTML = `
       <div class="modal-content">
         <div class="level-info">
@@ -47,7 +43,6 @@ export class RulesModal {
     `;
 
     document.body.appendChild(this.element);
-    console.log('Rules modal element added to DOM');
     this.bindEvents();
   }
 
