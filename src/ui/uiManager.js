@@ -595,7 +595,7 @@ export class UIManager {
 
     const totalLives = Math.max(dungeonMaster.maxLives || 3, 0);
     const currentLives = Math.max(Math.min(dungeonMaster.playerLives, totalLives), 0);
-    const hearts = '❤️'.repeat(currentLives);
+    const hearts = '🖤'.repeat(currentLives);
     const emptyHearts = '🤍'.repeat(Math.max(totalLives - currentLives, 0));
     const displayHearts = `${hearts}${emptyHearts}` || '—';
 
