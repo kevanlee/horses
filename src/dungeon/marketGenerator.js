@@ -32,7 +32,12 @@ export class MarketGenerator {
     const numActionCards = 10;
     
     // Shuffle and pick random cards
-    const shuffled = [...allActionCards].sort(() => Math.random() - 0.5);
+    const shuffled = [...allActionCards];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+
     const selectedCards = shuffled.slice(0, numActionCards);
     
     // Create market supply entries

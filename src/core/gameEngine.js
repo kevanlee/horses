@@ -34,7 +34,14 @@ export class GameEngine {
   }
 
   shuffle(array) {
-    return array.sort(() => Math.random() - 0.5);
+    const result = Array.isArray(array) ? [...array] : [];
+
+    for (let i = result.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [result[i], result[j]] = [result[j], result[i]];
+    }
+
+    return result;
   }
 
   drawCards(player, count = GAME_CONFIG.INITIAL_HAND_SIZE) {

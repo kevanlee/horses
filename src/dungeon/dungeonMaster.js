@@ -6,7 +6,8 @@ export class DungeonMaster {
   constructor() {
     this.currentLevel = 1;
     this.maxLevelReached = 1;
-    this.playerLives = 3;
+    this.maxLives = 3;
+    this.playerLives = this.maxLives;
     this.completedLevels = new Set();
     this.currentDungeonLevel = null;
     this.totalLevelsCompleted = 0;
@@ -18,7 +19,7 @@ export class DungeonMaster {
   // Start a new dungeon run (reset everything)
   startNewDungeon() {
     this.currentLevel = 1;
-    this.playerLives = 3;
+    this.playerLives = this.maxLives;
     this.completedLevels.clear();
     this.generateLevel(1);
   }
@@ -97,7 +98,7 @@ export class DungeonMaster {
 
   // Handle level failure (lose a life)
   failLevel() {
-    this.playerLives--;
+    this.playerLives = Math.max(0, this.playerLives - 1);
     return this.playerLives > 0;
   }
 
@@ -132,6 +133,7 @@ export class DungeonMaster {
       maxLevelReached: this.maxLevelReached,
       bestLevelReached: this.bestLevelReached,
       playerLives: this.playerLives,
+      maxLives: this.maxLives,
       completedLevels: Array.from(this.completedLevels),
       totalLevelsCompleted: this.totalLevelsCompleted,
       levelStats: Array.from(this.levelStats.entries()),
@@ -158,7 +160,8 @@ export class DungeonMaster {
       this.currentLevel = data.currentLevel || 1;
       this.maxLevelReached = data.maxLevelReached || 1;
       this.bestLevelReached = data.bestLevelReached || 1;
-      this.playerLives = data.playerLives || 3;
+      this.maxLives = data.maxLives || 3;
+      this.playerLives = data.playerLives ?? this.maxLives;
       this.completedLevels = new Set(data.completedLevels || []);
       this.totalLevelsCompleted = data.totalLevelsCompleted || 0;
       this.levelStats = new Map(data.levelStats || []);

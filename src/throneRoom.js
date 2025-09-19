@@ -189,15 +189,21 @@ export function handleThroneRoomEffect(player, throneRoomCard, gameEngine) {
     const modal = document.getElementById('card-modal');
     const modalTitle = document.getElementById('modal-title');
     const modalBody = document.getElementById('modal-body');
-    const modalConfirm = document.getElementById('modal-confirm');
+    const confirmButton = (window.uiManager && window.uiManager.getFreshModalConfirmButton({ text: 'Continue' })) || document.getElementById('modal-confirm');
 
     modalTitle.textContent = 'Throne Room';
     modalBody.innerHTML = '<p>You have no Action cards in your hand to play twice.</p>';
-    modalConfirm.textContent = 'Continue';
-    modalConfirm.onclick = () => {
-      modal.classList.add('hidden');
-      window.uiManager.refreshAfterActionCard();
-    };
+
+    if (confirmButton) {
+      confirmButton.classList.remove('hidden');
+      confirmButton.onclick = () => {
+        modal.classList.add('hidden');
+        confirmButton.onclick = null;
+        confirmButton.classList.add('hidden');
+        window.uiManager.refreshAfterActionCard();
+      };
+    }
+
     modal.classList.remove('hidden');
     return;
   }
@@ -206,7 +212,7 @@ export function handleThroneRoomEffect(player, throneRoomCard, gameEngine) {
   const modal = document.getElementById('card-modal');
   const modalTitle = document.getElementById('modal-title');
   const modalBody = document.getElementById('modal-body');
-  const modalConfirm = document.getElementById('modal-confirm');
+  const confirmButton = (window.uiManager && window.uiManager.getFreshModalConfirmButton({ text: 'Play Twice' })) || document.getElementById('modal-confirm');
 
   modalTitle.textContent = 'Throne Room: Choose an Action card to play twice';
   modalBody.innerHTML = '';
@@ -234,25 +240,25 @@ export function handleThroneRoomEffect(player, throneRoomCard, gameEngine) {
   });
 
   modal.classList.remove('hidden');
-  modalConfirm.textContent = 'Play Twice';
-  modalConfirm.onclick = () => {
+  if (!confirmButton) {
+    return;
+  }
+
+  confirmButton.classList.remove('hidden');
+  confirmButton.onclick = () => {
     if (selectedCardIndex.value !== null) {
       const selectedCard = actionCards[selectedCardIndex.value];
-      
-      // Check if this card has a Throne Room effect defined
+
       if (THRONE_ROOM_EFFECTS[selectedCard.name]) {
-        // Execute the Throne Room effect
         THRONE_ROOM_EFFECTS[selectedCard.name](player, gameEngine);
-        
-        // Close modal and update UI
-        modal.classList.add('hidden');
-        window.uiManager.refreshAfterActionCard();
       } else {
-        // Card not implemented for Throne Room yet
         gameEngine.logMessage(`Throne Room: ${selectedCard.name} is not yet implemented for Throne Room.`);
-        modal.classList.add('hidden');
-        window.uiManager.refreshAfterActionCard();
       }
+
+      modal.classList.add('hidden');
+      confirmButton.onclick = null;
+      confirmButton.classList.add('hidden');
+      window.uiManager.refreshAfterActionCard();
     } else {
       alert('Please select an Action card to play twice.');
     }

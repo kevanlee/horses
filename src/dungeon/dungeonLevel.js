@@ -20,32 +20,24 @@ export class DungeonLevel {
 
   // Check if win condition is met
   checkWinCondition(gameEngine) {
-    console.log(`Checking win condition: ${this.winCondition.type}`);
-    console.log(`Target: ${this.winCondition.target}`);
-    
     switch (this.winCondition.type) {
       case 'victory_points':
         const vpResult = gameEngine.player.victoryPoints >= this.winCondition.target;
-        console.log(`Victory points: ${gameEngine.player.victoryPoints} >= ${this.winCondition.target} = ${vpResult}`);
         return vpResult;
-      
+
       case 'gold_accumulation':
         const goldResult = gameEngine.calculateAvailableGold() >= this.winCondition.target;
-        console.log(`Gold: ${gameEngine.calculateAvailableGold()} >= ${this.winCondition.target} = ${goldResult}`);
         return goldResult;
-      
+
       case 'turn_limit':
         const turnResult = gameEngine.turnNumber <= this.winCondition.maxTurns;
-        console.log(`Turns: ${gameEngine.turnNumber} <= ${this.winCondition.maxTurns} = ${turnResult}`);
         return turnResult;
-      
+
       case 'card_collection':
         const cardResult = this.checkCardCollection(gameEngine);
-        console.log(`Card collection result: ${cardResult}`);
         return cardResult;
-      
+
       default:
-        console.log('Unknown win condition type:', this.winCondition.type);
         return false;
     }
   }

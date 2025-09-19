@@ -1,13 +1,10 @@
 export class RulesModal {
   constructor() {
     this.element = null;
+    this.boundEscHandler = null;
   }
 
   show(levelInfo) {
-    console.log('RulesModal.show() called with levelInfo:', levelInfo);
-    console.log('Win condition object:', levelInfo.winCondition);
-    console.log('Win condition description:', levelInfo.winConditionDescription);
-    
     // Create rules modal
     this.element = document.createElement('div');
     this.element.id = 'rules-modal';
@@ -15,7 +12,7 @@ export class RulesModal {
     
     // Get available cards for this level
     const availableCards = this.getAvailableCards(levelInfo.marketSupply);
-    
+
     this.element.innerHTML = `
       <div class="modal-content">
         <div class="level-info">
@@ -46,7 +43,6 @@ export class RulesModal {
     `;
 
     document.body.appendChild(this.element);
-    console.log('Rules modal element added to DOM');
     this.bindEvents();
   }
 
@@ -54,6 +50,11 @@ export class RulesModal {
     if (this.element) {
       this.element.remove();
       this.element = null;
+    }
+
+    if (this.boundEscHandler) {
+      document.removeEventListener('keydown', this.boundEscHandler);
+      this.boundEscHandler = null;
     }
   }
 
@@ -87,10 +88,14 @@ export class RulesModal {
     });
 
     // Close modal with Escape key
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && this.element) {
-        this.hide();
-      }
-    });
+    if (!this.boundEscHandler) {
+      this.boundEscHandler = (e) => {
+        if (e.key === 'Escape' && this.element) {
+          this.hide();
+        }
+      };
+      document.addEventListener('keydown', this.boundEscHandler);
+    }
   }
 }
+
