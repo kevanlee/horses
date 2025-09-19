@@ -6,14 +6,14 @@ python3 -m http.server 5500
 
 
 Bug list: 
-* Harbinger - Sometimes Harbinger's button says Discard
-* Vassal - the Action card I draw does not get its effects applied
+* ✅ Harbinger - Button now correctly says "Put on Top" and the chosen card returns to your deck.
+* ✅ Vassal - Revealed Action cards now play correctly after the modal choice, and messaging stays in sync.
 * Turn counter is missing its colon
 * Randomize gold+VP at first hand
-* Masquerade - button says Trash / Discard Selected when it shouldn't, e.g. after a card with a modal is played on a previous hand, like Cellar
-* Masquerade - the card you don't choose gets lost somewhere (trashed? abandoned?)
-* Cellar and Chapel don't show up in my game inventory
-* Add code so that any trashed card gets added to trash pile (Chapel)
+* ✅ Masquerade - button label reads "Put in Hand" and resets properly between modal cards.
+* ✅ Masquerade - the unchosen card is discarded instead of disappearing.
+* ✅ Cellar and Chapel now appear in the Deck Inventory alongside the rest of your collection.
+* ✅ Chapel now records trashed cards in the trash pile and UI.
 
 To-do
 * Restyle 
@@ -47,14 +47,14 @@ Cards are working? A checklist
 * Remodel ✅👍
 * Throne Room ⚫️
 * Chapel ✅👍
-* Masquerade ❌ - text of the button is wrong (Put in hand, not Discard). Also, it adds a card-image to money cards for some reason (the masquerade image btw)
-* Harbinger ❌🐠 - text of the button is wrong (Discard, should be "Add to top of deck"). Update button text if discard is empty. When does it put it on top of my deck? because I played masquerade right after, and my card wasn't in there. What is the # of cards that show up on a page? b/c I have two pages but it looks like they all could fit on page 1. 
-* Feast ❌ 🐠 - modal does not open
+* Masquerade ✅👍 - modal keeps the right art, the button now reads "Put in Hand," and the spare card goes to discard.
+* Harbinger ✅👍 - modal shows the right cards, supports paging, and puts the selected card back on top of your deck.
+* Feast ✅👍 - modal opens again so you can gain a card up to 5 cost.
 * Library ❌ - fix the UI. Also, when drawing new cards after discarding action cards, the new cards need the proper/same info including CSS class, and it needs to reshuffle the discard when it runs out
-* Mine ❌ 🐠 - needs rechecked
+* Mine ✅👍 - treasure upgrade flow works and sends the new treasure to your hand.
 * Moneylender ✅👍
 * Gardens ❌ 🐠
-* Adventurer ❌ 🐠 - needs rechecked
-* Vassal ❌ 🐠 - Fix UI. 
+* Adventurer ✅👍 - reveals cards with the right art, adds treasures to hand, and discards the rest.
+* Vassal ✅👍 - UI clarifies the choice and lets you play or discard the revealed Action.
 
 

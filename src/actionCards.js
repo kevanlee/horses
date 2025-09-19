@@ -2,6 +2,23 @@ import { GAME_CONFIG } from './constants.js';
 import { handleThroneRoomEffect } from './throneRoom.js';
 
 
+function prepareConfirmButton(options = {}) {
+  if (window.uiManager && typeof window.uiManager.getFreshModalConfirmButton === 'function') {
+    return window.uiManager.getFreshModalConfirmButton(options);
+  }
+
+  const button = document.getElementById('modal-confirm');
+  if (button) {
+    if (options.text) {
+      button.textContent = options.text;
+    }
+    button.classList.toggle('hidden', Boolean(options.hidden));
+    button.onclick = null;
+  }
+  return button;
+}
+
+
 // 👇 Central function that handles any action card
 export function playActionCardEffect(card, player, gameEngine) {
   switch (card.name) {
@@ -140,7 +157,7 @@ function handleCellarEffect(player, cellarCard, gameEngine) {
   const modal = document.getElementById('card-modal');
   const modalTitle = document.getElementById('modal-title');
   const modalBody = document.getElementById('modal-body');
-  const modalConfirm = document.getElementById('modal-confirm');
+  const confirmButton = prepareConfirmButton({ text: 'Discard Selected' });
 
   modalBody.innerHTML = '';
   modalTitle.textContent = 'Choose cards to discard for Cellar';
@@ -171,8 +188,12 @@ function handleCellarEffect(player, cellarCard, gameEngine) {
   // Show modal
   modal.classList.remove('hidden');
 
-  modalConfirm.textContent = 'Discard Selected';
-  modalConfirm.onclick = () => {
+  if (!confirmButton) {
+    return;
+  }
+
+  confirmButton.classList.remove('hidden');
+  confirmButton.onclick = () => {
     const numToDraw = selectedCards.size;
 
     const kept = [];
@@ -189,6 +210,8 @@ function handleCellarEffect(player, cellarCard, gameEngine) {
 
     // Close modal and update UI
     modal.classList.add('hidden');
+    confirmButton.onclick = null;
+    confirmButton.classList.add('hidden');
     window.uiManager.refreshAfterActionCard();
   };
 }
@@ -212,8 +235,9 @@ function handleLibraryEffect(player, libraryCard, gameEngine) {
   // Display how many cards are needed
   text.textContent = `You currently have ${currentHandSize} cards. You need to draw ${cardsNeeded} more card(s).`;
 
-  let drawn = [];
-  for (let i = 0; i < cardsNeeded; i++) {
+  const drawn = [];
+
+  const drawNextCard = () => {
     if (player.deck.length === 0 && player.discard.length > 0) {
       player.deck = window.gameEngine.shuffle(player.discard);
       player.discard = [];
@@ -222,74 +246,64 @@ function handleLibraryEffect(player, libraryCard, gameEngine) {
     if (player.deck.length > 0) {
       drawn.push(player.deck.pop());
     }
-  }
+  };
 
-  // Add "Here are your next X cards" text
-  const drawIntro = document.createElement('p');
-  drawIntro.textContent = `Here are your next ${drawn.length} card(s):`;
-  libraryHand.appendChild(drawIntro);
-
-  drawn.forEach(card => {
-    const cardDiv = document.createElement('div');
-    cardDiv.className = `card ${card.type.toLowerCase().replace(/\s+/g, '-')}`;
-    cardDiv.innerHTML = `<div class="card-name">${card.name}</div><div class="card-description">${card.description || ''}</div><div class="card-coins">${card.value ? card.value + '*' : ''}</div><div class="card-victory">${card.points ? card.points + 'pt' : ''}</div><div class="card-image"></div>`;
-
-    // Add a discard button for Action cards
-    if (card.type === "Action") {
-      const discardButton = document.createElement('button');
-      discardButton.textContent = 'Discard';
-      discardButton.onclick = () => {
-        // Discard the card and draw a new one
-        player.discard.push(card);
-        libraryHand.removeChild(cardDiv); // Remove the discarded card div
-        drawn = drawn.filter(c => c !== card); // Remove the card from the drawn array
-
-        // If deck is empty, shuffle discard pile and continue drawing
-        if (player.deck.length === 0 && player.discard.length > 0) {
-          player.deck = window.gameEngine.shuffle(player.discard);
-          player.discard = [];
-        }
-        if (player.deck.length > 0) {
-          const newCard = player.deck.pop();
-          drawn.push(newCard); // Add the new card to the drawn array
-
-          // Update modal with new card
-          const newCardDiv = document.createElement('div');
-          newCardDiv.className = `card ${card.type.toLowerCase().replace(/\s+/g, '-')}`;
-          newCardDiv.innerHTML = `<div class="card-name">${newCard.name}</div><div class="card-description">${newCard.description || ''}</div><div class="card-coins">${newCard.value ? newCard.value + '*' : ''}</div><div class="card-victory">${newCard.points ? newCard.points + 'pt' : ''}</div><div class="card-image"></div>`;
-          
-          // If the new card is an action card, add a Discard button again
-          if (newCard.type === "Action") {
-            const discardButtonNew = document.createElement('button');
-            discardButtonNew.textContent = 'Discard';
-            discardButtonNew.onclick = () => {
-              player.discard.push(newCard);
-              libraryHand.removeChild(newCardDiv);
-              drawn = drawn.filter(c => c !== newCard);
-            };
-            newCardDiv.appendChild(discardButtonNew);
-          }
-          
-          libraryHand.appendChild(newCardDiv); // Add the new card to the modal
-        }
-      };
-      cardDiv.appendChild(discardButton);
+  while (drawn.length < cardsNeeded) {
+    const beforeLength = drawn.length;
+    drawNextCard();
+    if (drawn.length === beforeLength) {
+      break; // No more cards to draw
     }
-
-    libraryHand.appendChild(cardDiv);
-  });
-
-  // Ensure Confirm button is shown after drawing cards
-  if (drawn.length > 0) {
-    confirmButton.classList.remove('hidden');
-    confirmButton.textContent = "Confirm";
-    confirmButton.onclick = () => {
-      // Add the drawn cards to the player's hand
-      player.hand.push(...drawn);
-      window.uiManager.refreshAfterActionCard(); // Use the new UI manager
-      modal.classList.add('hidden');
-    };
   }
+
+  const renderDrawnCards = () => {
+    libraryHand.innerHTML = '';
+
+    const drawIntro = document.createElement('p');
+    drawIntro.textContent = `Here are your next ${drawn.length} card(s):`;
+    libraryHand.appendChild(drawIntro);
+
+    drawn.forEach((card, index) => {
+      const cardDiv = document.createElement('div');
+      cardDiv.className = `card ${card.type.toLowerCase().replace(/\s+/g, '-')}`;
+      cardDiv.innerHTML = `
+        <div class="card-name">${card.name}</div>
+        <div class="card-description">${card.description || ''}</div>
+        <div class="card-coins">${card.value ? card.value + '*' : ''}</div>
+        <div class="card-victory">${card.points ? card.points + 'pt' : ''}</div>
+        <div class="card-image">${card.image ? `<img src="res/img/cards/${card.image}" alt="${card.name}">` : ''}</div>
+      `;
+
+      if (card.type.includes('Action')) {
+        const discardButton = document.createElement('button');
+        discardButton.textContent = 'Set Aside';
+        discardButton.onclick = () => {
+          player.discard.push(card);
+          drawn.splice(index, 1);
+          drawNextCard();
+          renderDrawnCards();
+        };
+        cardDiv.appendChild(discardButton);
+      }
+
+      libraryHand.appendChild(cardDiv);
+    });
+
+    if (drawn.length > 0) {
+      confirmButton.classList.remove('hidden');
+      confirmButton.textContent = "That's 7!";
+    } else {
+      confirmButton.classList.add('hidden');
+    }
+  };
+
+  renderDrawnCards();
+
+  confirmButton.onclick = () => {
+    player.hand.push(...drawn);
+    window.uiManager.refreshAfterActionCard();
+    modal.classList.add('hidden');
+  };
 }
 
 function handleChapelEffect(player, chapelCard, gameEngine) {
@@ -298,7 +312,7 @@ function handleChapelEffect(player, chapelCard, gameEngine) {
   const modal = document.getElementById('card-modal');
   const modalTitle = document.getElementById('modal-title');
   const modalBody = document.getElementById('modal-body');
-  const modalConfirm = document.getElementById('modal-confirm');
+  const confirmButton = prepareConfirmButton({ hidden: true });
 
   modalBody.innerHTML = '';
   modalTitle.textContent = 'Choose up to 4 cards to trash';
@@ -330,8 +344,13 @@ function handleChapelEffect(player, chapelCard, gameEngine) {
   // Show modal
   modal.classList.remove('hidden');
 
-  modalConfirm.textContent = 'Trash Selected';
-  modalConfirm.onclick = () => {
+  if (!confirmButton) {
+    return;
+  }
+
+  confirmButton.classList.remove('hidden');
+  confirmButton.textContent = 'Trash Selected';
+  confirmButton.onclick = () => {
     if (selectedCards.size > 0) {
       // Trash selected cards from the player's hand and deck
       const cardsToTrash = [];
@@ -347,12 +366,14 @@ function handleChapelEffect(player, chapelCard, gameEngine) {
 
       cardIndicesToTrash.forEach(i => {
         const [removed] = player.hand.splice(i, 1);
-        player.trash.push(removed); 
+        player.trash.push(removed);
       });
-      
+
 
       // Close the modal and update the UI
       modal.classList.add('hidden');
+      confirmButton.onclick = null;
+      confirmButton.classList.add('hidden');
       window.uiManager.refreshAfterActionCard();
       window.uiManager.updateVictoryPoints();
     } else {
@@ -367,7 +388,7 @@ function handleWorkshopEffect(player, workshopCard, gameEngine) {
   const modal = document.getElementById('card-modal');
   const modalTitle = document.getElementById('modal-title');
   const modalBody = document.getElementById('modal-body');
-  const modalConfirm = document.getElementById('modal-confirm');
+  const confirmButton = prepareConfirmButton({ text: 'Gain Selected' });
 
   modalBody.innerHTML = '';
   modalTitle.textContent = 'Choose a card costing up to 4';
@@ -397,21 +418,24 @@ function handleWorkshopEffect(player, workshopCard, gameEngine) {
   });
 
   modal.classList.remove('hidden');
-  modalConfirm.textContent = 'Gain Selected';
-  modalConfirm.onclick = () => {
+  if (!confirmButton) return;
+
+  confirmButton.onclick = () => {
     if (selectedCardIndex.value !== null) {
       const chosenSlot = window.currentMarketSupply[selectedCardIndex.value];
       if (chosenSlot.count > 0) {
         player.discard.push(chosenSlot.card);
         chosenSlot.count--;
-  
+
         // 🎉 Add this line:
         gameEngine.logMessage(`You gained a ${chosenSlot.card.name}!`);
       }
     }
-  
+
     // Close modal and update UI
     modal.classList.add('hidden');
+    confirmButton.onclick = null;
+    confirmButton.classList.add('hidden');
     window.uiManager.refreshAfterActionCard();
   };
 }
@@ -424,7 +448,7 @@ function handleVassalEffect(player, vassalCard, gameEngine) {
   const modal = document.getElementById('card-modal');
   const modalTitle = document.getElementById('modal-title');
   const modalBody = document.getElementById('modal-body');
-  const modalConfirm = document.getElementById('modal-confirm');
+  let confirmButton = prepareConfirmButton({ text: 'Trash Selected' });
 
   modalTitle.textContent = 'Vassal Effect';
   modalBody.innerHTML = `
@@ -432,7 +456,8 @@ function handleVassalEffect(player, vassalCard, gameEngine) {
       <p>You've gained +2 gold! Click the card below to reveal the top card of your deck.</p>
     </div>
   `;
-  modalConfirm.classList.add('hidden'); // Hide confirm button for now
+  if (!confirmButton) return;
+  confirmButton.classList.add('hidden');
 
   if (player.deck.length === 0) {
     window.gameEngine.shuffleDiscardIntoDeck();
@@ -440,10 +465,11 @@ function handleVassalEffect(player, vassalCard, gameEngine) {
 
   if (player.deck.length === 0) {
     modalBody.innerHTML += `<p>Your deck is empty. No card to reveal.</p>`;
-    modalConfirm.classList.remove('hidden');
-    modalConfirm.textContent = 'Continue';
-    modalConfirm.onclick = () => {
+    confirmButton.classList.remove('hidden');
+    confirmButton.textContent = 'Continue';
+    confirmButton.onclick = () => {
       modal.classList.add('hidden');
+      confirmButton.onclick = null;
       window.uiManager.refreshAfterActionCard();
     };
     modal.classList.remove('hidden');
@@ -468,22 +494,24 @@ function handleVassalEffect(player, vassalCard, gameEngine) {
 
     if (topCard.type === 'Action') {
       modalBody.innerHTML += `<br /><p>It's an Action card! Play it or discard it?</p>`;
-      modalConfirm.classList.remove('hidden');
-      modalConfirm.textContent = 'Play This Card';
+      confirmButton.classList.remove('hidden');
+      confirmButton.textContent = 'Play This Card';
 
       // Play it if they click confirm
-      modalConfirm.onclick = () => {
+      confirmButton.onclick = () => {
         gameEngine.logMessage(`Vassal: You played ${topCard.name} for free!`);
-        
+
         // Add the card to play area (like a normal action card play)
         player.playArea.push(topCard);
-        
+
         // Close the Vassal modal first
         modal.classList.add('hidden');
-        
+        confirmButton.onclick = null;
+        confirmButton.classList.add('hidden');
+
         // Execute the action card effect (this may open its own modal)
         playActionCardEffect(topCard, player, gameEngine);
-        
+
         // Update UI
         window.uiManager.refreshAfterActionCard();
       };
@@ -496,6 +524,8 @@ function handleVassalEffect(player, vassalCard, gameEngine) {
         player.discard.push(topCard);
         gameEngine.logMessage(`Vassal: You discarded ${topCard.name}.`);
         modal.classList.add('hidden');
+        confirmButton.onclick = null;
+        confirmButton.classList.add('hidden');
         window.uiManager.refreshAfterActionCard();
       };
       modalBody.appendChild(discardButton);
@@ -508,10 +538,12 @@ function handleVassalEffect(player, vassalCard, gameEngine) {
       discardMessage.textContent = `It's not an Action card. It has been discarded.`;
       modalBody.appendChild(discardMessage);
       
-      modalConfirm.classList.remove('hidden');
-      modalConfirm.textContent = 'Continue';
-      modalConfirm.onclick = () => {
+      confirmButton.classList.remove('hidden');
+      confirmButton.textContent = 'Continue';
+      confirmButton.onclick = () => {
         modal.classList.add('hidden');
+        confirmButton.onclick = null;
+        confirmButton.classList.add('hidden');
         window.uiManager.refreshAfterActionCard();
       };
     }
@@ -526,9 +558,8 @@ function handleMasqueradeEffect(player, card, gameEngine) {
   const drawnCards = [];
   for (let i = 0; i < 2; i++) {
     if (player.deck.length === 0 && player.discard.length > 0) {
-      player.deck = [...player.discard];
+      player.deck = window.gameEngine.shuffle(player.discard);
       player.discard = [];
-      window.gameEngine.shuffle(player.deck);
     }
     if (player.deck.length > 0) {
       drawnCards.push(player.deck.pop());
@@ -539,15 +570,15 @@ function handleMasqueradeEffect(player, card, gameEngine) {
   const modal = document.getElementById('card-modal');
   const modalTitle = document.getElementById('modal-title');
   const modalBody = document.getElementById('modal-body');
-  const confirmButton = document.getElementById('modal-confirm');
+  const confirmButton = prepareConfirmButton({ text: 'Put in Hand' });
 
   modalTitle.textContent = "Masquerade: Choose a card to keep";
   modalBody.innerHTML = '';
   modal.classList.remove('hidden');
   
   // Ensure confirm button is visible and labeled correctly for this flow
+  if (!confirmButton) return;
   confirmButton.classList.remove('hidden');
-  confirmButton.textContent = 'Put in Hand';
 
   let selectedCard = null;
 
@@ -596,6 +627,7 @@ function handleMasqueradeEffect(player, card, gameEngine) {
     // Cleanup
     modal.classList.add('hidden');
     confirmButton.removeEventListener('click', confirmChoice);
+    confirmButton.classList.add('hidden');
     modalBody.innerHTML = '';
 
     // Update the UI
@@ -611,20 +643,23 @@ function handleHarbingerEffect(player, card, gameEngine, discardCopy) {
   const modal = document.getElementById('card-modal');
   const modalTitle = document.getElementById('modal-title');
   const modalBody = document.getElementById('modal-body');
-  const confirmButton = document.getElementById('modal-confirm');
+  const confirmButton = prepareConfirmButton({ text: discardCopy.length === 0 ? 'Continue' : 'Put on Top' });
 
   let selectedCard = null;
   let currentPage = 0;
   const cardsPerPage = 10;
 
-  // discardCopy is now passed as a parameter (created before drawing cards)
+  if (!confirmButton) {
+    return;
+  }
 
   // Helper: Render a page of discard cards
-  function renderPage() {
+  const renderPage = () => {
     modalBody.innerHTML = '';
 
     if (discardCopy.length === 0) {
-      modalBody.innerHTML = "<p>No cards to choose from.</p>";
+      modalBody.innerHTML = '<p>No cards to choose from.</p>';
+      confirmButton.textContent = 'Continue';
       return;
     }
 
@@ -634,21 +669,19 @@ function handleHarbingerEffect(player, card, gameEngine, discardCopy) {
 
     pageCards.forEach((cardObj) => {
       const cardDiv = document.createElement('div');
-      cardDiv.className = `card ${card.type.toLowerCase().replace(/\s+/g, '-')}`;
+      cardDiv.className = `card ${cardObj.type.toLowerCase().replace(/\s+/g, '-')}`;
       cardDiv.innerHTML = `
         <div class="card-name">${cardObj.name}</div>
         <div class="card-description">${cardObj.description || ''}</div>
         <div class="card-coins">${cardObj.value ? cardObj.value + '*' : ''}</div>
         <div class="card-victory">${cardObj.points ? cardObj.points + 'pt' : ''}</div>
-        <div class="card-image">${card.image ? `<img src="res/img/cards/${card.image}" alt="${card.name}">` : ''}</div>
+        <div class="card-image">${cardObj.image ? `<img src="res/img/cards/${cardObj.image}" alt="${cardObj.name}">` : ''}</div>
       `;
 
       cardDiv.addEventListener('click', () => {
-        // Deselect previous selection
         const previous = modalBody.querySelector('.selected');
         if (previous) previous.classList.remove('selected');
 
-        // Select this card
         cardDiv.classList.add('selected');
         selectedCard = cardObj;
       });
@@ -669,57 +702,63 @@ function handleHarbingerEffect(player, card, gameEngine, discardCopy) {
       `;
       modalBody.appendChild(navDiv);
 
-      document.getElementById('prev-page').addEventListener('click', () => {
+      modalBody.querySelector('#prev-page').addEventListener('click', () => {
         if (currentPage > 0) {
           currentPage--;
           renderPage();
         }
       });
 
-      document.getElementById('next-page').addEventListener('click', () => {
+      modalBody.querySelector('#next-page').addEventListener('click', () => {
         if (currentPage < totalPages - 1) {
           currentPage++;
           renderPage();
         }
       });
     }
-  }
+  };
 
-  function confirmChoice() {
+  const confirmChoice = () => {
     if (discardCopy.length === 0) {
       modal.classList.add('hidden');
-      confirmButton.removeEventListener('click', confirmChoice);
+      confirmButton.onclick = null;
+      confirmButton.classList.add('hidden');
       modalBody.innerHTML = '';
       return;
     }
 
     if (!selectedCard) {
-      alert("Please select a card to put on top of your deck!");
+      alert('Please select a card to put on top of your deck!');
       return;
     }
 
-    // Remove selectedCard from discard pile and put on top of deck
-    const index = player.discard.indexOf(selectedCard);
-    if (index !== -1) {
-      player.discard.splice(index, 1);
-      player.deck.push(selectedCard);
+    let index = player.discard.indexOf(selectedCard);
+    if (index === -1) {
+      index = player.discard.findIndex(cardInDiscard => cardInDiscard.name === selectedCard.name);
     }
 
-    // Cleanup
+    if (index !== -1) {
+      const [cardToMove] = player.discard.splice(index, 1);
+      player.deck.push(cardToMove);
+      gameEngine.logMessage(`Harbinger: Placed ${cardToMove.name} on top of your deck.`);
+    }
+
     modal.classList.add('hidden');
-    confirmButton.removeEventListener('click', confirmChoice);
+    confirmButton.onclick = null;
+    confirmButton.classList.add('hidden');
     modalBody.innerHTML = '';
 
-    // Update UI
     window.uiManager.refreshAfterActionCard();
-  }
+  };
 
   // Set up the modal
-  modalTitle.textContent = "Harbinger: Choose a card to put on top of your deck";
+  modalTitle.textContent = 'Harbinger: Choose a card to put on top of your deck';
   modal.classList.remove('hidden');
-  renderPage();
+  confirmButton.classList.remove('hidden');
   confirmButton.textContent = discardCopy.length === 0 ? 'Continue' : 'Put on Top';
-  confirmButton.addEventListener('click', confirmChoice);
+  confirmButton.onclick = confirmChoice;
+
+  renderPage();
 }
 
 function handleFeastEffect(player, feastCard, gameEngine) {
@@ -729,13 +768,13 @@ function handleFeastEffect(player, feastCard, gameEngine) {
     player.playArea.splice(feastIndex, 1);
     player.trash.push(feastCard);
   }
-  
+
   gameEngine.logMessage("Feast: Trashed this card. Choose a card costing up to 5 coins.");
 
   const modal = document.getElementById('card-modal');
   const modalTitle = document.getElementById('modal-title');
   const modalBody = document.getElementById('modal-body');
-  const modalConfirm = document.getElementById('modal-confirm');
+  let confirmButton = prepareConfirmButton({ text: 'Gain Selected' });
 
   modalBody.innerHTML = '';
   modalTitle.textContent = 'Feast: Choose a card costing up to 5 coins';
@@ -765,20 +804,23 @@ function handleFeastEffect(player, feastCard, gameEngine) {
   });
 
   modal.classList.remove('hidden');
-  modalConfirm.textContent = 'Gain Selected';
-  modalConfirm.onclick = () => {
+  if (!confirmButton) return;
+
+  confirmButton.onclick = () => {
     if (selectedCardIndex.value !== null) {
       const chosenSlot = window.currentMarketSupply[selectedCardIndex.value];
       if (chosenSlot.count > 0) {
         player.discard.push(chosenSlot.card);
         chosenSlot.count--;
-        
+
         gameEngine.logMessage(`Feast: You gained a ${chosenSlot.card.name}!`);
       }
     }
 
     // Close modal and update UI
     modal.classList.add('hidden');
+    confirmButton.onclick = null;
+    confirmButton.classList.add('hidden');
     window.uiManager.refreshAfterActionCard();
   };
 }
@@ -802,7 +844,7 @@ function handleMoneylenderEffect(player, moneylenderCard, gameEngine) {
 function handleMineEffect(player, mineCard, gameEngine) {
   // Check if player has any Treasure cards in hand
   const treasureCards = player.hand.filter(card => card.type === 'Treasure');
-  
+
   if (treasureCards.length === 0) {
     gameEngine.logMessage("Mine: No Treasure cards in hand to trash.");
     return;
@@ -811,7 +853,7 @@ function handleMineEffect(player, mineCard, gameEngine) {
   const modal = document.getElementById('card-modal');
   const modalTitle = document.getElementById('modal-title');
   const modalBody = document.getElementById('modal-body');
-  const modalConfirm = document.getElementById('modal-confirm');
+  let confirmButton = prepareConfirmButton({ text: 'Trash Selected' });
 
   modalBody.innerHTML = '';
   modalTitle.textContent = 'Mine: Choose a Treasure to trash';
@@ -839,8 +881,9 @@ function handleMineEffect(player, mineCard, gameEngine) {
   });
 
   modal.classList.remove('hidden');
-  modalConfirm.textContent = 'Trash Selected';
-  modalConfirm.onclick = () => {
+  if (!confirmButton) return;
+
+  confirmButton.onclick = () => {
     if (selectedCardIndex.value !== null) {
       const selectedTreasure = treasureCards[selectedCardIndex.value];
       const maxCost = selectedTreasure.cost + 3;
@@ -880,20 +923,24 @@ function handleMineEffect(player, mineCard, gameEngine) {
         }
       });
       
-      modalConfirm.textContent = 'Gain Selected';
-      modalConfirm.onclick = () => {
+      confirmButton = prepareConfirmButton({ text: 'Gain Selected' });
+      if (!confirmButton) return;
+
+      confirmButton.onclick = () => {
         if (selectedGainIndex.value !== null) {
           const chosenSlot = window.currentMarketSupply[selectedGainIndex.value];
           if (chosenSlot.count > 0) {
             player.hand.push(chosenSlot.card);
             chosenSlot.count--;
-            
+
             gameEngine.logMessage(`Mine: Trashed ${selectedTreasure.name} and gained ${chosenSlot.card.name} to hand!`);
           }
         }
 
         // Close modal and update UI
         modal.classList.add('hidden');
+        confirmButton.onclick = null;
+        confirmButton.classList.add('hidden');
         window.uiManager.refreshAfterActionCard();
       };
     } else {
@@ -912,7 +959,7 @@ function handleRemodelEffect(player, remodelCard, gameEngine) {
   const modal = document.getElementById('card-modal');
   const modalTitle = document.getElementById('modal-title');
   const modalBody = document.getElementById('modal-body');
-  const modalConfirm = document.getElementById('modal-confirm');
+  let confirmButton = prepareConfirmButton({ text: 'Trash Selected' });
 
   modalBody.innerHTML = '';
   modalTitle.textContent = 'Remodel: Choose a card to trash';
@@ -940,8 +987,9 @@ function handleRemodelEffect(player, remodelCard, gameEngine) {
   });
 
   modal.classList.remove('hidden');
-  modalConfirm.textContent = 'Trash Selected';
-  modalConfirm.onclick = () => {
+  if (!confirmButton) return;
+
+  confirmButton.onclick = () => {
     if (selectedCardIndex.value !== null) {
       const selectedCard = player.hand[selectedCardIndex.value];
       const maxCost = selectedCard.cost + 2;
@@ -984,20 +1032,24 @@ function handleRemodelEffect(player, remodelCard, gameEngine) {
       });
       
       // Update the confirm button for the second step
-      modalConfirm.textContent = 'Gain Selected';
-      modalConfirm.onclick = () => {
+      confirmButton = prepareConfirmButton({ text: 'Gain Selected' });
+      if (!confirmButton) return;
+
+      confirmButton.onclick = () => {
         if (selectedGainIndex.value !== null) {
           const chosenSlot = window.currentMarketSupply[selectedGainIndex.value];
           if (chosenSlot.count > 0) {
             player.discard.push(chosenSlot.card);
             chosenSlot.count--;
-            
+
             gameEngine.logMessage(`Remodel: Trashed ${selectedCard.name} and gained ${chosenSlot.card.name}!`);
           }
         }
 
         // Close modal and update UI
         modal.classList.add('hidden');
+        confirmButton.onclick = null;
+        confirmButton.classList.add('hidden');
         window.uiManager.refreshAfterActionCard();
       };
     } else {
@@ -1043,7 +1095,7 @@ function handleAdventurerEffect(player, adventurerCard, gameEngine) {
   const modal = document.getElementById('card-modal');
   const modalTitle = document.getElementById('modal-title');
   const modalBody = document.getElementById('modal-body');
-  const modalConfirm = document.getElementById('modal-confirm');
+  const confirmButton = prepareConfirmButton({ text: 'Continue' });
 
   modal.classList.add('adventurer');
   modalBody.innerHTML = '';
@@ -1090,9 +1142,10 @@ function handleAdventurerEffect(player, adventurerCard, gameEngine) {
   }
   
   // Set up confirm button
-  modalConfirm.classList.remove('hidden');
-  modalConfirm.textContent = 'Continue';
-  modalConfirm.onclick = () => {
+  if (!confirmButton) return;
+
+  confirmButton.classList.remove('hidden');
+  confirmButton.onclick = () => {
     // Add found Treasures to hand
     treasuresFound.forEach(treasure => {
       player.hand.push(treasure);
@@ -1115,12 +1168,14 @@ function handleAdventurerEffect(player, adventurerCard, gameEngine) {
     if (nonTreasures.length > 0) {
       gameEngine.logMessage(`Discarded ${nonTreasures.length} non-Treasure cards.`);
     }
-    
+
     // Close modal and update UI
     modal.classList.add('hidden');
+    confirmButton.onclick = null;
+    confirmButton.classList.add('hidden');
     window.uiManager.refreshAfterActionCard();
   };
-  
+
   // Show the modal
   modal.classList.remove('hidden');
 }

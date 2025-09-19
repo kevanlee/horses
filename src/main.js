@@ -57,61 +57,52 @@ function initializeMenuModal() {
   const menuButton = document.getElementById('menu-button');
   const menuModal = document.getElementById('menu-modal');
   const closeButton = document.getElementById('close-menu');
+  const giveUpBtn = document.getElementById('give-up-btn');
 
   if (!menuButton || !menuModal || !closeButton) {
-    console.log('Menu modal elements not found, retrying...');
-    setTimeout(initializeMenuModal, 100);
     return;
   }
 
-  console.log('Initializing menu modal...');
+  let escapeHandler = null;
 
-  // Open modal when menu button is clicked
-  menuButton.addEventListener('click', () => {
-    console.log('Menu button clicked');
-    menuModal.classList.add('active');
-  });
-
-  // Close modal when close button is clicked
-  closeButton.addEventListener('click', () => {
-    console.log('Close button clicked');
+  const closeModal = () => {
     menuModal.classList.remove('active');
-  });
+    if (escapeHandler) {
+      document.removeEventListener('keydown', escapeHandler);
+      escapeHandler = null;
+    }
+  };
 
-  // Close modal when clicking outside the modal content
-  menuModal.addEventListener('click', (e) => {
-    if (e.target === menuModal) {
-      console.log('Clicked outside modal');
-      menuModal.classList.remove('active');
+  const openModal = () => {
+    menuModal.classList.add('active');
+    if (!escapeHandler) {
+      escapeHandler = (event) => {
+        if (event.key === 'Escape') {
+          closeModal();
+        }
+      };
+      document.addEventListener('keydown', escapeHandler);
+    }
+  };
+
+  menuButton.addEventListener('click', openModal);
+  closeButton.addEventListener('click', closeModal);
+
+  menuModal.addEventListener('click', (event) => {
+    if (event.target === menuModal) {
+      closeModal();
     }
   });
 
-  // Close modal with Escape key
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && menuModal.classList.contains('active')) {
-      console.log('Escape key pressed');
-      menuModal.classList.remove('active');
-    }
-  });
-
-  // Give up button
-  const giveUpBtn = document.getElementById('give-up-btn');
   if (giveUpBtn) {
     giveUpBtn.addEventListener('click', () => {
-      menuModal.classList.remove('active');
+      closeModal();
       uiManager.handleLevelFailure();
     });
   }
 }
 
-// Initialize menu modal - try multiple approaches
-initializeMenuModal();
-
-// Also try after DOM is ready
 document.addEventListener('DOMContentLoaded', initializeMenuModal);
-
-// And after window loads
-window.addEventListener('load', initializeMenuModal);
 
 // Game start/resume event handlers
 window.addEventListener('startNewGame', () => {

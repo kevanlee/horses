@@ -4,6 +4,13 @@ export class UIManager {
   constructor(gameEngine) {
     this.game = gameEngine;
     this.elements = this.cacheElements();
+    this.marketplaceCache = {
+      layoutKey: null,
+      cardNodes: new Map(),
+      liveInfo: null,
+      marketSupply: null
+    };
+    this.levelResolutionInProgress = false;
     this.bindEvents();
   }
 
@@ -33,14 +40,33 @@ export class UIManager {
   updateNumberWithAnimation(element, newValue, categoryText, animationType = 'flash') {
     const currentNumberSpan = element.querySelector('.number');
     const currentValue = currentNumberSpan ? currentNumberSpan.textContent : null;
-    
+
     // Update the content
-    element.innerHTML = `<span class="number">${newValue}</span> <span class="category">${categoryText}</span>`;
-    
+    element.innerHTML = `
+      <span class="category">${categoryText}:</span>
+      <span class="number">${newValue}</span>
+    `;
+
     // Only animate if the value actually changed
     if (currentValue !== null && currentValue !== newValue.toString()) {
       this.animateNumber(element, animationType);
     }
+  }
+
+  getFreshModalConfirmButton({ text = 'Confirm', hidden = false } = {}) {
+    const originalButton = document.getElementById('modal-confirm');
+    if (!originalButton) {
+      return null;
+    }
+
+    const newButton = originalButton.cloneNode(false);
+    newButton.textContent = text;
+    newButton.className = originalButton.className;
+    newButton.classList.toggle('hidden', hidden);
+    newButton.disabled = false;
+
+    originalButton.replaceWith(newButton);
+    return newButton;
   }
 
 
@@ -145,10 +171,30 @@ export class UIManager {
     });
   }
 
-  renderMarketplace(marketSupply) {
-    this.elements.marketplace.innerHTML = '';
-    
-    // Add live info for buys and gold
+  renderMarketplace(marketSupply = []) {
+    if (!this.elements.marketplace) return;
+
+    const layoutKey = Array.isArray(marketSupply)
+      ? marketSupply.map(slot => `${slot.card.name}-${slot.card.cost}`).join('|')
+      : '';
+
+    if (this.marketplaceCache.layoutKey !== layoutKey) {
+      this.buildMarketplaceLayout(marketSupply, layoutKey);
+    } else {
+      this.marketplaceCache.marketSupply = marketSupply;
+    }
+
+    this.updateMarketplaceAffordability();
+  }
+
+  buildMarketplaceLayout(marketSupply, layoutKey) {
+    const container = this.elements.marketplace;
+    container.innerHTML = '';
+
+    this.marketplaceCache.layoutKey = layoutKey;
+    this.marketplaceCache.cardNodes = new Map();
+    this.marketplaceCache.marketSupply = marketSupply;
+
     const liveInfo = document.createElement('div');
     liveInfo.className = 'marketplace-live-info';
     liveInfo.innerHTML = `
@@ -159,109 +205,144 @@ export class UIManager {
         <strong>Available Gold:</strong> <span id="marketplace-gold">${this.game.calculateAvailableGold()}</span>
       </div>
     `;
-    this.elements.marketplace.appendChild(liveInfo);
+    container.appendChild(liveInfo);
+    this.marketplaceCache.liveInfo = {
+      buys: liveInfo.querySelector('#marketplace-buys'),
+      gold: liveInfo.querySelector('#marketplace-gold')
+    };
 
-    const moneyCards = [];
-    const victoryCards = [];
-    const actionCards = [];
+    const topSection = document.createElement('div');
+    topSection.id = 'marketplace-top';
 
-    // Split cards into groups
-    marketSupply.forEach((slot) => {
+    const moneyContainer = document.createElement('div');
+    moneyContainer.id = 'money-cards';
+    const victoryContainer = document.createElement('div');
+    victoryContainer.id = 'victory-cards';
+
+    topSection.appendChild(moneyContainer);
+    topSection.appendChild(victoryContainer);
+    container.appendChild(topSection);
+
+    const actionContainer = document.createElement('div');
+    actionContainer.id = 'action-cards';
+    container.appendChild(actionContainer);
+
+    const groupedCards = {
+      money: [],
+      victory: [],
+      action: []
+    };
+
+    marketSupply.forEach((slot, index) => {
+      if (!slot || !slot.card) return;
+      const entry = { slot, index };
       const type = slot.card.type;
 
       if (type.includes('Action')) {
-        actionCards.push(slot);
+        groupedCards.action.push(entry);
       } else if (type.includes('Treasure')) {
-        moneyCards.push(slot);
+        groupedCards.money.push(entry);
       } else if (type.includes('Victory')) {
-        victoryCards.push(slot);
+        groupedCards.victory.push(entry);
       }
     });
 
-    // Sort action cards by cost ascending
-    actionCards.sort((a, b) => a.card.cost - b.card.cost);
+    groupedCards.action.sort((a, b) => a.slot.card.cost - b.slot.card.cost);
 
-    // Helper to render a section
-    const renderSection = (title, cards, container) => {
-      if (cards.length > 0) {
-        const sectionTitle = document.createElement('h3');
-        sectionTitle.textContent = title;
-        container.appendChild(sectionTitle);
+    this.populateMarketplaceSection('Money Cards', groupedCards.money, moneyContainer, marketSupply);
+    this.populateMarketplaceSection('Victory Cards', groupedCards.victory, victoryContainer, marketSupply);
+    this.populateMarketplaceSection('Action Cards', groupedCards.action, actionContainer, marketSupply);
+  }
 
-        const cardContainer = document.createElement('div');
-        cardContainer.className = 'card-container';
+  populateMarketplaceSection(title, entries, container, marketSupply) {
+    container.innerHTML = '';
+    if (!entries.length) {
+      return;
+    }
 
-        cards.forEach((slot) => {
-          const cardEl = document.createElement('div');
-          cardEl.className = `card ${slot.card.type.toLowerCase().replace(/\s+/g, '-')}`;
+    const sectionTitle = document.createElement('h3');
+    sectionTitle.textContent = title;
+    container.appendChild(sectionTitle);
 
-          const totalGold = this.game.calculateAvailableGold();
+    const cardContainer = document.createElement('div');
+    cardContainer.className = 'card-container';
 
-          if (slot.card.cost > totalGold || this.game.player.buys <= 0 || this.game.currentPhase !== 'buy') {
-            cardEl.classList.add('disabled');
-          } else {
-            cardEl.classList.remove('disabled');
-          }
+    entries.forEach(({ slot, index }) => {
+      const nodes = this.createMarketplaceCard(slot, index, marketSupply);
+      this.marketplaceCache.cardNodes.set(index, nodes);
+      cardContainer.appendChild(nodes.wrapper);
+    });
 
-          cardEl.innerHTML = `
-            <div class="card-name">${slot.card.name}</div>
-            <div class="card-type">${slot.card.type}</div>
-            <div class="card-description">${slot.card.description || ''}</div>
-            <div class="card-coins">${slot.card.value ? slot.card.value + '*' : ''}</div>
-            <div class="card-victory">${slot.card.points ? slot.card.points + 'pt' : ''}</div>
-            <div class="card-cost">Cost: ${slot.card.cost}</div>
-            <div class="card-image">${slot.card.image ? `<img src="res/img/cards/${slot.card.image}" alt="${slot.card.name}">` : ''}</div>
-          `;
+    container.appendChild(cardContainer);
+  }
 
-          if (!cardEl.classList.contains('disabled')) {
-            // Find the actual index in the marketSupply array
-            const actualIndex = marketSupply.findIndex(s => s.card.name === slot.card.name);
-            cardEl.addEventListener('click', () => this.handleBuyCard(actualIndex, marketSupply));
-          }
+  createMarketplaceCard(slot, index, marketSupply) {
+    const cardEl = document.createElement('div');
+    cardEl.className = `card ${slot.card.type.toLowerCase().replace(/\s+/g, '-')}`;
+    cardEl.dataset.marketIndex = index;
 
-          // Add count outside the card container
-          const countEl = document.createElement('div');
-          countEl.className = 'card-count';
-          countEl.textContent = `Left: ${slot.count}`;
+    cardEl.innerHTML = `
+      <div class="card-name">${slot.card.name}</div>
+      <div class="card-type">${slot.card.type}</div>
+      <div class="card-description">${slot.card.description || ''}</div>
+      <div class="card-coins">${slot.card.value ? slot.card.value + '*' : ''}</div>
+      <div class="card-victory">${slot.card.points ? slot.card.points + 'pt' : ''}</div>
+      <div class="card-cost">Cost: ${slot.card.cost}</div>
+      <div class="card-image">${slot.card.image ? `<img src="res/img/cards/${slot.card.image}" alt="${slot.card.name}">` : ''}</div>
+    `;
 
-          // Wrap card and count in a single container
-          const cardWrapper = document.createElement('div');
-          cardWrapper.className = 'card-wrapper';
-          cardWrapper.appendChild(cardEl);
-          cardWrapper.appendChild(countEl);
-
-          cardContainer.appendChild(cardWrapper);
-        });
-
-        container.appendChild(cardContainer);
+    cardEl.addEventListener('click', () => {
+      const supply = this.marketplaceCache.marketSupply || marketSupply;
+      if (!cardEl.classList.contains('disabled') && supply) {
+        this.handleBuyCard(index, supply);
       }
-    };
+    });
 
-    // Render money and victory cards side by side
-    if (moneyCards.length > 0 || victoryCards.length > 0) {
-      const topSection = document.createElement('div');
-      topSection.id = 'marketplace-top';
-      
-      const moneyContainer = document.createElement('div');
-      moneyContainer.id = 'money-cards';
-      const victoryContainer = document.createElement('div');
-      victoryContainer.id = 'victory-cards';
+    const countEl = document.createElement('div');
+    countEl.className = 'card-count';
+    countEl.textContent = `Left: ${slot.count}`;
 
-      renderSection('Money Cards', moneyCards, moneyContainer);
-      renderSection('Victory Cards', victoryCards, victoryContainer);
+    const cardWrapper = document.createElement('div');
+    cardWrapper.className = 'card-wrapper';
+    cardWrapper.appendChild(cardEl);
+    cardWrapper.appendChild(countEl);
 
-      topSection.appendChild(moneyContainer);
-      topSection.appendChild(victoryContainer);
-      this.elements.marketplace.appendChild(topSection);
+    return { wrapper: cardWrapper, cardEl, countEl };
+  }
+
+  updateMarketplaceAffordability() {
+    const cache = this.marketplaceCache;
+    if (!cache || !cache.marketSupply) {
+      return;
     }
 
-    // Render action cards below
-    if (actionCards.length > 0) {
-      const actionContainer = document.createElement('div');
-      actionContainer.id = 'action-cards';
-      renderSection('Action Cards', actionCards, actionContainer);
-      this.elements.marketplace.appendChild(actionContainer);
+    const gold = this.game.calculateAvailableGold();
+    const buys = this.game.player.buys;
+    const inBuyPhase = this.game.currentPhase === 'buy';
+
+    if (cache.liveInfo) {
+      if (cache.liveInfo.gold) {
+        cache.liveInfo.gold.textContent = gold;
+      }
+      if (cache.liveInfo.buys) {
+        cache.liveInfo.buys.textContent = buys;
+      }
     }
+
+    cache.cardNodes.forEach(({ cardEl, countEl }, index) => {
+      const slot = cache.marketSupply[index];
+      if (!slot) return;
+
+      const soldOut = slot.count <= 0;
+      const canAfford = slot.card.cost <= gold && buys > 0 && inBuyPhase;
+
+      if (countEl) {
+        countEl.textContent = `Left: ${slot.count}`;
+      }
+
+      cardEl.classList.toggle('disabled', soldOut || !canAfford);
+      cardEl.classList.toggle('sold-out', soldOut);
+    });
   }
 
   renderDeckAndDiscardCount() {
@@ -281,59 +362,77 @@ export class UIManager {
   renderActionsAndBuys() {
     this.updateNumberWithAnimation(this.elements.actionsLeft, this.game.player.actions, 'Actions', 'pulse');
     this.updateNumberWithAnimation(this.elements.buysLeft, this.game.player.buys, 'Buys', 'pulse');
-    
-    // Also update marketplace live info if it exists
-    const marketplaceBuys = document.getElementById('marketplace-buys');
-    if (marketplaceBuys) {
-      marketplaceBuys.textContent = this.game.player.buys;
-    }
+    this.updateMarketplaceAffordability();
   }
 
   renderDeckInventory() {
     this.elements.deckList.innerHTML = '';
 
-    const renderCardCounts = (cards, title) => {
-      const cardCounts = {};
+    const sections = [
+      { title: 'Hand', cards: this.game.player.hand },
+      { title: 'Play Area', cards: this.game.player.playArea },
+      { title: 'Draw Pile', cards: this.game.player.deck },
+      { title: 'Discard', cards: this.game.player.discard },
+      { title: 'Trash', cards: this.game.player.trash }
+    ];
 
-      cards.forEach(card => {
-        if (cardCounts[card.name]) {
-          cardCounts[card.name]++;
-        } else {
-          cardCounts[card.name] = 1;
-        }
-      });
+    const aggregateCounts = new Map();
+
+    const renderCardCounts = (cards, title) => {
+      if (!cards.length) {
+        return;
+      }
+
+      const cardCounts = cards.reduce((acc, card) => {
+        acc[card.name] = (acc[card.name] || 0) + 1;
+        return acc;
+      }, {});
 
       const sectionTitle = document.createElement('h3');
       sectionTitle.textContent = title;
       this.elements.deckList.appendChild(sectionTitle);
 
-      let totalCards = 0;
-      for (const cardName in cardCounts) {
-        const listItem = document.createElement('li');
-        listItem.textContent = `${cardName}: ${cardCounts[cardName]}`;
-        this.elements.deckList.appendChild(listItem);
-        totalCards += cardCounts[cardName];
-      }
+      Object.entries(cardCounts)
+        .sort(([aName], [bName]) => aName.localeCompare(bName))
+        .forEach(([cardName, count]) => {
+          const listItem = document.createElement('li');
+          listItem.textContent = `${cardName}: ${count}`;
+          this.elements.deckList.appendChild(listItem);
+          aggregateCounts.set(cardName, (aggregateCounts.get(cardName) || 0) + count);
+        });
 
       const totalCountEl = document.createElement('li');
-      totalCountEl.textContent = `Total Cards: ${totalCards}`;
+      totalCountEl.textContent = `Total Cards: ${cards.length}`;
+      totalCountEl.classList.add('section-total');
       this.elements.deckList.appendChild(totalCountEl);
     };
 
-    renderCardCounts(this.game.player.deck, 'Deck (All Cards)');
-    renderCardCounts(this.game.player.discard, 'Discard (Most Recent)');
-    renderCardCounts(this.game.player.trash, 'Trash');
+    sections.forEach(section => renderCardCounts(section.cards, section.title));
+
+    if (aggregateCounts.size) {
+      const summaryTitle = document.createElement('h3');
+      summaryTitle.textContent = 'Collection Totals';
+      this.elements.deckList.appendChild(summaryTitle);
+
+      Array.from(aggregateCounts.entries())
+        .sort(([aName], [bName]) => aName.localeCompare(bName))
+        .forEach(([cardName, count]) => {
+          const listItem = document.createElement('li');
+          listItem.textContent = `${cardName}: ${count}`;
+          this.elements.deckList.appendChild(listItem);
+        });
+
+      const overallTotal = document.createElement('li');
+      overallTotal.textContent = `Total Cards Owned: ${this.getTotalCardCount()}`;
+      overallTotal.classList.add('section-total');
+      this.elements.deckList.appendChild(overallTotal);
+    }
   }
 
   updateGoldDisplay() {
     const gold = this.game.calculateAvailableGold();
     this.updateNumberWithAnimation(this.elements.goldDisplay, gold, 'Gold', 'flash');
-    
-    // Also update marketplace live info if it exists
-    const marketplaceGold = document.getElementById('marketplace-gold');
-    if (marketplaceGold) {
-      marketplaceGold.textContent = gold;
-    }
+    this.updateMarketplaceAffordability();
   }
 
   updateVictoryPoints() {
@@ -409,27 +508,30 @@ export class UIManager {
 
   updateWinConditionDisplay() {
     if (!this.elements.winConditionDisplay) {
-      console.log('Win condition display element not found');
       return;
     }
-    
+
     const dungeonMaster = window.dungeonMaster;
-    console.log('DungeonMaster:', dungeonMaster);
-    console.log('Current dungeon level:', dungeonMaster?.currentDungeonLevel);
-    
     if (dungeonMaster && dungeonMaster.currentDungeonLevel) {
       const level = dungeonMaster.currentDungeonLevel;
       const description = level.getWinConditionDescription();
-      console.log('Setting win condition:', description);
-      
+      const progress = this.getWinConditionProgress(level);
+
       this.elements.winConditionDisplay.innerHTML = `
         <div class="win-condition">
           <h3>Level ${level.levelNumber} Goal</h3>
           <p>${description}</p>
+          <ul class="win-progress">
+            ${progress.map(item => `
+              <li>
+                <span class="progress-label">${item.label}</span>
+                <span class="progress-value">${item.value}</span>
+              </li>
+            `).join('')}
+          </ul>
         </div>
       `;
     } else {
-      console.log('No dungeon master or current level found');
       this.elements.winConditionDisplay.innerHTML = `
         <div class="win-condition">
           <h3>Loading...</h3>
@@ -439,20 +541,68 @@ export class UIManager {
     }
   }
 
+  getWinConditionProgress(level) {
+    const progress = [];
+    const condition = level.winCondition || {};
+
+    switch (condition.type) {
+      case 'victory_points':
+        progress.push({
+          label: 'Victory Points',
+          value: `${this.game.player.victoryPoints} / ${condition.target}`
+        });
+        break;
+      case 'gold_accumulation':
+        progress.push({
+          label: 'Gold in Hand',
+          value: `${this.game.calculateAvailableGold()} / ${condition.target}`
+        });
+        break;
+      case 'card_collection':
+        progress.push({
+          label: 'Total Cards',
+          value: `${this.getTotalCardCount()} / ${condition.target}`
+        });
+        break;
+      case 'turn_limit':
+        progress.push({
+          label: 'Turns Survived',
+          value: `${this.game.turnNumber} / ${condition.maxTurns}`
+        });
+        break;
+      default:
+        progress.push({
+          label: 'Progress',
+          value: `${this.game.turnNumber}`
+        });
+    }
+
+    if (condition.type !== 'turn_limit' && level.maxTurns) {
+      progress.push({
+        label: 'Turn',
+        value: `${this.game.turnNumber} / ${level.maxTurns}`
+      });
+    }
+
+    return progress;
+  }
+
   updateLivesDisplay() {
     if (!this.elements.livesDisplay) return;
-    
+
     const dungeonMaster = window.dungeonMaster;
-    if (dungeonMaster) {
-      const hearts = '❤️'.repeat(dungeonMaster.playerLives);
-      const emptyHearts = '🤍'.repeat(3 - dungeonMaster.playerLives);
-      this.elements.livesDisplay.innerHTML = `
-        <div class="lives-display">
-          <span class="lives-label">Lives:</span>
-          <span class="hearts">${hearts}${emptyHearts}</span>
-        </div>
-      `;
-    }
+    if (!dungeonMaster) return;
+
+    const totalLives = Math.max(dungeonMaster.maxLives || 3, 0);
+    const currentLives = Math.max(Math.min(dungeonMaster.playerLives, totalLives), 0);
+    const hearts = '❤️'.repeat(currentLives);
+    const emptyHearts = '🤍'.repeat(Math.max(totalLives - currentLives, 0));
+    const displayHearts = `${hearts}${emptyHearts}` || '—';
+
+    this.elements.livesDisplay.innerHTML = `
+      <span class="lives-label">Lives:</span>
+      <span class="hearts">${displayHearts}</span>
+    `;
   }
 
   updateLevelProgression() {
@@ -637,6 +787,10 @@ export class UIManager {
   }
 
   checkWinConditions() {
+    if (this.levelResolutionInProgress) {
+      return;
+    }
+
     const dungeonMaster = window.dungeonMaster;
     if (!dungeonMaster || !dungeonMaster.currentDungeonLevel) {
       console.log('No dungeon master or current level found for win condition check');
@@ -654,11 +808,13 @@ export class UIManager {
     console.log('Level completed?', completed);
     
     if (completed) {
+      this.levelResolutionInProgress = true;
       this.handleLevelComplete();
     } else {
       // Check if turn limit exceeded (level failure)
       if (this.game.turnNumber > dungeonMaster.currentDungeonLevel.maxTurns) {
         console.log('Turn limit exceeded - level failed');
+        this.levelResolutionInProgress = true;
         this.handleLevelFailure();
       }
     }
@@ -680,10 +836,10 @@ export class UIManager {
     const modal = document.getElementById('card-modal');
     const modalTitle = document.getElementById('modal-title');
     const modalBody = document.getElementById('modal-body');
-    const modalConfirm = document.getElementById('modal-confirm');
 
     // Add victory class to the modal
     modal.classList.add('victory');
+    modal.classList.remove('failure');
 
     const currentLevel = dungeonMaster.currentDungeonLevel;
     const levelStats = {
@@ -724,16 +880,20 @@ export class UIManager {
       </div>
     `;
 
-    modalConfirm.classList.remove('hidden');
-    modalConfirm.textContent = 'Continue to Next Level';
-    modalConfirm.onclick = () => {
+    const confirmButton = this.getFreshModalConfirmButton({ text: 'Continue to Next Level' });
+
+    confirmButton.onclick = () => {
       modal.classList.add('hidden');
-      
+      modal.classList.remove('victory');
+
       // Add a pony for the completed level (if level 2 or higher)
       if (dungeonMaster.currentLevel >= 2) {
         this.addPonyToFooter();
       }
-      
+
+      this.marketplaceCache.layoutKey = null;
+      this.levelResolutionInProgress = false;
+
       // Advance to next level
       const nextLevel = dungeonMaster.advanceToNextLevel();
       if (nextLevel) {
@@ -745,43 +905,97 @@ export class UIManager {
     modal.classList.remove('hidden');
   }
 
+  showFailureModal(dungeonMaster, { isGameOver = false } = {}) {
+    const modal = document.getElementById('card-modal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalBody = document.getElementById('modal-body');
+
+    modal.classList.add('failure');
+    modal.classList.remove('victory');
+
+    const livesRemaining = Math.max(dungeonMaster.playerLives, 0);
+    modalTitle.textContent = isGameOver ? '💀 Game Over 💀' : 'Level Failed';
+    modalBody.innerHTML = `
+      <div class="failure-message">
+        <p>${isGameOver ? 'You are out of lives.' : 'You did not complete the objective in time.'}</p>
+        <p>Lives remaining: ${livesRemaining}</p>
+      </div>
+    `;
+
+    const confirmButton = this.getFreshModalConfirmButton({ text: isGameOver ? 'Return to Camp' : 'Try Again' });
+
+    confirmButton.onclick = () => {
+      modal.classList.add('hidden');
+      modal.classList.remove('failure');
+
+      if (isGameOver) {
+        this.handleGameOver();
+      } else {
+        this.restartCurrentLevel();
+      }
+    };
+
+    modal.classList.remove('hidden');
+  }
+
   getTotalCardCount() {
-    return this.game.player.hand.length + 
-           this.game.player.deck.length + 
-           this.game.player.discard.length + 
+    return this.game.player.hand.length +
+           this.game.player.deck.length +
+           this.game.player.discard.length +
            this.game.player.playArea.length;
+  }
+
+  restartCurrentLevel() {
+    const dungeonMaster = window.dungeonMaster;
+    if (!dungeonMaster) return;
+
+    dungeonMaster.generateLevel(dungeonMaster.currentLevel);
+    window.currentMarketSupply = dungeonMaster.currentDungeonLevel.marketSupply;
+
+    this.game.startNewGame();
+    this.marketplaceCache.layoutKey = null;
+
+    this.updateAllDisplays();
+
+    const levelTitle = dungeonMaster.currentDungeonLevel.challengeName ?
+      `=== Retry Level ${dungeonMaster.currentLevel}: ${dungeonMaster.currentDungeonLevel.challengeName} ===` :
+      `=== Retry Level ${dungeonMaster.currentLevel} ===`;
+
+    this.logMessage(levelTitle);
+    this.logMessage(`Goal: ${dungeonMaster.currentDungeonLevel.getWinConditionDescription()}`);
+
+    dungeonMaster.saveProgress();
+    this.levelResolutionInProgress = false;
   }
 
   handleLevelFailure() {
     const dungeonMaster = window.dungeonMaster;
+    if (!dungeonMaster) return;
+
+    this.levelResolutionInProgress = true;
+
     const hasLivesLeft = dungeonMaster.failLevel();
-    
+    this.updateLivesDisplay();
+
     if (hasLivesLeft) {
       this.logMessage(`💔 You failed! Lives remaining: ${dungeonMaster.playerLives}`);
-      this.logMessage("Try again with the same level...");
-      
-      // Restart the current level
-      setTimeout(() => {
-        dungeonMaster.generateLevel(dungeonMaster.currentLevel);
-        window.currentMarketSupply = dungeonMaster.currentDungeonLevel.marketSupply;
-        this.game.startNewGame();
-        this.updateAllDisplays();
-        const levelTitle = dungeonMaster.currentDungeonLevel.challengeName ? 
-          `=== Retry Level ${dungeonMaster.currentLevel}: ${dungeonMaster.currentDungeonLevel.challengeName} ===` :
-          `=== Retry Level ${dungeonMaster.currentLevel} ===`;
-        this.logMessage(levelTitle);
-        this.logMessage(`Goal: ${dungeonMaster.currentDungeonLevel.getWinConditionDescription()}`);
-      }, 2000);
+      this.logMessage('Try again with the same level...');
+      this.showFailureModal(dungeonMaster, { isGameOver: false });
     } else {
-      this.handleGameOver();
+      this.showFailureModal(dungeonMaster, { isGameOver: true });
     }
   }
 
   handleGameOver() {
-    this.logMessage("💀 GAME OVER 💀");
-    this.logMessage(`You reached Level ${dungeonMaster.maxLevelReached}`);
-    this.logMessage("Better luck next time!");
-    
+    const dungeonMaster = window.dungeonMaster;
+    this.logMessage('💀 GAME OVER 💀');
+    if (dungeonMaster) {
+      this.logMessage(`You reached Level ${dungeonMaster.maxLevelReached}`);
+    }
+    this.logMessage('Better luck next time!');
+
+    this.levelResolutionInProgress = false;
+
     // Show game over screen after delay
     setTimeout(() => {
       window.dispatchEvent(new CustomEvent('gameOver'));

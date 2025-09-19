@@ -1,6 +1,7 @@
 export class RulesModal {
   constructor() {
     this.element = null;
+    this.boundEscHandler = null;
   }
 
   show(levelInfo) {
@@ -55,6 +56,11 @@ export class RulesModal {
       this.element.remove();
       this.element = null;
     }
+
+    if (this.boundEscHandler) {
+      document.removeEventListener('keydown', this.boundEscHandler);
+      this.boundEscHandler = null;
+    }
   }
 
   getAvailableCards(marketSupply) {
@@ -87,10 +93,14 @@ export class RulesModal {
     });
 
     // Close modal with Escape key
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && this.element) {
-        this.hide();
-      }
-    });
+    if (!this.boundEscHandler) {
+      this.boundEscHandler = (e) => {
+        if (e.key === 'Escape' && this.element) {
+          this.hide();
+        }
+      };
+      document.addEventListener('keydown', this.boundEscHandler);
+    }
   }
 }
+

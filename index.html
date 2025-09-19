@@ -80,13 +80,27 @@
   
   <div id="game" >
   
-  <div id="top">
+    <div id="top">
     <div id="top-spacer">
       <ul id="points-display">
-        <li><div class="spacer">  </div></li>
-        <li><div id="victory-display">Victory Points: 0</div></li>
-        <li><div id="turn-counter">Turn: 1</div></li>
-        <li><div id="card-counter">Cards: 18</div></li>
+        <li>
+          <div id="victory-display" class="stat-display">
+            <span class="category">Points:</span>
+            <span class="number">0</span>
+          </div>
+        </li>
+        <li>
+          <div id="turn-counter" class="stat-display">
+            <span class="category">Turns:</span>
+            <span class="number">1</span>
+          </div>
+        </li>
+        <li>
+          <div id="card-counter" class="stat-display">
+            <span class="category">Cards:</span>
+            <span class="number">0</span>
+          </div>
+        </li>
       </ul>
     </div>
 
@@ -95,9 +109,30 @@
     </div>
     <div id="header">
       <ul id="scoreboard">
-        <li><div id="gold-display"></div></li>
-        <li><div id="actions-left">Actions: 1</div></li>
-        <li><div id="buys-left">Buys: 1</div></li>
+        <li>
+          <div id="gold-display" class="stat-display">
+            <span class="category">Gold:</span>
+            <span class="number">0</span>
+          </div>
+        </li>
+        <li>
+          <div id="actions-left" class="stat-display">
+            <span class="category">Actions:</span>
+            <span class="number">1</span>
+          </div>
+        </li>
+        <li>
+          <div id="buys-left" class="stat-display">
+            <span class="category">Buys:</span>
+            <span class="number">1</span>
+          </div>
+        </li>
+        <li>
+          <div id="lives-display" class="lives-display" aria-live="polite">
+            <span class="lives-label">Lives:</span>
+            <span class="hearts">❤️❤️❤️</span>
+          </div>
+        </li>
       </ul>
       <button id="next-phase" class="start-button">Next Phase</button>
     </div>
