@@ -144,7 +144,7 @@ h1.title {
 /* Menu Positioning */
 #menu {
   position: absolute;
-  top: 20px;
+  top: 40px;
   right: 20px;
   display: flex;
   justify-content: flex-end;
@@ -162,6 +162,7 @@ h1.title {
 #menu-button img {
   width: 50%;
   height: auto;
+  opacity: 0.3;
 }
 
 #game-logo img {
@@ -302,14 +303,11 @@ h1.title {
 }
 
 .win-condition {
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  padding: var(--spacing-md);
-  display: flex;
+  align-items: center;
+  justify-content: center;
+  display: flex; 
   flex-direction: column;
-  gap: var(--spacing-sm);
-  align-items: stretch;
+  margin-bottom: 50px;
 }
 
 .win-condition h3 {
@@ -402,8 +400,9 @@ h1.title {
 
 #scoreboard .stat-display {
   flex-direction: row;
-  justify-content: space-between;
+  justify-content: flex-start;
   width: 100%;
+  gap: 15px;
 }
 
 #scoreboard .stat-display .number {
@@ -418,9 +417,8 @@ h1.title {
   list-style-type: none;
   padding: 0;
   margin: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: var(--spacing-sm);
+  display: flex;
+  flex-wrap: wrap;
   width: 100%;
 }
 
@@ -428,6 +426,8 @@ h1.title {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex: 0 0 50%;
+  box-sizing: border-box; 
 }
 
 /* ========================================
@@ -1008,7 +1008,7 @@ h1.title {
   background: #c0392b;
 }
 
-#next-page {
+#next-page, #prev-page {
   background-color: var(--primary-bg);
   color: var(--text-dark);
   border: 1px solid var(--text-dark);
@@ -1019,8 +1019,13 @@ h1.title {
   margin: var(--spacing-sm) 0;
 }
 
-#next-page:hover {
+#next-page:hover, #prev-page:hover {
   background-color: var(--secondary-bg);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* ========================================
@@ -1089,17 +1094,17 @@ h1.title {
 }
 
 h2.level-number {
-  padding-left: 16px; 
   font-size: 2rem;
   font-weight: bolder;
 }
 
 .level-subtitle {
-  font-size: .8rem;
+  font-size: 1.2rem;
   background-color: var(--border-color);
   color: var(--text-light);
-  padding: .3rem var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
   border-radius: var(--radius-sm);
+  margin-right: var(--spacing-sm);
 }
 
 .level-info-box, .level-info {
