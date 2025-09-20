@@ -570,6 +570,10 @@ h1.title {
   padding: var(--spacing-md);
   border-radius: var(--radius-md);
   margin-bottom: 50px;
+    background-image: url(../res/img/coins.png);
+  background-size: contain;
+  background-position: top;
+  background-repeat: no-repeat;
 }
 
 #marketplace h2 {
