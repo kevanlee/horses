@@ -2,11 +2,11 @@
   "name": "HORSES - Dungeon Card Game",
   "short_name": "HORSES",
   "description": "A strategic deck-building dungeon crawler with 50 unique challenges",
-  "start_url": "/",
+  "start_url": "https://kevanlee.github.io/horses",
   "display": "standalone",
   "background_color": "#2c1810",
   "theme_color": "#8b4513",
-  "orientation": "portrait-primary",
+  "orientation": "landscape-primary",
   "scope": "/",
   "lang": "en-US",
   "categories": ["games", "entertainment"],
@@ -38,7 +38,7 @@
       "url": "/?action=new",
       "icons": [
         {
-          "src": "res/img/horses-logo.png",
+          "src": "res/img/horse-head.svg",
           "sizes": "96x96"
         }
       ]
@@ -50,7 +50,7 @@
       "url": "/?action=levels",
       "icons": [
         {
-          "src": "res/img/horses-logo.png",
+          "src": "res/img/horse-head.svg",
           "sizes": "96x96"
         }
       ]
